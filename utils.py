@@ -1,4 +1,5 @@
 import os
+from concurrent_iterator.thread import Producer
 
 
 class ExitCodeError(Exception): pass
@@ -20,6 +21,11 @@ def fread(fname):
 
 def ls(x):
     return [x + '/' + fn for fn in os.listdir(x)]
+
+
+def cycle_documents(dataset):
+    while True:
+        yield from Producer(dataset.documents(), 1000)
 
 
 # https://stackoverflow.com/questions/12523586/python-format-size-application-converting-b-to-kb-mb-gb-tb/37423778

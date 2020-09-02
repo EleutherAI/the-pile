@@ -3,6 +3,7 @@ import json
 from pytablewriter import MarkdownTableWriter
 from tqdm import tqdm 
 from utils import humanbytes
+import random
 
 from datasets import *
 
@@ -15,8 +16,7 @@ datasets = [
     (BookCorpusDataset()   , 1. ),
 ]
 
-
-if __name__ == '__main__':
+def mk_table(datasets):
     values = []
 
     total_weight = sum([x[1] * x[0].size() for x in datasets])
@@ -26,10 +26,7 @@ if __name__ == '__main__':
     for dataset, weight in datasets:
         size = dataset.size()
         relative_weight = size * weight / total_weight
-        print(dataset.name(), weight * size / total_weight)
         values.append([dataset.name(), size, '{:.1%}'.format(relative_weight), train_chars / size * relative_weight])
-    
-    print(values)
     
     values.sort(key=lambda x: -x[1])
     values.append(['**Total**', sum([x[1] for x in values]), "", ""])
@@ -37,6 +34,62 @@ if __name__ == '__main__':
 
     writer = MarkdownTableWriter()
     writer.table_name = "The Pile™ Components"
-    writer.headers = ["Component", "Size", "Weight", "Epochs (@1T2B)"]
+    writer.headers = ["Component", "Size", "Weight", "Epochs (@1.2TB)"]
     writer.value_matrix = values
-    print(writer.dumps())
+    return writer.dumps()
+
+
+class ThePile:
+    def __init__(self, datasets, dataset_bytes):
+        self.datasets = datasets
+        self.dataset_bytes = dataset_bytes
+    
+    @abc.abstractmethod
+    def name(self):
+        return "The Pile"
+
+    @abc.abstractmethod
+    def documents(self):
+        datasets = []
+        weights = []
+
+        # calculate relative_weight for each
+        total_weight = sum([x[1] * x[0].size() for x in self.datasets])
+        for dataset, weight in self.datasets:
+            size = dataset.size()
+            relative_weight = size * weight / total_weight
+            datasets.append(cycle_documents(dataset))
+            weights.append(relative_weight)
+
+        random.seed(42)
+        
+        # yield from dataset until right number of bytes
+        total_bytes = 0
+        pbar = tqdm(total=self.dataset_bytes, unit='B', unit_scale=True, unit_divisor=1024)
+        while True:
+            chunk = random.choices(population=datasets, weights=weights, k=1000)
+            for dset in chunk:
+                doc = next(dset)
+
+                size = utf8len(doc)
+                total_bytes += size
+                pbar.update(size)
+                yield doc
+
+                if total_bytes > self.dataset_bytes:
+                    return
+
+
+    @abc.abstractmethod
+    def clean(self):
+        for dataset, _ in self.datasets: dataset.clean()
+    
+    def size(self):
+        return sum(map(lambda x: x[0].size(), tqdm(self.datasets())))
+
+if __name__ == '__main__':
+    print(mk_table(datasets))
+
+    pile = ThePile(datasets, int(1.2e12))
+    for x in pile.documents():
+        pass
