@@ -244,3 +244,38 @@ class EnronEmailsDataset(Dataset):
             sh("""
             rm -rf components/enron_emails
             """)
+
+
+
+class LiteroticaDataset(Dataset):
+    """ Source: https://www.reddit.com/r/literotica/comments/6xvxvh/i_downloaded_all_380000_stories_on_literotica/?utm_source=share&utm_medium=ios_app&utm_name=iossmf """
+    def name(self):
+        return "Literotica"
+
+    def _download(self):
+        if not os.path.exists('components/literotica'):
+            sh("""
+            mkdir -p components/literotica
+            cd components/literotica
+            git clone https://github.com/EleutherAI/pile_enron_emails .
+            virtualenv env
+            . env/bin/activate
+            pip install gdown
+            gdown https://drive.google.com/uc?id=0B5J6A3VOJQjGTUt5cm9XMV80cmc
+            tar xf liter.tar.gz
+            """)
+            sha256sum('components/literotica/liter.tar.gz', '9b54711a9df7b0a9512fd4e4d15f7295908791cab514610f5d0c65acd079ec59')
+
+    def documents(self):
+        self._download()
+
+        yield from map(fread, ls('components/literotica/liter/story_text'))
+
+    def clean(self):
+        if os.path.exists('components/literotica'):
+            sh("""
+            rm -rf components/literotica
+            """)
+
+    def size(self):
+        return 9456345155
