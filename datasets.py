@@ -215,3 +215,32 @@ class DMMathDataset(Dataset):
             sh("""
             rm -rf components/dm_math
             """)
+
+
+class EnronEmailsDataset(Dataset):
+    def name(self):
+        return "Enron Emails"
+
+    def _download(self):
+        if not os.path.exists('components/enron_emails'):
+            sh("""
+            mkdir -p components/enron_emails
+            cd components/enron_emails
+            git clone https://github.com/EleutherAI/pile_enron_emails .
+            virtualenv env
+            . env/bin/activate
+            pip install -r requirements.txt
+            python main.py
+            """)
+            sha256sum('components/enron_emails/enron_mail_20150507.tar.gz', 'b3da1b3fe0369ec3140bb4fbce94702c33b7da810ec15d718b3fadf5cd748ca7')
+
+    def documents(self):
+        self._download()
+
+        yield from lmd.Reader('components/enron_emails/out').stream_data()
+
+    def clean(self):
+        if os.path.exists('components/enron_emails'):
+            sh("""
+            rm -rf components/enron_emails
+            """)

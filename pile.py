@@ -15,6 +15,7 @@ datasets = [
     (GutenbergDataset()    , 1. ),
     (DMMathDataset()       , 1. ),
     (BookCorpusDataset()   , 1. ),
+    (EnronEmailsDataset()  , 1. ),
 ]
 
 def mk_table(datasets):
