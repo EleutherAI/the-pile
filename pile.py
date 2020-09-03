@@ -13,6 +13,7 @@ datasets = [
     (WikipediaDataset()    , 1. ),
     (OpensubtitlesDataset(), 1. ),
     (GutenbergDataset()    , 1. ),
+    (DMMathDataset()       , 1. ),
     (BookCorpusDataset()   , 1. ),
 ]
 

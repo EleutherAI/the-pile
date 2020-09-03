@@ -28,6 +28,11 @@ def cycle_documents(dataset):
     while True:
         yield from Producer(dataset.documents(), 1000)
 
+def concat(xs):
+    for x in xs:
+        yield from x
+
+
 def sha256sum(filename, expected=None):
     h  = hashlib.sha256()
     b  = bytearray(128*1024)

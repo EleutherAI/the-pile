@@ -182,3 +182,36 @@ class GutenbergDataset(Dataset):
     def size(self):
         self._download()
         return sum(os.path.getsize(f) for f in ls('components/gutenberg/pg19_train'))
+
+
+class DMMathDataset(Dataset):
+    def name(self):
+        return "DM Mathematics"
+
+    def _download(self):
+        if not os.path.exists('components/dm_math'):
+            sh("""
+            mkdir -p components/dm_math
+            cd components/dm_math
+            virtualenv env
+            . env/bin/activate
+            pip install gsutil
+            gsutil -m rsync gs://mathematics-dataset/ $PWD
+            tar xf mathematics_dataset-v1.0.tar.gz
+            """)
+            sha256sum('components/dm_math/mathematics_dataset-v1.0.tar.gz', 'def638343403cb9ed60437d6b684c859dd23b72779f5cc5661b0a31e67c58576')
+
+    def documents(self):
+        self._download()
+
+        yield from concat(
+            map(
+                lambda x: map(fread, ls('components/dm_math/mathematics_dataset-v1.0/train-' + x)), 
+                ['easy', 'medium', 'hard'])
+        )
+
+    def clean(self):
+        if os.path.exists('components/dm_math'):
+            sh("""
+            rm -rf components/dm_math
+            """)
