@@ -6,6 +6,9 @@ from concurrent_iterator.thread import Producer
 class ExitCodeError(Exception): pass
 
 
+def id(x):
+    return x
+
 def utf8len(s):
     return len(s.encode('utf-8'))
 
@@ -26,7 +29,7 @@ def ls(x):
 
 def cycle_documents(dataset):
     while True:
-        yield from Producer(dataset.documents(), 1000)
+        yield from Producer(filter(id, dataset.documents()), 1000)
 
 def concat(xs):
     for x in xs:
