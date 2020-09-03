@@ -1,4 +1,5 @@
 import os
+import hashlib
 from concurrent_iterator.thread import Producer
 
 
@@ -26,6 +27,20 @@ def ls(x):
 def cycle_documents(dataset):
     while True:
         yield from Producer(dataset.documents(), 1000)
+
+def sha256sum(filename, expected=None):
+    h  = hashlib.sha256()
+    b  = bytearray(128*1024)
+    mv = memoryview(b)
+    with open(filename, 'rb', buffering=0) as f:
+        for n in iter(lambda : f.readinto(mv), 0):
+            h.update(mv[:n])
+    
+    if expected:
+        assert h.hexdigest() == expected
+        print('CHECKSUM OK', filename)
+    else:
+        print(filename, h.hexdigest())
 
 
 # https://stackoverflow.com/questions/12523586/python-format-size-application-converting-b-to-kb-mb-gb-tb/37423778

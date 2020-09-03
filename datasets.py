@@ -103,6 +103,7 @@ class BookCorpusDataset(Dataset):
             wget -nc https://battle.shawwn.com/sdb/bookcorpus/2020-09-01-bookcorpus-nometa.tar.zst
             tar -I zstd -xf 2020-09-01-bookcorpus-nometa.tar.zst
             """)
+            sha256sum('components/bookcorpus/2020-09-01-bookcorpus-nometa.tar.zst', '080b73bc9754609b53a8d4fc827e76ba6fb459d43a105bb884f404f6a29e97ca')
 
     def documents(self):
         self._download()
@@ -133,6 +134,7 @@ class OpenWebTextDataset(Dataset):
             gdown https://drive.google.com/uc?id=1EA5V0oetDCOke7afsktL_JDQ-ETtNOvx
             tar xf openwebtext.tar.xz
             """)
+            sha256sum('components/openwebtext/openwebtext.tar.xz','9fe39d154c5bc67da8c359415372b79510eb1e2edb0d035fe4f7fc3a732b9336')
 
     def documents(self):
         self._download()
