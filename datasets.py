@@ -257,7 +257,6 @@ class LiteroticaDataset(Dataset):
             sh("""
             mkdir -p components/literotica
             cd components/literotica
-            git clone https://github.com/EleutherAI/pile_enron_emails .
             virtualenv env
             . env/bin/activate
             pip install gdown
