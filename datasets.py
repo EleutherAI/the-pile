@@ -217,6 +217,8 @@ class DMMathDataset(Dataset):
             rm -rf components/dm_math
             """)
 
+    def size(self):
+        return 8316165951
 
 class EnronEmailsDataset(Dataset):
     def name(self):
@@ -246,6 +248,8 @@ class EnronEmailsDataset(Dataset):
             rm -rf components/enron_emails
             """)
 
+    def size(self):
+        return 945212874
 
 
 class LiteroticaDataset(Dataset):
