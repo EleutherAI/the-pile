@@ -1,6 +1,8 @@
 import os
 import hashlib
 from concurrent_iterator.thread import Producer
+from functools import reduce
+import operator
 
 
 class ExitCodeError(Exception): pass
@@ -34,6 +36,10 @@ def cycle_documents(dataset):
 def concat(xs):
     for x in xs:
         yield from x
+
+
+def flatMap(f, x):
+    return reduce(operator.add, map(f, x), [])
 
 
 def sha256sum(filename, expected=None):

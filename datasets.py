@@ -283,3 +283,37 @@ class LiteroticaDataset(Dataset):
 
     def size(self):
         return 9456345155
+
+
+class BibliotikDataset(Dataset):
+    def name(self):
+        return "Bibliotik"
+
+    def _download(self):
+
+        if not os.path.exists('components/bibliotik'):
+            if not os.path.exists('books3.tar.gz'):
+                raise AssertionError('Must download books3.tar.gz manually!')
+
+            sh("""
+            mkdir -p components/bibliotik
+            cd components/bibliotik
+
+            mv ../../books3.tar.gz .
+            tar xf books3.tar.gz
+            """)
+            sha256sum('components/bibliotik/books3.tar.gz', '016b90fa6b8507328b6a90d13b0f68c2b87dfd281b35e449a1d466fd9eebc14a')
+
+    def documents(self):
+        self._download()
+
+        yield from map(fread, flatMap(ls, ls('components/bibliotik/books3/the-eye.eu/public/Books/Bibliotik')))
+
+    def clean(self):
+        if os.path.exists('components/bibliotik'):
+            sh("""
+            rm -rf components/bibliotik
+            """)
+
+    def size(self):
+        return 108404259563

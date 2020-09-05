@@ -9,6 +9,7 @@ from datasets import *
 
 
 datasets = [
+    (BibliotikDataset()    , 1. ),
     (OpenWebTextDataset()  , 1. ),
     (WikipediaDataset()    , 1. ),
     (OpensubtitlesDataset(), 1. ),
