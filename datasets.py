@@ -356,3 +356,34 @@ class CORD19Dataset(Dataset):
     
     def size(self):
         return 4573360967
+
+
+class UbuntuIRCDataset(Dataset):
+    def name(self):
+        return "Ubuntu IRC"
+
+    def _download(self):
+        if not os.path.exists('components/ubuntu_irc'):
+            sh("""
+            mkdir -p components/ubuntu_irc
+            cd components/ubuntu_irc
+            virtualenv env
+            . env/bin/activate
+            pip install gdown
+            gdown https://drive.google.com/uc?id=1W2AN0UKS5Xw1SuIuqPvY7bza6zEzADy7
+            """)
+            sha256sum('components/ubuntu_irc/ubuntu_irc_until_2020_9_4.jsonl.zst', '1f5374cb61819dcf4386e5d9d9e39ca2d64b13863badd9b4f7150db068451e60')
+
+    def documents(self):
+        self._download()
+
+        yield from lmd.Reader('components/ubuntu_irc/ubuntu_irc_until_2020_9_4.jsonl.zst').stream_data()
+
+    def clean(self):
+        if os.path.exists('components/ubuntu_irc'):
+            sh("""
+            rm -rf components/ubuntu_irc
+            """)
+    
+    def size(self):
+        return 5923631555
