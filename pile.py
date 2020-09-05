@@ -17,6 +17,7 @@ datasets = [
     (LiteroticaDataset()   , 1. ),
     (DMMathDataset()       , 1. ),
     (BookCorpusDataset()   , 1. ),
+    (CORD19Dataset()       , 1. ),
     (EnronEmailsDataset()  , 1. ),
 ]
 

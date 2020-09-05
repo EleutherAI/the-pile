@@ -317,3 +317,42 @@ class BibliotikDataset(Dataset):
 
     def size(self):
         return 108404259563
+
+
+class CORD19Dataset(Dataset):
+    def name(self):
+        return "CORD-19"
+
+    def _download(self):
+
+        if not os.path.exists('components/cord19'):
+            if not os.path.exists('document_parses'):
+                raise AssertionError('Must download document_parses manually!')
+
+            sh("""
+            mkdir -p components/cord19
+            cd components/cord19
+
+            git clone https://github.com/EleutherAI/pile_cord19 .
+            virtualenv env
+            . env/bin/activate
+
+            mv ../../document_parses .
+
+            pip install -r requirements.txt
+            python main.py
+            """)
+
+    def documents(self):
+        self._download()
+
+        yield from lmd.Reader('components/cord19/out').stream_data()
+
+    def clean(self):
+        if os.path.exists('components/cord19'):
+            sh("""
+            rm -rf components/cord19
+            """)
+    
+    def size(self):
+        return 4573360967
