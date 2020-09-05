@@ -100,15 +100,15 @@ class BookCorpusDataset(Dataset):
             mkdir -p components/bookcorpus
             cd components/bookcorpus
 
-            wget -nc https://battle.shawwn.com/sdb/bookcorpus/2020-09-01-bookcorpus-nometa.tar.zst
-            tar -I zstd -xf 2020-09-01-bookcorpus-nometa.tar.zst
+            wget -nc http://battle.shawwn.com/sdb/books1/books1.tar.gz
+            tar xf books1.tar.gz
             """)
-            sha256sum('components/bookcorpus/2020-09-01-bookcorpus-nometa.tar.zst', '080b73bc9754609b53a8d4fc827e76ba6fb459d43a105bb884f404f6a29e97ca')
+            sha256sum('components/bookcorpus/books1.tar.gz')
 
     def documents(self):
         self._download()
 
-        yield from map(fread, ls('components/bookcorpus/nometa/epub'))
+        yield from map(fread, ls('components/bookcorpus/books1/epubtxt'))
 
     def clean(self):
         if os.path.exists('components/bookcorpus'):
@@ -118,6 +118,7 @@ class BookCorpusDataset(Dataset):
 
     def size(self):
         return 6767414779
+
 
 class OpenWebTextDataset(Dataset):
     def name(self):
