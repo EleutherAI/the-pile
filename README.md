@@ -20,3 +20,8 @@ The following components need manual downloading. Either download them or commen
 
  - **Bibliotik**: `books3.tar.gz` needs to be in the current directory. Download temporarily unavailable.
  - **CORD-19**: `document_parses` needs to be in the current directory. Download from [here](https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge).
+ 
+## Workflow
+
+To propose a new dataset be added to the Pile, open an issue with the tag [![label: api][~api]](https://github.com/isaacs/github/labels/api)
+[~api]: https://img.shields.io/github/labels/EleutherAI/The-Pile/Proposed%20Dataset
