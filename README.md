@@ -20,8 +20,11 @@ The following components need manual downloading. Either download them or commen
 
  - **Bibliotik**: `books3.tar.gz` needs to be in the current directory. Download temporarily unavailable.
  - **CORD-19**: `document_parses` needs to be in the current directory. Download from [here](https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge).
- 
+
 ## Workflow
 
-To propose a new dataset be added to the Pile, open an issue with the tag [![label: api][~api]](https://github.com/isaacs/github/labels/api)
-[~api]: https://img.shields.io/github/labels/EleutherAI/The-Pile/Proposed%20Dataset
+To propose a new dataset be added to the Pile, open an issue with the tag ![](https://img.shields.io/github/labels/EleutherAI/The-Pile/Proposed%20Dataset). Your issue should include a description of the dataset, its size, what language(s) it is in, a link to the data, and any other relevant information. If a project manger approves your proposal, they will change its label to ![](https://img.shields.io/github/labels/EleutherAI/The-Pile/Dataset?link=https://github.com/EleutherAI/The-Pile/issues?q=is%3Aissue+is%3Aopen+label%3ADataset) and add it to ![](https://img.shields.io/badge/Project-Datasets-lightgrey?link=https://github.com/EleutherAI/The-Pile/projects/2&link=https://github.com/EleutherAI/The-Pile/projects/2).
+
+To claim an unclaimed dataset, leave a comment on one of our unassigned issues. Once an dataset has been assigned to you, make the necessary changes to `datsets.py` and `pile.py` in a fork and submit a pull request. If you require, you can also submit a script for processing the data as shown [here](https://github.com/EleutherAI/pile_enron_emails).
+
+To raise an issue that is not proposing a new dataset, open an issue with the tag ![](https://img.shields.io/github/labels/EleutherAI/The-Pile/Feature%20Request) or ![](https://img.shields.io/github/labels/EleutherAI/The-Pile/Bug) as appropriate.
