@@ -1,4 +1,7 @@
 # The Pile™
+
+The Pile is (going to be) the world's largest open source language modeling data set. We are currently developing Version 1, with a goal of 1 TiB of English text.
+
 |    Component    |   Size   |Weight|Epochs (@1.2TB)|
 |-----------------|----------|------|--------------:|
 |Bibliotik        |100.96 GiB|47.48%|          5.256|
@@ -23,7 +26,7 @@ The following components need manual downloading. Either download them or commen
 
 ## Workflow
 
-To propose a new dataset be added to the Pile, open an issue with the tag [![Proposed Dataset](https://img.shields.io/github/labels/EleutherAI/The-Pile/Proposed%20Dataset)](https://github.com/EleutherAI/The-Pile/labels/Proposed%20Dataset). Your issue should include a description of the dataset, its size, what language(s) it is in, a link to the data, and any other relevant information. If a project manger approves your proposal, they will change its label to [![Datasets](https://img.shields.io/github/labels/EleutherAI/The-Pile/Dataset)](https://github.com/EleutherAI/The-Pile/labels/Dataset) and add it to [![Project: Datasets](https://img.shields.io/badge/Project-Datasets-lightgrey)](https://github.com/EleutherAI/The-Pile/projects/2).
+To propose a new dataset be added to the Pile, open an issue with the tag [![Proposed Dataset](https://img.shields.io/github/labels/EleutherAI/The-Pile/Proposed%20Dataset)](https://github.com/EleutherAI/The-Pile/labels/Proposed%20Dataset). Your issue should include a description of the dataset, its size, what language(s) it is in, a link to the data, and any other relevant information. If a project manger approves your proposal, they will change its label to [![Datasets](https://img.shields.io/github/labels/EleutherAI/The-Pile/Dataset)](https://github.com/EleutherAI/The-Pile/labels/Dataset) and add it to [![Project: Datasets](https://img.shields.io/badge/Project-Datasets-lightgrey)](https://github.com/EleutherAI/The-Pile/projects/2). Datasets that we elect to not include in the current version of the Pile will recieve a [![Deferred](https://img.shields.io/github/labels/EleutherAI/The-Pile/Deferred)](https://github.com/EleutherAI/The-Pile/labels/Deferred) or [![Declined](https://img.shields.io/github/labels/EleutherAI/The-Pile/Declined)](https://github.com/EleutherAI/The-Pile/labels/Declined) label. While we welcome multingual datasets and plan on including non-English datasets in the future, the initial release of the Pile will be English-only and all submissions of non-English datasets will be Deferred.
 
 To claim an unclaimed dataset, leave a comment on one of our unassigned issues. Once an dataset has been assigned to you, make the necessary changes to `datsets.py` and `pile.py` in a fork and submit a pull request. If you require, you can also submit a script for processing the data as shown [here](https://github.com/EleutherAI/pile_enron_emails).
 
