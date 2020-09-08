@@ -4,18 +4,20 @@ The Pile is (going to be) the world's largest open source language modeling data
 
 |    Component    |   Size   |Weight|Epochs (@1.2TB)|
 |-----------------|----------|------|--------------:|
-|Bibliotik        |100.96 GiB|47.48%|          5.256|
-|OpenWebText      |37.03 GiB |17.41%|          5.256|
-|Wikipedia (en)   |17.27 GiB |8.12% |          5.256|
-|OpenSubtitles    |12.98 GiB |6.11% |          5.256|
-|Gutenberg (PG-19)|10.88 GiB |5.12% |          5.256|
-|Literotica       |8.81 GiB  |4.14% |          5.256|
-|DM Mathematics   |7.75 GiB  |3.64% |          5.256|
-|BookCorpus       |6.30 GiB  |2.96% |          5.256|
-|Ubuntu IRC       |5.52 GiB  |2.59% |          5.256|
-|CORD-19          |4.26 GiB  |2.00% |          5.256|
-|Enron Emails     |901.43 MiB|0.41% |          5.256|
-|**Total**        |212.63 GiB|      |               |
+|Bibliotik        |100.96 GiB|37.55%|          4.157|
+|ArXiv            |56.21 GiB |20.91%|          4.157|
+|OpenWebText      |37.03 GiB |13.77%|          4.157|
+|Wikipedia (en)   |17.27 GiB |6.42% |          4.157|
+|OpenSubtitles    |12.98 GiB |4.83% |          4.157|
+|Gutenberg (PG-19)|10.88 GiB |4.05% |          4.157|
+|Literotica       |8.81 GiB  |3.28% |          4.157|
+|DM Mathematics   |7.75 GiB  |2.88% |          4.157|
+|BookCorpus       |6.30 GiB  |2.34% |          4.157|
+|Ubuntu IRC       |5.52 GiB  |2.05% |          4.157|
+|CORD-19          |4.26 GiB  |1.58% |          4.157|
+|Enron Emails     |901.43 MiB|0.33% |          4.157|
+|**Total**        |268.84 GiB|      |               |
+
 
 ## Manual Download Components
 

@@ -25,7 +25,9 @@ class Dataset(abc.ABC):
     def size(self):
         """ Return an estimate of the dataset size. Implementations may use a faster, less accurate estimate. """
 
-        return sum(map(utf8len, tqdm(self.documents())))
+        size = sum(map(utf8len, tqdm(self.documents())))
+        print(self.name(), size)
+        return size
 
 class WikipediaDataset(Dataset):
     def name(self):
@@ -387,3 +389,31 @@ class UbuntuIRCDataset(Dataset):
     
     def size(self):
         return 5923631555
+
+
+class ArXivDataset(Dataset):
+    def name(self):
+        return "ArXiv"
+
+    def _download(self):
+        if not os.path.exists('components/arxiv'):
+            sh("""
+            mkdir -p components/arxiv
+            cd components/arxiv
+            wget https://battle.shawwn.com/sdb/arxiv/2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz
+            tar xf 2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz
+            """)
+
+    def documents(self):
+        self._download()
+
+        yield from map(fread, ls('components/arxiv/documents'))
+
+    def clean(self):
+        if os.path.exists('components/arxiv'):
+            sh("""
+            rm -rf components/arxiv
+            """)
+
+    def size(self):
+        return 60353358395
