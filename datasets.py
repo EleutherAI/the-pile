@@ -417,3 +417,34 @@ class ArXivDataset(Dataset):
 
     def size(self):
         return 60353358395
+
+
+class PubMedDataset(Dataset):
+    def name(self):
+        return "PubMed Abstracts"
+
+    def _download(self):
+        if not os.path.exists('components/pubmed'):
+            sh("""
+            mkdir -p components/pubmed
+            cd components/pubmed
+            virtualenv env
+            . env/bin/activate
+            pip install gdown
+            gdown https://drive.google.com/uc?id=1k1DBISbB04KMbHGZplbMCrTdKbLxLXQi
+            """)
+            sha256sum('components/pubmed/PUBMED_title_abstracts_2019_baseline.jsonl.zst', '15c26a83ac2b11378b8e6ba5a16bab92428de29bacb85709834948cfcf1f029b')
+
+    def documents(self):
+        self._download()
+
+        yield from lmd.Reader('components/pubmed/PUBMED_title_abstracts_2019_baseline.jsonl.zst').stream_data()
+
+    def clean(self):
+        if os.path.exists('components/pubmed'):
+            sh("""
+            rm -rf components/pubmed
+            """)
+
+    def size(self):
+        return 20684050384

@@ -12,6 +12,7 @@ datasets = [
     (BibliotikDataset()    , 1. ),
     (ArXivDataset()        , 1. ),
     (OpenWebTextDataset()  , 1. ),
+    (PubMedDataset()       , 1. ),
     (WikipediaDataset()    , 1. ),
     (OpensubtitlesDataset(), 1. ),
     (GutenbergDataset()    , 1. ),
