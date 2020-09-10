@@ -2,21 +2,23 @@
 
 The Pile is (going to be) the world's largest open source language modeling data set. We are currently developing Version 1, with a goal of 1 TiB of English text.
 
-|    Component    |   Size   |Weight|Epochs (@1.2TB)|
-|-----------------|----------|------|--------------:|
-|Bibliotik        |100.96 GiB|37.55%|          4.157|
-|ArXiv            |56.21 GiB |20.91%|          4.157|
-|OpenWebText      |37.03 GiB |13.77%|          4.157|
-|Wikipedia (en)   |17.27 GiB |6.42% |          4.157|
-|OpenSubtitles    |12.98 GiB |4.83% |          4.157|
-|Gutenberg (PG-19)|10.88 GiB |4.05% |          4.157|
-|Literotica       |8.81 GiB  |3.28% |          4.157|
-|DM Mathematics   |7.75 GiB  |2.88% |          4.157|
-|BookCorpus       |6.30 GiB  |2.34% |          4.157|
-|Ubuntu IRC       |5.52 GiB  |2.05% |          4.157|
-|CORD-19          |4.26 GiB  |1.58% |          4.157|
-|Enron Emails     |901.43 MiB|0.33% |          4.157|
-|**Total**        |268.84 GiB|      |               |
+|    Component    |   Size   |Weight|Epochs (@1.2TB)|Mean Document Size|
+|-----------------|----------|------|--------------:|------------------|
+|Bibliotik        |100.96 GiB|35.04%|          3.879|538.36 KiB        |
+|ArXiv            |56.21 GiB |19.51%|          3.879|46.61 KiB         |
+|OpenWebText      |37.03 GiB |12.85%|          3.879|4.84 KiB          |
+|PubMed Abstracts |19.26 GiB |6.69% |          3.879|1.30 KiB          |
+|Wikipedia (en)   |17.27 GiB |5.99% |          3.879|3.00 KiB          |
+|OpenSubtitles    |12.98 GiB |4.51% |          3.879|30.48 KiB         |
+|Gutenberg (PG-19)|10.88 GiB |3.78% |          3.879|398.73 KiB        |
+|Literotica       |8.81 GiB  |3.06% |          3.879|24.39 KiB         |
+|DM Mathematics   |7.75 GiB  |2.69% |          3.879|47.21 MiB         |
+|BookCorpus       |6.30 GiB  |2.19% |          3.879|369.87 KiB        |
+|Ubuntu IRC       |5.52 GiB  |1.91% |          3.879|15.96 MiB         |
+|CORD-19          |4.26 GiB  |1.48% |          3.879|25.59 KiB         |
+|Enron Emails     |901.43 MiB|0.31% |          3.879|1.78 KiB          |
+|**Total**        |288.10 GiB|      |               |9.27 KiB          |
+
 
 
 ## Manual Download Components
