@@ -28,6 +28,12 @@ class Dataset(abc.ABC):
         size = sum(map(utf8len, tqdm(self.documents())))
         print(self.name(), size)
         return size
+    
+    def num_docs(self):
+        """ Return an estimate of the number of documents in the dataset. Implementations may use a faster, less accurate estimate. """
+
+        size = len(list(map(lambda x: None, tqdm(self.documents()))))
+        return size
 
 class WikipediaDataset(Dataset):
     def name(self):
@@ -60,6 +66,9 @@ class WikipediaDataset(Dataset):
     def size(self):
         self._download()
         return sum(os.path.getsize(f) for f in ls('components/wikipedia_en/output'))
+    
+    def num_docs(self):
+        return 6033151
 
 
 class OpensubtitlesDataset(Dataset):
@@ -91,6 +100,9 @@ class OpensubtitlesDataset(Dataset):
     def size(self):
         return 13940478112
 
+    def num_docs(self):
+        return 446612
+
 
 class BookCorpusDataset(Dataset):
     def name(self):
@@ -120,6 +132,9 @@ class BookCorpusDataset(Dataset):
 
     def size(self):
         return 6767414779
+    
+    def num_docs(self):
+        return 17868
 
 
 class OpenWebTextDataset(Dataset):
@@ -152,6 +167,9 @@ class OpenWebTextDataset(Dataset):
     
     def size(self):
         return 39757465434
+    
+    def num_docs(self):
+        return 8013769
 
 
 class GutenbergDataset(Dataset):
@@ -185,6 +203,10 @@ class GutenbergDataset(Dataset):
     def size(self):
         self._download()
         return sum(os.path.getsize(f) for f in ls('components/gutenberg/pg19_train'))
+    
+    def num_docs(self):
+        return 28602
+
 
 
 class DMMathDataset(Dataset):
@@ -222,6 +244,10 @@ class DMMathDataset(Dataset):
     def size(self):
         return 8316165951
 
+    def num_docs(self):
+        return 168
+
+
 class EnronEmailsDataset(Dataset):
     def name(self):
         return "Enron Emails"
@@ -252,6 +278,9 @@ class EnronEmailsDataset(Dataset):
 
     def size(self):
         return 945212874
+    
+    def num_docs(self):
+        return 517401
 
 
 class LiteroticaDataset(Dataset):
@@ -285,6 +314,9 @@ class LiteroticaDataset(Dataset):
 
     def size(self):
         return 9456345155
+    
+    def num_docs(self):
+        return 378553
 
 
 class BibliotikDataset(Dataset):
@@ -319,6 +351,9 @@ class BibliotikDataset(Dataset):
 
     def size(self):
         return 108404259563
+    
+    def num_docs(self):
+        return 196640
 
 
 class CORD19Dataset(Dataset):
@@ -358,6 +393,9 @@ class CORD19Dataset(Dataset):
     
     def size(self):
         return 4573360967
+    
+    def num_docs(self):
+        return 174560
 
 
 class UbuntuIRCDataset(Dataset):
@@ -389,6 +427,9 @@ class UbuntuIRCDataset(Dataset):
     
     def size(self):
         return 5923631555
+    
+    def num_docs(self):
+        return 354
 
 
 class ArXivDataset(Dataset):
@@ -417,6 +458,9 @@ class ArXivDataset(Dataset):
 
     def size(self):
         return 60353358395
+    
+    def num_docs(self):
+        return 1264405
 
 
 class PubMedDataset(Dataset):
@@ -448,3 +492,6 @@ class PubMedDataset(Dataset):
 
     def size(self):
         return 20684050384
+    
+    def num_docs(self):
+        return 15518009

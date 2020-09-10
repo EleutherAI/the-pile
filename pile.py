@@ -34,15 +34,15 @@ def mk_table(datasets):
     for dataset, weight in datasets:
         size = dataset.size()
         relative_weight = size * weight / total_weight
-        values.append([dataset.name(), size, '{:.2%}'.format(relative_weight), train_chars / size * relative_weight])
+        values.append([dataset.name(), size, '{:.2%}'.format(relative_weight), train_chars / size * relative_weight, humanbytes(size / dataset.num_docs())])
     
     values.sort(key=lambda x: -x[1])
-    values.append(['**Total**', sum([x[1] for x in values]), "", ""])
-    values = [[x[0], humanbytes(x[1]), x[2], x[3]] for x in values]
+    values.append(['**Total**', sum([x[1] for x in values]), "", "", humanbytes(sum([x[1] for x in values]) / sum(x[0].num_docs() for x in datasets))])
+    values = [[x[0], humanbytes(x[1]), x[2], x[3], x[4]] for x in values]
 
     writer = MarkdownTableWriter()
     writer.table_name = "The Pile™"
-    writer.headers = ["Component", "Size", "Weight", "Epochs (@1.2TB)"]
+    writer.headers = ["Component", "Size", "Weight", "Epochs (@1.2TB)", "Mean Document Size"]
     writer.value_matrix = values
     return writer.dumps()
 
