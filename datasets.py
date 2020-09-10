@@ -2,7 +2,6 @@ import abc
 import os
 import lm_dataformat as lmd
 import json
-import shutil
 from tqdm import tqdm
 
 from utils import *
@@ -121,40 +120,6 @@ class BookCorpusDataset(Dataset):
 
     def size(self):
         return 6767414779
-
-class PubMedAbstracts(Dataset):
-
-    gdrive_link = 'https://drive.google.com/uc?id=1k1DBISbB04KMbHGZplbMCrTdKbLxLXQi'
-    f_compressed = 'PUBMED_title_abstracts_2019_baseline.jsonl.zst'
-    sha256val = '15c26a83ac2b11378b8e6ba5a16bab92428de29bacb85709834948cfcf1f029b'
-    
-    def name(self):
-        return "PubMedAbstracts"
-
-    def size(self):
-        return 21628496355
-    
-    def _download(self):
-        if not os.path.exists(f'components/{self.name()}'):
-            sh(f"""
-            mkdir -p components/{self.name()}
-            cd components/{self.name()}
-            virtualenv env
-            . env/bin/activate
-            pip install gdown
-            gdown {self.gdrive_link}
-            zstd -d {self.f_compressed}
-            """)
-            sha256sum(f'components/{self.name()}/{self.f_compressed}', self.sha256val)
-
-    def documents(self):
-        self._download()
-
-        yield from lmd.Reader(f'components/{self.name()}/{self.f_compressed}').stream_data()
-
-    
-    def clean(self):
-        shutil.rmtree(f'components/{self.name()}', ignore_errors=True)
 
 
 class OpenWebTextDataset(Dataset):
