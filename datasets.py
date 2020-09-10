@@ -495,3 +495,37 @@ class PubMedDataset(Dataset):
     
     def num_docs(self):
         return 15518009
+
+
+class ExPorterDataset(Dataset):
+    def name(self):
+        return "NIH ExPorter"
+
+    def _download(self):
+        if not os.path.exists('components/exporter'):
+            sh("""
+            mkdir -p components/exporter
+            cd components/exporter
+            virtualenv env
+            . env/bin/activate
+            pip install gdown
+            gdown https://drive.google.com/uc?id=11mO-0LuL2YeKoqqWXyHPHf3d2ODnjVPP
+            """)
+            sha256sum('components/exporter/NIH_ExPORTER_awarded_grant_text.jsonl.zst', 'be7fc69b9a3652391b6567891b99277ac99e7dfd5892ba19cb312f909357c458')
+
+    def documents(self):
+        self._download()
+
+        yield from lmd.Reader('components/exporter/NIH_ExPORTER_awarded_grant_text.jsonl.zst').stream_data()
+
+    def clean(self):
+        if os.path.exists('components/exporter'):
+            sh("""
+            rm -rf components/exporter
+            """)
+    
+    def size(self):
+        return 2034579138
+    
+    def num_docs(self):
+        return 939661
