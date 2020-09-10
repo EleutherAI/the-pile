@@ -11,6 +11,7 @@ from datasets import *
 datasets = [
     (BibliotikDataset()    , 1. ),
     (ArXivDataset()        , 1. ),
+    (PubMedAbstracts()     , 1. ),
     (OpenWebTextDataset()  , 1. ),
     (WikipediaDataset()    , 1. ),
     (OpensubtitlesDataset(), 1. ),
