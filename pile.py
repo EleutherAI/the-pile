@@ -23,6 +23,7 @@ datasets = [
     (CORD19Dataset()       , 1. ),
     (ExPorterDataset()     , 1. ),
     (EnronEmailsDataset()  , 1. ),
+    (FreeLawDataset()      , 1. ),
 ]
 
 def mk_table(datasets):
@@ -43,7 +44,7 @@ def mk_table(datasets):
 
     writer = MarkdownTableWriter()
     writer.table_name = "The Pile™"
-    writer.headers = ["Component", "Size", "Weight", "Epochs (@1.2TB)", "Mean Document Size"]
+    writer.headers = ["Component", "Size", "Weight", "Epochs", "Mean Document Size"]
     writer.value_matrix = values
     return writer.dumps()
 

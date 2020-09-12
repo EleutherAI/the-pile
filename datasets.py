@@ -529,3 +529,38 @@ class ExPorterDataset(Dataset):
     
     def num_docs(self):
         return 939661
+
+
+
+class FreeLawDataset(Dataset):
+    def name(self):
+        return "FreeLaw"
+
+    def _download(self):
+        if not os.path.exists('components/freelaw'):
+            sh("""
+            mkdir -p components/freelaw
+            cd components/freelaw
+            virtualenv env
+            . env/bin/activate
+            pip install gdown
+            gdown https://drive.google.com/uc?id=1L-x3g3V888gHNUVHQWDkJBJHs5N02Kjz
+            """)
+            sha256sum('components/freelaw/FreeLaw_Opinions.jsonl.zst', '7d7ba907cf397e8585bb3ef148b3e9678edbf142b2247460f907c16aecbaed2d')
+
+    def documents(self):
+        self._download()
+
+        yield from lmd.Reader('components/freelaw/FreeLaw_Opinions.jsonl.zst').stream_data()
+
+    def clean(self):
+        if os.path.exists('components/freelaw'):
+            sh("""
+            rm -rf components/freelaw
+            """)
+    
+    def size(self):
+        return 54923939791
+    
+    def num_docs(self):
+        return 3562015

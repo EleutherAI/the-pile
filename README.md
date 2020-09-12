@@ -2,24 +2,27 @@
 
 The Pile is (going to be) the world's largest open source language modeling data set. We are currently developing Version 1, with a goal of 1 TiB of English text.
 
-|    Component    |   Size   |Weight|Epochs (@1.2TB)|Mean Document Size|
-|-----------------|----------|------|--------------:|------------------|
-|Bibliotik        |100.96 GiB|34.81%|          3.854|538.36 KiB        |
-|ArXiv            |56.21 GiB |19.38%|          3.854|46.61 KiB         |
-|OpenWebText      |37.03 GiB |12.77%|          3.854|4.84 KiB          |
-|PubMed Abstracts |19.26 GiB |6.64% |          3.854|1.30 KiB          |
-|Wikipedia (en)   |17.27 GiB |5.96% |          3.854|3.00 KiB          |
-|OpenSubtitles    |12.98 GiB |4.48% |          3.854|30.48 KiB         |
-|Gutenberg (PG-19)|10.88 GiB |3.75% |          3.854|398.73 KiB        |
-|Literotica       |8.81 GiB  |3.04% |          3.854|24.39 KiB         |
-|DM Mathematics   |7.75 GiB  |2.67% |          3.854|47.21 MiB         |
-|BookCorpus       |6.30 GiB  |2.17% |          3.854|369.87 KiB        |
-|Ubuntu IRC       |5.52 GiB  |1.90% |          3.854|15.96 MiB         |
-|CORD-19          |4.26 GiB  |1.47% |          3.854|25.59 KiB         |
-|NIH ExPorter     |1.89 GiB  |0.65% |          3.854|2.11 KiB          |
-|Enron Emails     |901.43 MiB|0.30% |          3.854|1.78 KiB          |
-|**Total**        |289.99 GiB|      |               |9.07 KiB          |
+|    Component    |   Size   |Weight|Epochs|Mean Document Size|
+|-----------------|----------|------|-----:|------------------|
+|Bibliotik        |100.96 GiB|29.59%| 3.276|538.36 KiB        |
+|ArXiv            |56.21 GiB |16.48%| 3.276|46.61 KiB         |
+|FreeLaw          |51.15 GiB |14.99%| 3.276|57.08 KiB         |
+|OpenWebText      |37.03 GiB |10.85%| 3.276|4.84 KiB          |
+|PubMed Abstracts |19.26 GiB |5.65% | 3.276|1.30 KiB          |
+|Wikipedia (en)   |17.27 GiB |5.06% | 3.276|3.00 KiB          |
+|OpenSubtitles    |12.98 GiB |3.81% | 3.276|30.48 KiB         |
+|Gutenberg (PG-19)|10.88 GiB |3.19% | 3.276|398.73 KiB        |
+|Literotica       |8.81 GiB  |2.58% | 3.276|24.39 KiB         |
+|DM Mathematics   |7.75 GiB  |2.27% | 3.276|47.21 MiB         |
+|BookCorpus       |6.30 GiB  |1.85% | 3.276|369.87 KiB        |
+|Ubuntu IRC       |5.52 GiB  |1.62% | 3.276|15.96 MiB         |
+|CORD-19          |4.26 GiB  |1.25% | 3.276|25.59 KiB         |
+|NIH ExPorter     |1.89 GiB  |0.56% | 3.276|2.11 KiB          |
+|Enron Emails     |901.43 MiB|0.26% | 3.276|1.78 KiB          |
+|**Total**        |341.15 GiB|      |      |10.38 KiB         |
 
+
+(Epochs refers to the number of epochs elapsed after 1.2TB)
 
 
 
