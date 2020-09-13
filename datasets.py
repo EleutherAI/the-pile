@@ -35,6 +35,7 @@ class Dataset(abc.ABC):
         size = len(list(map(lambda x: None, tqdm(self.documents()))))
         return size
 
+
 class WikipediaDataset(Dataset):
     def name(self):
         return "Wikipedia (en)"
@@ -206,7 +207,6 @@ class GutenbergDataset(Dataset):
     
     def num_docs(self):
         return 28602
-
 
 
 class DMMathDataset(Dataset):
@@ -530,6 +530,33 @@ class ExPorterDataset(Dataset):
     def num_docs(self):
         return 939661
 
+
+class StackExchangeDataset(Dataset):
+    def name(self):
+        return "StackExchange"
+
+    def _download(self):
+        if not os.path.exists('components/stackexchange'):
+            sh("""
+            git clone https://github.com/EleutherAI/stackexchange_dataset components/stackexchange
+            cd components/stackexchange
+            virtualenv env
+            . env/bin/activate
+            pip install -r requirements.txt
+            pip install requests
+            python3 main.py --names all
+            """)
+
+    def documents(self):
+        self._download()
+
+        yield from map(fread, ls('components/stackexchange/out'))
+
+    def clean(self):
+        if os.path.exists('components/stackexchange/out'):
+            sh("""
+            rm -rf components/stackexchange/out
+            """)
 
 
 class FreeLawDataset(Dataset):
