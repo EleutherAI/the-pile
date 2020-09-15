@@ -538,19 +538,17 @@ class StackExchangeDataset(Dataset):
     def _download(self):
         if not os.path.exists('components/stackexchange'):
             sh("""
-            git clone https://github.com/EleutherAI/stackexchange_dataset components/stackexchange
+            mkdir -p components/stackexchange
             cd components/stackexchange
-            virtualenv env
-            . env/bin/activate
-            pip install -r requirements.txt
-            pip install requests
-            python3 main.py --names all
+            wget https://eaidata.bmk.sh/data/stackexchange_dataset.tar
+            tar xf stackexchange_dataset.tar
             """)
+            sha256sum('components/stackexchange/stackexchange_dataset.tar')
 
     def documents(self):
         self._download()
 
-        yield from map(fread, ls('components/stackexchange/out'))
+        yield from lmd.Reader('components/stackexchange/out').stream_data()
 
     def clean(self):
         if os.path.exists('components/stackexchange/out'):
@@ -558,6 +556,11 @@ class StackExchangeDataset(Dataset):
             rm -rf components/stackexchange/out
             """)
 
+    def size(self):
+        return 34571286358
+    
+    def num_docs(self):
+        return 15622475
 
 class FreeLawDataset(Dataset):
     def name(self):
