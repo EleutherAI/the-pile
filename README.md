@@ -5,23 +5,23 @@ The Pile is (going to be) the world's largest open source language modeling data
 
 |    Component    |   Size   |Weight|Epochs|Mean Document Size|
 |-----------------|----------|------|-----:|------------------|
-|Bibliotik        |100.96 GiB|27.04%| 2.993|538.36 KiB        |
-|ArXiv            |56.21 GiB |15.06%| 2.993|46.61 KiB         |
-|FreeLaw          |51.15 GiB |13.70%| 2.993|15.06 KiB         |
-|OpenWebText      |37.03 GiB |9.92% | 2.993|4.84 KiB          |
-|StackExchange    |32.20 GiB |8.62% | 2.993|2.16 KiB          |
-|PubMed Abstracts |19.26 GiB |5.16% | 2.993|1.30 KiB          |
-|Wikipedia (en)   |17.27 GiB |4.63% | 2.993|3.00 KiB          |
-|OpenSubtitles    |12.98 GiB |3.48% | 2.993|30.48 KiB         |
-|Gutenberg (PG-19)|10.88 GiB |2.91% | 2.993|398.73 KiB        |
-|Literotica       |8.81 GiB  |2.36% | 2.993|24.39 KiB         |
-|DM Mathematics   |7.75 GiB  |2.07% | 2.993|47.21 MiB         |
-|BookCorpus       |6.30 GiB  |1.69% | 2.993|369.87 KiB        |
-|Ubuntu IRC       |5.52 GiB  |1.48% | 2.993|15.96 MiB         |
-|CORD-19          |4.26 GiB  |1.14% | 2.993|25.59 KiB         |
-|NIH ExPorter     |1.89 GiB  |0.51% | 2.993|2.11 KiB          |
-|Enron Emails     |901.43 MiB|0.24% | 2.993|1.78 KiB          |
-|**Total**        |373.34 GiB|      |      |7.43 KiB          |
+|Bibliotik        |100.96 GiB|26.84%| 2.971|538.36 KiB        |
+|ArXiv            |56.21 GiB |14.94%| 2.971|46.61 KiB         |
+|FreeLaw          |51.15 GiB |13.60%| 2.971|15.06 KiB         |
+|OpenWebText      |37.03 GiB |9.84% | 2.971|4.84 KiB          |
+|StackExchange    |32.20 GiB |8.56% | 2.971|2.16 KiB          |
+|PubMed Abstracts |19.26 GiB |5.12% | 2.971|1.30 KiB          |
+|Wikipedia (en)   |17.27 GiB |4.59% | 2.971|3.00 KiB          |
+|OpenSubtitles    |12.98 GiB |3.45% | 2.971|30.48 KiB         |
+|Literotica       |11.60 GiB |3.08% | 2.971|25.69 KiB         |
+|Gutenberg (PG-19)|10.88 GiB |2.89% | 2.971|398.73 KiB        |
+|DM Mathematics   |7.75 GiB  |2.06% | 2.971|47.21 MiB         |
+|BookCorpus       |6.30 GiB  |1.68% | 2.971|369.87 KiB        |
+|Ubuntu IRC       |5.52 GiB  |1.47% | 2.971|15.96 MiB         |
+|CORD-19          |4.26 GiB  |1.13% | 2.971|25.59 KiB         |
+|NIH ExPorter     |1.89 GiB  |0.50% | 2.971|2.11 KiB          |
+|Enron Emails     |901.43 MiB|0.23% | 2.971|1.78 KiB          |
+|**Total**        |376.14 GiB|      |      |7.47 KiB          |
 
 
 

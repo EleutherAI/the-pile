@@ -296,15 +296,14 @@ class LiteroticaDataset(Dataset):
             virtualenv env
             . env/bin/activate
             pip install gdown
-            gdown https://drive.google.com/uc?id=0B5J6A3VOJQjGTUt5cm9XMV80cmc
-            tar xf liter.tar.gz
+            gdown https://drive.google.com/uc?id=1Nx63w9BFZZSI_s2pmJnhcBU9c-y803T7
             """)
-            sha256sum('components/literotica/liter.tar.gz', '9b54711a9df7b0a9512fd4e4d15f7295908791cab514610f5d0c65acd079ec59')
+            sha256sum('components/literotica/Literotica.jsonl.zst')
 
     def documents(self):
         self._download()
 
-        yield from map(fread, ls('components/literotica/liter/story_text'))
+        yield from lmd.Reader('components/literotica/Literotica.jsonl.zst').stream_data()
 
     def clean(self):
         if os.path.exists('components/literotica'):
@@ -313,10 +312,10 @@ class LiteroticaDataset(Dataset):
             """)
 
     def size(self):
-        return 9456345155
+        return 12458318640
     
     def num_docs(self):
-        return 378553
+        return 473653
 
 
 class BibliotikDataset(Dataset):
