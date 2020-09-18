@@ -10,6 +10,7 @@ from datasets import *
 
 datasets = [
     (BibliotikDataset()    , 1. ),
+    (PubMedCentralDataset(), 1. ),
     (ArXivDataset()        , 1. ),
     (FreeLawDataset()      , 1. ),
     (OpenWebTextDataset()  , 1. ),

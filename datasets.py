@@ -593,3 +593,34 @@ class FreeLawDataset(Dataset):
     
     def num_docs(self):
         return 3562015
+
+
+class PubMedCentralDataset(Dataset):
+    def name(self):
+        return "PubMed Central"
+
+    def _download(self):
+        if not os.path.exists('components/pubmedcentral'):
+            sh("""
+            mkdir -p components/pubmedcentral
+            cd components/pubmedcentral
+            wget https://eaidata.bmk.sh/data/PMC_extracts.tar.gz
+            """)
+            sha256sum('components/pubmedcentral/PMC_extracts.tar.gz')
+
+    def documents(self):
+        self._download()
+
+        yield from lmd.Reader('components/pubmedcentral/PMC_extracts.tar.gz').stream_data()
+
+    def clean(self):
+        if os.path.exists('components/pubmedcentral'):
+            sh("""
+            rm -rf components/pubmedcentral
+            """)
+
+    def size(self):
+        return 96929951580
+
+    def num_docs(self):
+        return 3098931
