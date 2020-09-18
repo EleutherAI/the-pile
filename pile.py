@@ -14,6 +14,7 @@ datasets = [
     (ArXivDataset()        , 1. ),
     (FreeLawDataset()      , 1. ),
     (OpenWebTextDataset()  , 1. ),
+    (StackExchangeDataset(), 1. ),
     (PubMedDataset()       , 1. ),
     (WikipediaDataset()    , 1. ),
     (OpensubtitlesDataset(), 1. ),
@@ -25,7 +26,6 @@ datasets = [
     (CORD19Dataset()       , 1. ),
     (ExPorterDataset()     , 1. ),
     (EnronEmailsDataset()  , 1. ),
-    (StackExchangeDataset(), 1. ),
 ]
 
 def mk_table(datasets):
