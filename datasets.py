@@ -658,3 +658,37 @@ class CZICDataset(Dataset):
 
     def num_docs(self):
         return 4774
+
+
+class PhilPapersDataset(Dataset):
+    def name(self):
+        return "PhilPapers"
+
+    def _download(self):
+        if not os.path.exists('components/philpapers'):
+            sh("""
+            mkdir -p components/philpapers
+            cd components/philpapers
+            virtualenv env
+            . env/bin/activate
+            pip install gdown
+            gdown https://drive.google.com/uc?id=1u01vkBNAS8jtu0AZeQW56bzf-6QbeSRB
+            """)
+            sha256sum('components/philpapers/PhilArchive.jsonl.zst', 'e90529b9b3961328d1e34b60534a8e0f73d5ad1f104e22a217de53cd53c41fea')
+
+    def documents(self):
+        self._download()
+
+        yield from lmd.Reader('components/philpapers/PhilArchive.jsonl.zst').stream_data()
+
+    def clean(self):
+        if os.path.exists('components/philpapers'):
+            sh("""
+            rm -rf components/philpapers
+            """)
+
+    def size(self):
+        return 2553543227
+
+    def num_docs(self):
+        return 33990

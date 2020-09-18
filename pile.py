@@ -24,6 +24,7 @@ datasets = [
     (BookCorpusDataset()   , 1. ),
     (UbuntuIRCDataset()    , 1. ),
     (CORD19Dataset()       , 1. ),
+    (PhilPapersDataset()   , 1. ),
     (ExPorterDataset()     , 1. ),
     (EnronEmailsDataset()  , 1. ),
     (CZICDataset()         , 1. ),
