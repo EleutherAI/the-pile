@@ -26,6 +26,7 @@ datasets = [
     (CORD19Dataset()       , 1. ),
     (ExPorterDataset()     , 1. ),
     (EnronEmailsDataset()  , 1. ),
+    (CZICDataset()         , 1. ),
 ]
 
 def mk_table(datasets):

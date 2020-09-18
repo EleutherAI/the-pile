@@ -624,3 +624,37 @@ class PubMedCentralDataset(Dataset):
 
     def num_docs(self):
         return 3098931
+
+
+class CZICDataset(Dataset):
+    def name(self):
+        return "CZIC"
+
+    def _download(self):
+        if not os.path.exists('components/czic'):
+            sh("""
+            mkdir -p components/czic
+            cd components/czic
+            virtualenv env
+            . env/bin/activate
+            pip install gdown
+            gdown https://drive.google.com/uc?id=1qjZZTqS-m63TMKBYB1eNRc5Bh4W--SYQ
+            """)
+            sha256sum('components/czic/GOVINFO_CZIC_KL.jsonl.zst', 'c7a46f5af12789fc8b2105b208e22fa400c63ac720c72073e90ee91af6744f00')
+
+    def documents(self):
+        self._download()
+
+        yield from lmd.Reader('components/czic/GOVINFO_CZIC_KL.jsonl.zst').stream_data()
+
+    def clean(self):
+        if os.path.exists('components/czic'):
+            sh("""
+            rm -rf components/czic
+            """)
+
+    def size(self):
+        return 837798818
+
+    def num_docs(self):
+        return 4774
