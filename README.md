@@ -5,27 +5,27 @@ The Pile is (going to be) the world's largest diverse open source language model
 
 |    Component    |   Size   |Weight|Epochs|Mean Document Size|
 |-----------------|----------|------|-----:|------------------|
-|Bibliotik        |100.96 GiB|21.50%| 2.380|538.36 KiB        |
-|PubMed Central   |90.27 GiB |19.22%| 2.380|30.55 KiB         |
-|ArXiv            |56.21 GiB |11.97%| 2.380|46.61 KiB         |
-|FreeLaw          |51.15 GiB |10.89%| 2.380|15.06 KiB         |
-|OpenWebText      |37.03 GiB |7.89% | 2.380|4.84 KiB          |
-|StackExchange    |32.20 GiB |6.86% | 2.380|2.16 KiB          |
-|PubMed Abstracts |19.26 GiB |4.10% | 2.380|1.30 KiB          |
-|Wikipedia (en)   |17.27 GiB |3.68% | 2.380|3.00 KiB          |
-|OpenSubtitles    |12.98 GiB |2.76% | 2.380|30.48 KiB         |
-|Literotica       |11.60 GiB |2.47% | 2.380|25.69 KiB         |
-|Gutenberg (PG-19)|10.88 GiB |2.32% | 2.380|398.73 KiB        |
-|DM Mathematics   |7.75 GiB  |1.65% | 2.380|47.21 MiB         |
-|BookCorpus       |6.30 GiB  |1.34% | 2.380|369.87 KiB        |
-|Ubuntu IRC       |5.52 GiB  |1.17% | 2.380|15.96 MiB         |
-|CORD-19          |4.26 GiB  |0.91% | 2.380|25.59 KiB         |
-|PhilPapers       |2.38 GiB  |0.51% | 2.380|73.37 KiB         |
-|NIH ExPorter     |1.89 GiB  |0.40% | 2.380|2.11 KiB          |
-|Enron Emails     |901.43 MiB|0.19% | 2.380|1.78 KiB          |
-|CZIC             |798.99 MiB|0.17% | 2.380|171.38 KiB        |
-|**Total**        |469.57 GiB|      |      |8.80 KiB          |
-
+|Bibliotik        |100.96 GiB|20.50%| 2.269|538.36 KiB        |
+|PubMed Central   |90.27 GiB |18.33%| 2.269|30.55 KiB         |
+|ArXiv            |56.21 GiB |11.41%| 2.269|46.61 KiB         |
+|FreeLaw          |51.15 GiB |10.39%| 2.269|15.06 KiB         |
+|OpenWebText      |37.03 GiB |7.52% | 2.269|4.84 KiB          |
+|StackExchange    |32.20 GiB |6.54% | 2.269|2.16 KiB          |
+|USPTO            |22.90 GiB |4.65% | 2.269|4.08 KiB          |
+|PubMed Abstracts |19.26 GiB |3.91% | 2.269|1.30 KiB          |
+|Wikipedia (en)   |17.27 GiB |3.51% | 2.269|3.00 KiB          |
+|OpenSubtitles    |12.98 GiB |2.64% | 2.269|30.48 KiB         |
+|Literotica       |11.60 GiB |2.36% | 2.269|25.69 KiB         |
+|Gutenberg (PG-19)|10.88 GiB |2.21% | 2.269|398.73 KiB        |
+|DM Mathematics   |7.75 GiB  |1.57% | 2.269|47.21 MiB         |
+|BookCorpus       |6.30 GiB  |1.28% | 2.269|369.87 KiB        |
+|Ubuntu IRC       |5.52 GiB  |1.12% | 2.269|15.96 MiB         |
+|CORD-19          |4.26 GiB  |0.86% | 2.269|25.59 KiB         |
+|PhilPapers       |2.38 GiB  |0.48% | 2.269|73.37 KiB         |
+|NIH ExPorter     |1.89 GiB  |0.38% | 2.269|2.11 KiB          |
+|Enron Emails     |901.43 MiB|0.18% | 2.269|1.78 KiB          |
+|CZIC             |798.99 MiB|0.16% | 2.269|171.38 KiB        |
+|**Total**        |492.48 GiB|      |      |8.35 KiB          |
 
 
 

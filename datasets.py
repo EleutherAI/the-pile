@@ -692,3 +692,34 @@ class PhilPapersDataset(Dataset):
 
     def num_docs(self):
         return 33990
+
+
+class USPTODataset(Dataset):
+    def name(self):
+        return "USPTO"
+
+    def _download(self):
+        if not os.path.exists('components/uspto'):
+            sh("""
+            mkdir -p components/uspto
+            cd components/uspto
+            wget https://eaidata.bmk.sh/data/pile_uspto.tar
+            """)
+            sha256sum('components/uspto/pile_uspto.tar')
+
+    def documents(self):
+        self._download()
+
+        yield from lmd.Reader('components/uspto/pile_uspto').stream_data()
+
+    def clean(self):
+        if os.path.exists('components/uspto'):
+            sh("""
+            rm -rf components/uspto
+            """)
+
+    def size(self):
+        return 24593538339
+
+    def num_docs(self):
+        return 5883037

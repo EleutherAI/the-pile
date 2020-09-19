@@ -15,6 +15,7 @@ datasets = [
     (FreeLawDataset()      , 1. ),
     (OpenWebTextDataset()  , 1. ),
     (StackExchangeDataset(), 1. ),
+    (USPTODataset()        , 1. ),
     (PubMedDataset()       , 1. ),
     (WikipediaDataset()    , 1. ),
     (OpensubtitlesDataset(), 1. ),
