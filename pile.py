@@ -1,7 +1,7 @@
 import lm_dataformat as lmd
 import json
 from pytablewriter import MarkdownTableWriter
-from tqdm import tqdm 
+from tqdm import tqdm, trange
 from utils import humanbytes
 import random
 
@@ -30,6 +30,34 @@ datasets = [
     (ExPorterDataset()     , 1. ),
     (EnronEmailsDataset()  , 1. ),
 ]
+
+def take(n, iter):
+    ret = []
+    for i in range(n):
+        try:
+            ret.append(next(iter))
+        except StopIteration:
+            break
+    return ret
+
+def get_samples():
+    for dset, _ in datasets:
+        print('\\subsection{' + dset.name() + '}')
+        print()
+        docs = take(1000, dset.documents())
+        random.shuffle(docs)
+
+        limit = 8192
+        res = ''
+        for doc in docs:
+            if len(res) > limit:
+                break
+            res += doc + '<|endoftext|>'
+        
+        if len(res) > limit:
+            i = random.randrange(0, len(res) - limit)
+            res = res[i:i+limit]
+        print('\\begin{verbatim}\n' + res + '\n\\end{verbatim}')
 
 def mk_table(datasets):
     values = []
@@ -103,8 +131,10 @@ class ThePile:
         return sum(map(lambda x: x[0].size(), tqdm(self.datasets())))
 
 if __name__ == '__main__':
+    random.seed(42)
     print(mk_table(datasets))
 
     pile = ThePile(datasets, int(1.2e12))
+    get_samples()
     for x in pile.documents():
         pass
