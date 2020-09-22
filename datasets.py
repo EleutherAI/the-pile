@@ -110,7 +110,7 @@ class BookCorpusDataset(Dataset):
         return "BookCorpus"
 
     def _download(self):
-        if not os.path.exists('components/bookcorpus/nometa'):
+        if not os.path.exists('components/bookcorpus/books1.tar.gz'):
             sh("""
             mkdir -p components/bookcorpus
             cd components/bookcorpus
