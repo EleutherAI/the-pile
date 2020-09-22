@@ -723,3 +723,37 @@ class USPTODataset(Dataset):
 
     def num_docs(self):
         return 5883037
+
+
+class EuroParlDataset(Dataset):
+    def name(self):
+        return "EuroParl"
+
+    def _download(self):
+        if not os.path.exists('components/europarl'):
+            sh("""
+            mkdir -p components/europarl
+            cd components/europarl
+            virtualenv env
+            . env/bin/activate
+            pip install gdown
+            gdown https://drive.google.com/uc?id=12Q23Y7IKQyjF28xH0Aw6yZaYEx2YIOiB
+            """)
+            sha256sum('components/europarl/EuroParliamentProceedings_1996_2011.jsonl.zst', '6111400e7b7f75ce91fed1b5fc0a3630b8263217bd01ce75f7d8701f26ac0e98')
+
+    def documents(self):
+        self._download()
+
+        yield from lmd.Reader('components/europarl/EuroParliamentProceedings_1996_2011.jsonl.zst').stream_data()
+
+    def clean(self):
+        if os.path.exists('components/europarl'):
+            sh("""
+            rm -rf components/europarl
+            """)
+
+    def size(self):
+        return 4923130035
+
+    def num_docs(self):
+        return 69814

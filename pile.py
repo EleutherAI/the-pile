@@ -24,6 +24,7 @@ datasets = [
     (DMMathDataset()       , 1. ),
     (BookCorpusDataset()   , 1. ),
     (UbuntuIRCDataset()    , 1. ),
+    (EuroParlDataset()     , 1. ),
     (CORD19Dataset()       , 1. ),
     (PhilPapersDataset()   , 1. ),
     (ExPorterDataset()     , 1. ),
