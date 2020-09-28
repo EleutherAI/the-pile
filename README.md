@@ -2,30 +2,29 @@
 
 The Pile is (going to be) the world's largest diverse open source language modeling data set. We are currently developing Version 1, with an ultimate goal of 1 TiB of English text.
 
-
 |    Component    |   Size   |Weight|Epochs|Mean Document Size|
 |-----------------|----------|------|-----:|------------------|
-|Bibliotik        |100.96 GiB|20.34%| 2.252|538.36 KiB        |
-|PubMed Central   |90.27 GiB |18.19%| 2.252|30.55 KiB         |
-|ArXiv            |56.21 GiB |11.33%| 2.252|46.61 KiB         |
-|FreeLaw          |51.15 GiB |10.31%| 2.252|15.06 KiB         |
-|OpenWebText      |37.03 GiB |7.46% | 2.252|4.84 KiB          |
-|StackExchange    |32.20 GiB |6.49% | 2.252|2.16 KiB          |
-|USPTO            |22.90 GiB |4.62% | 2.252|4.08 KiB          |
-|PubMed Abstracts |19.26 GiB |3.88% | 2.252|1.30 KiB          |
-|Wikipedia (en)   |17.27 GiB |3.48% | 2.252|3.00 KiB          |
-|OpenSubtitles    |12.98 GiB |2.62% | 2.252|30.48 KiB         |
-|Literotica       |11.60 GiB |2.34% | 2.252|25.69 KiB         |
-|Gutenberg (PG-19)|10.88 GiB |2.19% | 2.252|398.73 KiB        |
-|DM Mathematics   |7.75 GiB  |1.56% | 2.252|47.21 MiB         |
-|BookCorpus       |6.30 GiB  |1.27% | 2.252|369.87 KiB        |
-|Ubuntu IRC       |5.52 GiB  |1.11% | 2.252|15.96 MiB         |
-|EuroParl         |4.59 GiB  |0.92% | 2.252|68.87 KiB         |
-|CORD-19          |4.26 GiB  |0.86% | 2.252|25.59 KiB         |
-|PhilPapers       |2.38 GiB  |0.48% | 2.252|73.37 KiB         |
-|NIH ExPorter     |1.89 GiB  |0.38% | 2.252|2.11 KiB          |
-|Enron Emails     |901.43 MiB|0.18% | 2.252|1.78 KiB          |
-|**Total**        |496.28 GiB|      |      |8.41 KiB          |
+|Bibliotik        |100.96 GiB|20.52%| 2.271|538.36 KiB        |
+|PubMed Central   |90.27 GiB |18.35%| 2.271|30.55 KiB         |
+|ArXiv            |56.21 GiB |11.42%| 2.271|46.61 KiB         |
+|FreeLaw          |51.15 GiB |10.40%| 2.271|15.06 KiB         |
+|OpenWebText      |37.03 GiB |7.53% | 2.271|4.84 KiB          |
+|StackExchange    |32.20 GiB |6.54% | 2.271|2.16 KiB          |
+|USPTO            |22.90 GiB |4.66% | 2.271|4.08 KiB          |
+|PubMed Abstracts |19.26 GiB |3.92% | 2.271|1.30 KiB          |
+|Wikipedia (en)   |17.27 GiB |3.51% | 2.271|3.00 KiB          |
+|OpenSubtitles    |12.98 GiB |2.64% | 2.271|30.48 KiB         |
+|Literotica       |11.60 GiB |2.36% | 2.271|25.69 KiB         |
+|Gutenberg (PG-19)|10.88 GiB |2.21% | 2.271|398.73 KiB        |
+|DM Mathematics   |7.75 GiB  |1.57% | 2.271|47.21 MiB         |
+|BookCorpus       |6.30 GiB  |1.28% | 2.271|369.87 KiB        |
+|Ubuntu IRC       |5.52 GiB  |1.12% | 2.271|15.96 MiB         |
+|EuroParl         |4.59 GiB  |0.93% | 2.271|68.87 KiB         |
+|PhilPapers       |2.38 GiB  |0.48% | 2.271|73.37 KiB         |
+|NIH ExPorter     |1.89 GiB  |0.39% | 2.271|2.11 KiB          |
+|Enron Emails     |901.43 MiB|0.18% | 2.271|1.78 KiB          |
+|**Total**        |492.02 GiB|      |      |8.36 KiB          |
+
 
 
 
