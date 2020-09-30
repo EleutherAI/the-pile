@@ -26,13 +26,14 @@ class Dataset(abc.ABC):
         """ Return an estimate of the dataset size. Implementations may use a faster, less accurate estimate. """
 
         size = sum(map(utf8len, tqdm(self.documents())))
-        print(self.name(), size)
+        print('size', self.name(), size)
         return size
     
     def num_docs(self):
         """ Return an estimate of the number of documents in the dataset. Implementations may use a faster, less accurate estimate. """
 
         size = len(list(map(lambda x: None, tqdm(self.documents()))))
+        print('docs', self.name(), size)
         return size
 
 
