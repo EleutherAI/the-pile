@@ -758,3 +758,35 @@ class EuroParlDataset(Dataset):
 
     def num_docs(self):
         return 69814
+
+
+class YoutubeSubtitleDataset(Dataset):
+    def name(self):
+        return "YoutubeSubtitles"
+
+    def _download(self):
+        if not os.path.exists('components/youtubesubtitles'):
+            sh("""
+            mkdir -p components/youtubesubtitles
+            cd components/youtubesubtitles
+            virtualenv env
+            . env/bin/activate
+            wget https://eaidata.bmk.sh/data/yt_subs.jsonl.zst
+            """)
+
+    def documents(self):
+        self._download()
+
+        yield from lmd.Reader('components/youtubesubtitles/yt_subs.jsonl.zst').stream_data()
+
+    def clean(self):
+        if os.path.exists('components/youtubesubtitles'):
+            sh("""
+            rm -rf components/youtubesubtitles
+            """)
+
+    def size(self):
+        return 4010420381
+
+    def num_docs(self):
+        return 173651
