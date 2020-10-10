@@ -1,6 +1,9 @@
 # The Pile™
 
-The Pile is (going to be) the world's largest diverse open source language modeling data set. We are currently developing Version 1, with an ultimate goal of 1 TiB of English text.
+The Pile is a large, diverse, open source language modelling data set that consists of many smaller datasets combined together. The objective is to obtain text from as many modalities as possible to ensure that models trained using The Pile will have much broader generalization abilities. We are currently developing Version 1, with an ultimate goal of 1 TiB of English text. After the completion of Version 1, our next goal is a fully-multilingual, 10TiB text dataset.
+
+The Pile is currently still under development.
+
 
 |    Component    |   Size   |Weight|Epochs|Mean Document Size|
 |-----------------|----------|------|-----:|------------------|
