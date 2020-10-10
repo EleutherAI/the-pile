@@ -56,8 +56,9 @@ class WikipediaDataset(Dataset):
         self._download()
 
         for file in ls('components/wikipedia_en/output'):
-            ob = json.loads(fread(file))
-            yield from ob
+            with open(file) as fh:
+                ob = json.load(fh)
+                yield from ob
 
     def clean(self):
         if os.path.exists('components/wikipedia_en'):
@@ -760,7 +761,7 @@ class EuroParlDataset(Dataset):
         return 69814
 
 
-class YoutubeSubtitleDataset(Dataset):
+class YTSubtitlesDataset(Dataset):
     def name(self):
         return "YoutubeSubtitles"
 
@@ -769,8 +770,7 @@ class YoutubeSubtitleDataset(Dataset):
             sh("""
             mkdir -p components/youtubesubtitles
             cd components/youtubesubtitles
-            virtualenv env
-            . env/bin/activate
+
             wget https://eaidata.bmk.sh/data/yt_subs.jsonl.zst
             """)
 
