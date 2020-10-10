@@ -29,6 +29,7 @@ datasets = [
     (PhilPapersDataset()   , 1. ),
     (ExPorterDataset()     , 1. ),
     (EnronEmailsDataset()  , 1. ),
+    (HackerNewsDataset()   , 1. ),
 ]
 
 def take(n, iter):

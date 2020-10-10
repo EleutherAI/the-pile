@@ -790,3 +790,34 @@ class YTSubtitlesDataset(Dataset):
 
     def num_docs(self):
         return 173651
+
+
+class HackerNewsDataset(Dataset):
+    def name(self):
+        return "HackerNews"
+
+    def _download(self):
+        if not os.path.exists('components/hackernews'):
+            sh("""
+            mkdir -p components/hackernews
+            cd components/hackernews
+
+            wget https://eaidata.bmk.sh/data/hn.tar.gz
+            """)
+
+    def documents(self):
+        self._download()
+
+        yield from lmd.Reader('components/hackernews/hn.tar.gz').stream_data()
+
+    def clean(self):
+        if os.path.exists('components/hackernews'):
+            sh("""
+            rm -rf components/hackernews
+            """)
+    
+    def size(self):
+        return 1704809038
+    
+    def num_docs(self):
+        return 373028
