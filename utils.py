@@ -57,6 +57,11 @@ def sha256sum(filename, expected=None):
         print(filename, h.hexdigest())
 
 
+def rm_if_exists(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
+
+
 # https://stackoverflow.com/questions/12523586/python-format-size-application-converting-b-to-kb-mb-gb-tb/37423778
 def humanbytes(B):
    'Return the given bytes as a human friendly KB, MB, GB, or TB string'

@@ -2,6 +2,7 @@ import abc
 import os
 import lm_dataformat as lmd
 import json
+import shutil
 from tqdm import tqdm
 
 from utils import *
@@ -61,10 +62,7 @@ class WikipediaDataset(Dataset):
                 yield from ob
 
     def clean(self):
-        if os.path.exists('components/wikipedia_en'):
-            sh("""
-            rm -rf components/wikipedia_en
-            """)
+        rm_if_exists('components/wikipedia_en')
     
     def size(self):
         self._download()
@@ -95,10 +93,8 @@ class OpensubtitlesDataset(Dataset):
         yield from lmd.Reader('components/opensubtitles/out').stream_data()
 
     def clean(self):
-        if os.path.exists('components/opensubtitles'):
-            sh("""
-            rm -rf components/opensubtitles
-            """)
+        rm_if_exists('components/opensubtitles')
+
 
     def size(self):
         return 13940478112
@@ -128,10 +124,7 @@ class BookCorpusDataset(Dataset):
         yield from map(fread, ls('components/bookcorpus/books1/epubtxt'))
 
     def clean(self):
-        if os.path.exists('components/bookcorpus'):
-            sh("""
-            rm -rf components/bookcorpus
-            """)
+        rm_if_exists('components/bookcorpus')
 
     def size(self):
         return 6767414779
@@ -163,10 +156,8 @@ class OpenWebTextDataset(Dataset):
         yield from lmd.Reader('components/openwebtext/openwebtext').stream_data()
 
     def clean(self):
-        if os.path.exists('components/openwebtext'):
-            sh("""
-            rm -rf components/openwebtext
-            """)
+        rm_if_exists('components/openwebtext')
+
     
     def size(self):
         return 39757465434
@@ -198,10 +189,7 @@ class GutenbergDataset(Dataset):
         yield from map(fread, ls('components/gutenberg/pg19_train'))
 
     def clean(self):
-        if os.path.exists('components/gutenberg'):
-            sh("""
-            rm -rf components/gutenberg
-            """)
+        rm_if_exists('components/gutenberg')
     
     def size(self):
         self._download()
@@ -238,10 +226,7 @@ class DMMathDataset(Dataset):
         )
 
     def clean(self):
-        if os.path.exists('components/dm_math'):
-            sh("""
-            rm -rf components/dm_math
-            """)
+        rm_if_exists('components/dm_math')
 
     def size(self):
         return 8316165951
@@ -273,10 +258,7 @@ class EnronEmailsDataset(Dataset):
         yield from lmd.Reader('components/enron_emails/out').stream_data()
 
     def clean(self):
-        if os.path.exists('components/enron_emails'):
-            sh("""
-            rm -rf components/enron_emails
-            """)
+        rm_if_exists('components/enron_emails')
 
     def size(self):
         return 945212874
@@ -308,10 +290,7 @@ class LiteroticaDataset(Dataset):
         yield from lmd.Reader('components/literotica/Literotica.jsonl.zst').stream_data()
 
     def clean(self):
-        if os.path.exists('components/literotica'):
-            sh("""
-            rm -rf components/literotica
-            """)
+        rm_if_exists('components/literotica')
 
     def size(self):
         return 12458318640
@@ -345,10 +324,7 @@ class BibliotikDataset(Dataset):
         yield from map(fread, flatMap(ls, ls('components/bibliotik/books3/the-eye.eu/public/Books/Bibliotik')))
 
     def clean(self):
-        if os.path.exists('components/bibliotik'):
-            sh("""
-            rm -rf components/bibliotik
-            """)
+        rm_if_exists('components/bibliotik')
 
     def size(self):
         return 108404259563
@@ -387,10 +363,7 @@ class CORD19Dataset(Dataset):
         yield from lmd.Reader('components/cord19/out').stream_data()
 
     def clean(self):
-        if os.path.exists('components/cord19'):
-            sh("""
-            rm -rf components/cord19
-            """)
+        rm_if_exists('components/cord19')
     
     def size(self):
         return 4573360967
@@ -408,29 +381,24 @@ class UbuntuIRCDataset(Dataset):
             sh("""
             mkdir -p components/ubuntu_irc
             cd components/ubuntu_irc
-            virtualenv env
-            . env/bin/activate
-            pip install gdown
-            gdown https://drive.google.com/uc?id=1W2AN0UKS5Xw1SuIuqPvY7bza6zEzADy7
+
+            wget https://eaidata.bmk.sh/data/ubuntu_irc_until_2020_9_1.jsonl.zst
             """)
-            sha256sum('components/ubuntu_irc/ubuntu_irc_until_2020_9_4.jsonl.zst', '1f5374cb61819dcf4386e5d9d9e39ca2d64b13863badd9b4f7150db068451e60')
+            sha256sum('components/ubuntu_irc/ubuntu_irc_until_2020_9_1.jsonl.zst', 'b2bd119beb2741f428c7f1de954794718ce6e8090e3125be5e64845bb320767e')
 
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/ubuntu_irc/ubuntu_irc_until_2020_9_4.jsonl.zst').stream_data()
+        yield from lmd.Reader('components/ubuntu_irc/ubuntu_irc_until_2020_9_1.jsonl.zst').stream_data()
 
     def clean(self):
-        if os.path.exists('components/ubuntu_irc'):
-            sh("""
-            rm -rf components/ubuntu_irc
-            """)
+        rm_if_exists('components/ubuntu_irc')
     
     def size(self):
         return 5923631555
     
     def num_docs(self):
-        return 354
+        return 2807
 
 
 class ArXivDataset(Dataset):
@@ -449,13 +417,10 @@ class ArXivDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from map(fread, ls('components/arxiv/documents'))
+        yield from map(compose(strip_markdown_colons, fread), ls('components/arxiv/documents'))
 
     def clean(self):
-        if os.path.exists('components/arxiv'):
-            sh("""
-            rm -rf components/arxiv
-            """)
+        rm_if_exists('components/arxiv')
 
     def size(self):
         return 60353358395
@@ -486,10 +451,7 @@ class PubMedDataset(Dataset):
         yield from lmd.Reader('components/pubmed/PUBMED_title_abstracts_2019_baseline.jsonl.zst').stream_data()
 
     def clean(self):
-        if os.path.exists('components/pubmed'):
-            sh("""
-            rm -rf components/pubmed
-            """)
+        rm_if_exists('components/pubmed')
 
     def size(self):
         return 20684050384
@@ -520,10 +482,7 @@ class ExPorterDataset(Dataset):
         yield from lmd.Reader('components/exporter/NIH_ExPORTER_awarded_grant_text.jsonl.zst').stream_data()
 
     def clean(self):
-        if os.path.exists('components/exporter'):
-            sh("""
-            rm -rf components/exporter
-            """)
+        rm_if_exists('components/exporter')
     
     def size(self):
         return 2034579138
@@ -552,10 +511,7 @@ class StackExchangeDataset(Dataset):
         yield from lmd.Reader('components/stackexchange/out').stream_data()
 
     def clean(self):
-        if os.path.exists('components/stackexchange/out'):
-            sh("""
-            rm -rf components/stackexchange/out
-            """)
+        rm_if_exists('components/stackexchange/out')
 
     def size(self):
         return 34571286358
@@ -585,10 +541,7 @@ class FreeLawDataset(Dataset):
         yield from lmd.Reader('components/freelaw/FreeLaw_Opinions.jsonl.zst').stream_data()
 
     def clean(self):
-        if os.path.exists('components/freelaw'):
-            sh("""
-            rm -rf components/freelaw
-            """)
+        rm_if_exists('components/freelaw')
     
     def size(self):
         return 54923939791
@@ -613,13 +566,10 @@ class PubMedCentralDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/pubmedcentral/PMC_extracts.tar.gz').stream_data()
+        yield from map(strip_markdown_colons, lmd.Reader('components/pubmedcentral/PMC_extracts.tar.gz').stream_data())
 
     def clean(self):
-        if os.path.exists('components/pubmedcentral'):
-            sh("""
-            rm -rf components/pubmedcentral
-            """)
+        rm_if_exists('components/pubmedcentral')
 
     def size(self):
         return 96929951580
@@ -650,10 +600,7 @@ class CZICDataset(Dataset):
         yield from lmd.Reader('components/czic/GOVINFO_CZIC_KL.jsonl.zst').stream_data()
 
     def clean(self):
-        if os.path.exists('components/czic'):
-            sh("""
-            rm -rf components/czic
-            """)
+        rm_if_exists('components/czic')
 
     def size(self):
         return 837798818
@@ -684,10 +631,7 @@ class PhilPapersDataset(Dataset):
         yield from lmd.Reader('components/philpapers/PhilArchive.jsonl.zst').stream_data()
 
     def clean(self):
-        if os.path.exists('components/philpapers'):
-            sh("""
-            rm -rf components/philpapers
-            """)
+        rm_if_exists('components/philpapers')
 
     def size(self):
         return 2553543227
@@ -715,10 +659,7 @@ class USPTODataset(Dataset):
         yield from lmd.Reader('components/uspto/pile_uspto').stream_data()
 
     def clean(self):
-        if os.path.exists('components/uspto'):
-            sh("""
-            rm -rf components/uspto
-            """)
+        rm_if_exists('components/uspto')
 
     def size(self):
         return 24593538339
@@ -749,10 +690,7 @@ class EuroParlDataset(Dataset):
         yield from lmd.Reader('components/europarl/EuroParliamentProceedings_1996_2011.jsonl.zst').stream_data()
 
     def clean(self):
-        if os.path.exists('components/europarl'):
-            sh("""
-            rm -rf components/europarl
-            """)
+        rm_if_exists('components/europarl')
 
     def size(self):
         return 4923130035
@@ -780,10 +718,7 @@ class YTSubtitlesDataset(Dataset):
         yield from lmd.Reader('components/youtubesubtitles/yt_subs.jsonl.zst').stream_data()
 
     def clean(self):
-        if os.path.exists('components/youtubesubtitles'):
-            sh("""
-            rm -rf components/youtubesubtitles
-            """)
+        rm_if_exists('components/youtubesubtitles')
 
     def size(self):
         return 4010420381
@@ -811,10 +746,7 @@ class HackerNewsDataset(Dataset):
         yield from lmd.Reader('components/hackernews/hn.tar.gz').stream_data()
 
     def clean(self):
-        if os.path.exists('components/hackernews'):
-            sh("""
-            rm -rf components/hackernews
-            """)
+        rm_if_exists('components/hackernews')
     
     def size(self):
         return 1704809038
