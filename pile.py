@@ -9,28 +9,77 @@ from datasets import *
 
 
 datasets = [
-    (BibliotikDataset()    , 1. ),
-    (PubMedCentralDataset(), 1. ),
-    (ArXivDataset()        , 1. ),
-    (FreeLawDataset()      , 1. ),
-    (OpenWebTextDataset()  , 1. ),
-    (StackExchangeDataset(), 1. ),
-    (USPTODataset()        , 1. ),
-    (PubMedDataset()       , 1. ),
-    (WikipediaDataset()    , 1. ),
-    (OpensubtitlesDataset(), 1. ),
-    (GutenbergDataset()    , 1. ),
-    (LiteroticaDataset()   , 1. ),
-    (DMMathDataset()       , 1. ),
-    (BookCorpusDataset()   , 1. ),
-    (UbuntuIRCDataset()    , 1. ),
-    (EuroParlDataset()     , 1. ),
-    (YTSubtitlesDataset()  , 1. ),
-    (PhilPapersDataset()   , 1. ),
-    (ExPorterDataset()     , 1. ),
-    (EnronEmailsDataset()  , 1. ),
-    (HackerNewsDataset()   , 1. ),
+    (
+    [
+        # Academic
+        (PubMedCentralDataset(), 1.5 ),
+        (ArXivDataset()        , 2.  ),
+        (FreeLawDataset()      , 1.5 ),
+        (USPTODataset()        , 2.  ),
+        (PubMedDataset()       , 2.  ),
+        (PhilPapersDataset()   , 3.  ),
+        (ExPorterDataset()     , 3.  ),
+    ], 0.45
+    ),
+
+    (
+    [
+        # General internet
+        (OpenWebText2Dataset() , 2.  ),
+        (StackExchangeDataset(), 2.  ),
+        (WikipediaDataset()    , 3.  ),
+    ], 0.20
+    ),
+
+    (
+    [
+        # Prose
+        (BibliotikDataset()    , 1.  ),
+        (GutenbergDataset()    , 2.  ),
+        (LiteroticaDataset()   , 1.  ),
+        (BookCorpusDataset()   , 1.5 ),
+    ], 0.18
+    ),
+
+    (
+    [
+        (GithubDataset()       , 0.15),
+    ], 0.10
+    ),
+
+    (
+    [
+        # Dialogue
+        (UbuntuIRCDataset()    , 3.  ),
+        (HackerNewsDataset()   , 3.  ),
+        (EuroParlDataset()     , 3.  ),
+        (YTSubtitlesDataset()  , 3.  ),
+        (OpensubtitlesDataset(), 2.  ),
+    ], 0.05
+    ),
+
+    (
+    [
+        # Misc
+        (DMMathDataset()       , 2.  ),
+        (EnronEmailsDataset()  , 3.  ),
+    ], 0.02
+    ),
 ]
+
+datasets_new = []
+target_size = 800 * 1024 * 1024 * 1024
+for dsets, tgt_frac in datasets:
+    dsets_size_wt = sum([x.size()*w for x, w in dsets])
+    dsets_twt     = sum([w          for _, w in dsets])
+    tgt_size = tgt_frac * target_size
+
+    for dset, wt in dsets:
+        frac_of_section = dset.size() * wt / dsets_size_wt
+        datasets_new.append((dset, frac_of_section * tgt_size / dset.size()))
+
+datasets = datasets_new
+
 
 def take(n, iter):
     ret = []
