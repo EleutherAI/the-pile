@@ -753,3 +753,31 @@ class HackerNewsDataset(Dataset):
     
     def num_docs(self):
         return 373028
+
+
+class GithubDataset(Dataset):
+    def name(self):
+        return "Github"
+
+    def _download(self):
+        if not os.path.exists('components/github'):
+            sh("""
+            mkdir -p components/github
+            cd components/github
+
+            wget https://eaidata.bmk.sh/data/github.tar -O github.jsonl.zst.tar
+            """)
+
+    def documents(self):
+        self._download()
+
+        yield from filter(lambda x: len(x) < 100000, lmd.Reader('components/github/github.jsonl.zst.tar').stream_data())
+
+    def clean(self):
+        rm_if_exists('components/github')
+    
+    def size(self):
+        return 677143668214
+    
+    def num_docs(self):
+        return 56626342
