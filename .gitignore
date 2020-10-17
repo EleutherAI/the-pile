@@ -1,2 +1,6 @@
 components/*/
 __pycache__
+.pypirc
+*build
+*dist
+*egg-info*
