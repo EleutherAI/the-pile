@@ -781,3 +781,31 @@ class GithubDataset(Dataset):
     
     def num_docs(self):
         return 56626342
+
+
+class OpenWebText2Dataset(Dataset):
+    def name(self):
+        return "OpenWebText2"
+
+    def _download(self):
+        if not os.path.exists('components/openwebtext2'):
+            sh("""
+            mkdir -p components/openwebtext2
+            cd components/openwebtext2
+
+            wget https://eaidata.bmk.sh/data/openwebtext2.jsonl.zst.tar
+            """)
+
+    def documents(self):
+        self._download()
+
+        yield from map(remove_advertisement, lmd.Reader('components/openwebtext2/openwebtext2.jsonl.zst.tar').stream_data())
+
+    def clean(self):
+        rm_if_exists('components/openwebtext2')
+    
+    def size(self):
+        return 67396380547
+    
+    def num_docs(self):
+        return 17103059
