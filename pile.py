@@ -147,10 +147,10 @@ class ThePile:
         weights = []
 
         # calculate relative_weight for each
-        total_weight = sum([x[1] * x[0].size() for x in self.datasets])
+        total_weight = sum([x[1] * x[0].num_docs() for x in self.datasets])
         for dataset, weight in self.datasets:
             size = dataset.size()
-            relative_weight = size * weight / total_weight
+            relative_weight = weight * dataset.num_docs() / total_weight
             datasets.append(cycle_documents(dataset))
             weights.append(relative_weight)
 
