@@ -1,11 +1,12 @@
 import abc
 import os
-import lm_dataformat as lmd
 import json
-import shutil
+
+import gdown
+import lm_dataformat as lmd
 from tqdm import tqdm
 
-from utils import *
+from .utils import *
 
 class Dataset(abc.ABC):
     @abc.abstractmethod
@@ -138,17 +139,17 @@ class OpenWebTextDataset(Dataset):
         return "OpenWebText"
 
     def _download(self):
-        if not os.path.exists('components/openwebtext'):
-            sh("""
-            mkdir -p components/openwebtext
-            cd components/openwebtext
-            virtualenv env
-            . env/bin/activate
-            pip install gdown
-            gdown https://drive.google.com/uc?id=1EA5V0oetDCOke7afsktL_JDQ-ETtNOvx
-            tar xf openwebtext.tar.xz
-            """)
-            sha256sum('components/openwebtext/openwebtext.tar.xz','9fe39d154c5bc67da8c359415372b79510eb1e2edb0d035fe4f7fc3a732b9336')
+        download_directory = "components/openwebtext"
+        done_file = os.path.join(download_directory, "download.done")
+        if not os.path.exists(done_file):
+            os.makedirs(download_directory, exist_ok=True)
+            url = "https://drive.google.com/uc?id=1EA5V0oetDCOke7afsktL_JDQ-ETtNOvx"
+            output_file = os.path.join(download_directory, "openwebtext.tar.xz")        
+            gdown.download(url, output_file, quiet=False)
+            sha256sum(output_file,'9fe39d154c5bc67da8c359415372b79510eb1e2edb0d035fe4f7fc3a732b9336')
+
+            with open(done_file, "w") as fh:
+                fh.write("done!")
 
     def documents(self):
         self._download()
