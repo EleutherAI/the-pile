@@ -4,6 +4,7 @@ from pytablewriter import MarkdownTableWriter
 from tqdm import tqdm, trange
 from utils import humanbytes
 import random
+import fasttext
 
 from datasets import *
 
@@ -43,7 +44,7 @@ datasets = [
 
     (
     [
-        (GithubDataset()       , 0.15),
+        (GithubDataset()       , 1.  ),
     ], 0.10
     ),
 
@@ -89,25 +90,6 @@ def take(n, iter):
         except StopIteration:
             break
     return ret
-
-def get_samples():
-    for dset, _ in datasets:
-        print('\\subsection{' + dset.name() + '}')
-        print()
-        docs = take(1000, dset.documents())
-        random.shuffle(docs)
-
-        limit = 8192
-        res = ''
-        for doc in docs:
-            if len(res) > limit:
-                break
-            res += doc + '<|endoftext|>'
-        
-        if len(res) > limit:
-            i = random.randrange(0, len(res) - limit)
-            res = res[i:i+limit]
-        print('\\begin{verbatim}\n' + res + '\n\\end{verbatim}')
 
 def mk_table(datasets):
     values = []
@@ -180,11 +162,44 @@ class ThePile:
     def size(self):
         return sum(map(lambda x: x[0].size(), tqdm(self.datasets())))
 
+
+def preprocess_for_fasttext(x):
+    return x.replace('\n', ' ').replace('\r', ' ')[:4000][-1500:]
+
+
+langdet = fasttext.load_model("lid.176.bin") 
+import collections
+import argparse
+
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
+
+args = parser.parse_args()
+
+def make_fasttext(pile):
+    with open('fasttext_pile.txt', 'w') as fh, open('pile_sample.txt', 'w') as fh2:
+        for x in pile.documents():
+            if random.random() < 0.1:
+                p = preprocess_for_fasttext(x)
+                if len(p) > 100:
+                    fh.write('__label__pile ' + p + '\n')
+            if random.random() < 0.001:
+                fh2.write(x + '<|endoftext|>\n')
+
+def lang_stats(pile):
+    n = 0
+    langs = collections.defaultdict(int)
+    for x in pile.documents():
+        details = langdet.predict(x.replace('\n', ' '), k=5)
+        langs[details[0][0].replace('__label__', '')] += 1
+        n += 1
+        print('\n'.join([k + ',' + str(v / n).ljust(9) for k,v in sorted(list(langs.items()), key=lambda x: -x[1])]))
+
 if __name__ == '__main__':
     random.seed(42)
     print(mk_table(datasets))
 
     pile = ThePile(datasets, int(1.2e12))
-    get_samples()
-    for x in pile.documents():
-        pass
+
+    if args.make_fasttext:
+        make_fasttext(pile)
