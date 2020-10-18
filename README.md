@@ -37,13 +37,25 @@ The Pile is currently still under development.
 (Epochs refers to the number of epochs elapsed after 1.2TB)
 
 
+## Usage
+
+
+Install:
+
+```
+pip install -e .
+```
+
+To generate fasttext training data for CC filtering:
+```
+python the_pile/pile.py --make_fasttext
+```
 
 ## Manual Download Components
 
 The following components need manual downloading. Either download them or comment out from `pile.py`. 
 
  - **Bibliotik**: `books3.tar.gz` needs to be in the current directory. Download temporarily unavailable.
- - **CORD-19**: `document_parses` needs to be in the current directory. Download from [here](https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge).
 
 ## Workflow
 
@@ -52,3 +64,4 @@ To propose a new dataset be added to the Pile, [open an issue](https://github.co
 To claim responsibility for implementing an unclaimed dataset, leave a comment on one of our unassigned issues. Once an dataset has been assigned to you, make the necessary changes to `datsets.py` and `pile.py` in a fork and submit a pull request. If you require, you can also submit a script for processing the data as shown [here](https://github.com/EleutherAI/pile_enron_emails).
 
 To raise an issue that is not proposing a new dataset, open an issue with the tag [![Feature Request](https://img.shields.io/github/labels/EleutherAI/The-Pile/Feature%20Request)](https://github.com/EleutherAI/The-Pile/labels/Feature%20Request) or [![Bug](https://img.shields.io/github/labels/EleutherAI/The-Pile/Bug)](https://github.com/EleutherAI/The-Pile/labels/Bug) as appropriate.
+

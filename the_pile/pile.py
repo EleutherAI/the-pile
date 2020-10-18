@@ -4,8 +4,8 @@ import fasttext
 from pytablewriter import MarkdownTableWriter
 from tqdm import tqdm
 
-from .utils import humanbytes
-from .datasets import *
+from the_pile.utils import humanbytes
+from the_pile.datasets import *
 
 
 datasets = [
