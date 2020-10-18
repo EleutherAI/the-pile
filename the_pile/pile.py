@@ -1,11 +1,10 @@
-import lm_dataformat as lmd
-import json
-from pytablewriter import MarkdownTableWriter
-from tqdm import tqdm, trange
-from utils import humanbytes
 import random
 
-from datasets import *
+from pytablewriter import MarkdownTableWriter
+from tqdm import tqdm
+
+from .utils import humanbytes
+from .datasets import *
 
 
 datasets = [
