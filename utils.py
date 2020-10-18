@@ -1,3 +1,4 @@
+import re
 import os
 import hashlib
 from concurrent_iterator.thread import Producer
@@ -81,3 +82,19 @@ def humanbytes(B):
       return '{0:.2f} GiB'.format(B/GB)
    elif TB <= B:
       return '{0:.2f} TiB'.format(B/TB)
+
+
+def strip_markdown_colons(x):
+    return re.sub(r'^:::.*?\n', '', x, flags=re.MULTILINE)
+
+def remove_advertisement(x):
+    return re.sub(r'^Advertisement\n', '', x, flags=re.MULTILINE)
+
+
+def compose(*fs):
+    def _f(x):
+        for f in reversed(fs):
+            x = f(x)
+        return x
+
+    return _f
