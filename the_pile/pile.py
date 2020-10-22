@@ -169,7 +169,6 @@ def preprocess_for_fasttext(x):
     return x.replace('\n', ' ').replace('\r', ' ')[:4000][-1500:]
 
 
-langdet = fasttext.load_model("lid.176.bin") 
 import collections
 import argparse
 
@@ -190,6 +189,7 @@ def make_fasttext(pile, keep_frac):
                 fh2.write(x + '<|endoftext|>\n')
 
 def lang_stats(pile):
+    langdet = fasttext.load_model("lid.176.bin") 
     n = 0
     langs = collections.defaultdict(int)
     for x in pile:
