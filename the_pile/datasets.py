@@ -437,10 +437,7 @@ class PubMedDataset(Dataset):
             sh("""
             mkdir -p components/pubmed
             cd components/pubmed
-            virtualenv env
-            . env/bin/activate
-            pip install gdown
-            gdown https://drive.google.com/uc?id=1k1DBISbB04KMbHGZplbMCrTdKbLxLXQi
+            wget https://eaidata.bmk.sh/data/PUBMED_title_abstracts_2019_baseline.jsonl.zst
             """)
             sha256sum('components/pubmed/PUBMED_title_abstracts_2019_baseline.jsonl.zst', '15c26a83ac2b11378b8e6ba5a16bab92428de29bacb85709834948cfcf1f029b')
 
@@ -649,6 +646,7 @@ class USPTODataset(Dataset):
             mkdir -p components/uspto
             cd components/uspto
             wget https://eaidata.bmk.sh/data/pile_uspto.tar
+            tar xf pile_uspto.tar
             """)
             sha256sum('components/uspto/pile_uspto.tar')
 
