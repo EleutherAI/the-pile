@@ -113,16 +113,20 @@ def mk_table(datasets):
     return writer.dumps()
 
 
+def dataset_tqdm(dset):
+    pbar = tqdm(total=dset.size(), unit='B', unit_scale=True, unit_divisor=1024)
+    for doc in dset.documents():
+        pbar.update(utf8len(doc))
+        yield doc 
+
 class ThePile:
     def __init__(self, datasets, dataset_bytes):
         self.datasets = datasets
         self.dataset_bytes = dataset_bytes
     
-    @abc.abstractmethod
     def name(self):
         return "The Pile"
 
-    @abc.abstractmethod
     def documents(self):
         datasets = []
         weights = []
@@ -154,12 +158,11 @@ class ThePile:
                     return
 
 
-    @abc.abstractmethod
     def clean(self):
         for dataset, _ in self.datasets: dataset.clean()
     
     def size(self):
-        return sum(map(lambda x: x[0].size(), tqdm(self.datasets())))
+        return self.dataset_bytes
 
 
 def preprocess_for_fasttext(x):
@@ -172,13 +175,14 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
+parser.add_argument('--make_fasttext_wt_only', action='store_true', help='make data for fasttext using only OpenWebText2Dataset')
 
 args = parser.parse_args()
 
-def make_fasttext(pile):
+def make_fasttext(pile, keep_frac):
     with open('fasttext_pile.txt', 'w') as fh, open('pile_sample.txt', 'w') as fh2:
-        for x in pile.documents():
-            if random.random() < 0.1:
+        for x in pile:
+            if random.random() < keep_frac:
                 p = preprocess_for_fasttext(x)
                 if len(p) > 100:
                     fh.write('__label__pile ' + p + '\n')
@@ -188,7 +192,7 @@ def make_fasttext(pile):
 def lang_stats(pile):
     n = 0
     langs = collections.defaultdict(int)
-    for x in pile.documents():
+    for x in pile:
         details = langdet.predict(x.replace('\n', ' '), k=5)
         langs[details[0][0].replace('__label__', '')] += 1
         n += 1
@@ -199,6 +203,8 @@ if __name__ == '__main__':
     print(mk_table(datasets))
 
     pile = ThePile(datasets, int(1.2e12))
-
     if args.make_fasttext:
-        make_fasttext(pile)
+        make_fasttext(pile.documents(), 0.1)
+    elif args.make_fasttext_wt_only:
+        make_fasttext(dataset_tqdm(OpenWebText2Dataset()), 1)
+

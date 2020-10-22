@@ -46,6 +46,7 @@ class WikipediaDataset(Dataset):
     def _download(self):
         if not os.path.exists('components/wikipedia_en/output'):
             sh("""
+            mkdir -p components/wikipedia_en/output
             cd components/wikipedia_en/output
             wget https://eaidata.bmk.sh/data/wikipedia-en.tar.gz
             tar xf wikipedia-en.tar.gz
