@@ -44,14 +44,11 @@ class WikipediaDataset(Dataset):
         return "Wikipedia (en)"
 
     def _download(self):
-        if not os.path.exists('components/wikipedia_en'):
+        if not os.path.exists('components/wikipedia_en/output'):
             sh("""
-            git clone https://github.com/noanabeshima/wikipedia-downloader/ components/wikipedia_en
-            cd components/wikipedia_en
-            virtualenv env
-            . env/bin/activate
-            bash install_requirements.sh
-            python main.py
+            cd components/wikipedia_en/output
+            wget https://eaidata.bmk.sh/data/wikipedia-en.tar.gz
+            tar xf wikipedia-en.tar.gz
             """)
 
     def documents(self):
