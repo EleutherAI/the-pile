@@ -173,6 +173,7 @@ import collections
 import argparse
 
 parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--download', action='store_true', help='force download all')
 parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
 parser.add_argument('--make_fasttext_wt_only', action='store_true', help='make data for fasttext using only OpenWebText2Dataset')
 
@@ -203,6 +204,9 @@ if __name__ == '__main__':
     print(mk_table(datasets))
 
     pile = ThePile(datasets, int(1.2e12))
+    if args.download:
+        for dset, _ in datasets:
+            dset._download()
     if args.make_fasttext:
         make_fasttext(pile.documents(), 0.1)
     elif args.make_fasttext_wt_only:
