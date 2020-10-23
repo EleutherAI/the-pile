@@ -4,7 +4,77 @@ import hashlib
 from concurrent_iterator.thread import Producer
 from functools import reduce
 import operator
+import collections
+import urllib.request
+from pathlib import Path
+import gdown
+import tarfile
+import requests
+import shutil
+from tqdm import tqdm
 
+def download_file(url, to):
+    # modified from https://stackoverflow.com/a/37573701
+    print('Downloading {}'.format(url))
+
+    response = requests.get(url, stream=True)
+    size = int(response.headers.get('content-length', 0))
+    block_size = 1024*1024
+    pbar = tqdm(total=size, unit='iB', unit_scale=True)
+    with open(to, 'wb') as fout:
+        for data in response.iter_content(block_size):
+            pbar.update(len(data))
+            fout.write(data)
+    pbar.close()
+    assert not (size != 0 and pbar.n != size)
+
+Source = collections.namedtuple('Source', ['type', 'url'])
+
+def download(fname, checksum, sources, extract=False):
+    if os.path.exists(fname):
+        try:
+            sha256sum(fname, expected=checksum)
+            return
+        except AssertionError:
+            print('{} exists but doesn\'t match checksum!'.format(fname))
+            rm_if_exists(fname)
+            
+
+    parentdir = Path(fname).parent
+    os.makedirs(parentdir, exist_ok=True)
+
+    for source in sources:
+        try:
+            if source.type == 'direct':
+                download_file(source.url, fname)
+            elif source.type == 'gdrive':
+                gdown.download(source.url, fname, quiet=False)
+            elif source.type == 'gcloud':
+                raise NotImplementedError('gcloud download not implemented!')
+            
+            sha256sum(fname, expected=checksum)
+
+            if extract:
+                tar_xf(fname)
+            return
+        except KeyboardInterrupt:
+            raise
+        except:
+            import traceback
+            traceback.print_exc()
+            print('Download method [{}] {} failed, trying next option'.format(source.type, source.url))
+            rm_if_exists(fname)
+            continue
+
+        break
+
+    raise Exception('Failed to download {} from any source'.format(fname))
+
+
+def tar_xf(x):
+    parentdir = Path(x).parent
+    tf = tarfile.open(x)
+    tf.extractall(parentdir)
 
 class ExitCodeError(Exception): pass
 
@@ -59,8 +129,11 @@ def sha256sum(filename, expected=None):
 
 
 def rm_if_exists(path):
-    if os.path.exists(path):
-        shutil.rmtree(path)
+    try:
+        if os.path.exists(path):
+            shutil.rmtree(path)
+    except NotADirectoryError:
+        os.remove(path)
 
 
 # https://stackoverflow.com/questions/12523586/python-format-size-application-converting-b-to-kb-mb-gb-tb/37423778

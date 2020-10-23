@@ -44,13 +44,9 @@ class WikipediaDataset(Dataset):
         return "Wikipedia (en)"
 
     def _download(self):
-        if not os.path.exists('components/wikipedia_en/output'):
-            sh("""
-            mkdir -p components/wikipedia_en/output
-            cd components/wikipedia_en/output
-            wget https://eaidata.bmk.sh/data/wikipedia-en.tar.gz
-            tar xvf wikipedia-en.tar.gz
-            """)
+        download('components/wikipedia_en/output/wikipedia-en.tar.gz', '87b78787f71297250bca644ab9d8e3992346eeb2e2ad91101487109e3d01e644', [
+            Source('direct', 'https://eaidata.bmk.sh/data/wikipedia-en.tar.gz'),
+        ], extract=True)
 
     def documents(self):
         self._download()
@@ -77,6 +73,7 @@ class OpensubtitlesDataset(Dataset):
 
     def _download(self):
         if not os.path.exists('components/opensubtitles'):
+            # todo: host result
             sh("""
             git clone https://github.com/sdtblck/Opensubtitles_dataset components/opensubtitles
             cd components/opensubtitles
@@ -107,15 +104,9 @@ class BookCorpusDataset(Dataset):
         return "BookCorpus"
 
     def _download(self):
-        if not os.path.exists('components/bookcorpus/books1.tar.gz'):
-            sh("""
-            mkdir -p components/bookcorpus
-            cd components/bookcorpus
-
-            wget -nc http://battle.shawwn.com/sdb/books1/books1.tar.gz
-            tar xf books1.tar.gz
-            """)
-            sha256sum('components/bookcorpus/books1.tar.gz')
+        download('components/bookcorpus/books1.tar.gz', 'e3c993cc825df2bdf0f78ef592f5c09236f0b9cd6bb1877142281acc50f446f9', [
+            Source('direct', 'http://battle.shawwn.com/sdb/books1/books1.tar.gz'),
+        ], extract=True)
 
     def documents(self):
         self._download()
@@ -137,6 +128,7 @@ class OpenWebTextDataset(Dataset):
         return "OpenWebText"
 
     def _download(self):
+        # todo: convert
         download_directory = "components/openwebtext"
         done_file = os.path.join(download_directory, "download.done")
         if not os.path.exists(done_file):
@@ -171,6 +163,7 @@ class GutenbergDataset(Dataset):
 
     def _download(self):
         if not os.path.exists('components/gutenberg'):
+            # todo: convert after gcloud download is implemented
             sh("""
             mkdir -p components/gutenberg
             cd components/gutenberg
@@ -204,6 +197,7 @@ class DMMathDataset(Dataset):
 
     def _download(self):
         if not os.path.exists('components/dm_math'):
+            # todo: convert after gcloud download is implemented
             sh("""
             mkdir -p components/dm_math
             cd components/dm_math
@@ -272,16 +266,9 @@ class LiteroticaDataset(Dataset):
         return "Literotica"
 
     def _download(self):
-        if not os.path.exists('components/literotica'):
-            sh("""
-            mkdir -p components/literotica
-            cd components/literotica
-            virtualenv env
-            . env/bin/activate
-            pip install gdown
-            gdown https://drive.google.com/uc?id=1Nx63w9BFZZSI_s2pmJnhcBU9c-y803T7
-            """)
-            sha256sum('components/literotica/Literotica.jsonl.zst')
+        download('components/literotica/Literotica.jsonl.zst', '3c6b968f851831c6345f175b394416f7521da3bacd90fdc827093f0d310bd4ef', [
+            Source('gdrive', 'https://drive.google.com/uc?id=1Nx63w9BFZZSI_s2pmJnhcBU9c-y803T7'),
+        ])
 
     def documents(self):
         self._download()
@@ -303,19 +290,9 @@ class BibliotikDataset(Dataset):
         return "Bibliotik"
 
     def _download(self):
-
-        if not os.path.exists('components/bibliotik'):
-            if not os.path.exists('books3.tar.gz'):
-                raise AssertionError('Must download books3.tar.gz manually!')
-
-            sh("""
-            mkdir -p components/bibliotik
-            cd components/bibliotik
-
-            mv ../../books3.tar.gz .
-            tar xf books3.tar.gz
-            """)
-            sha256sum('components/bibliotik/books3.tar.gz', '016b90fa6b8507328b6a90d13b0f68c2b87dfd281b35e449a1d466fd9eebc14a')
+        download('components/bibliotik/books3.tar.gz', '016b90fa6b8507328b6a90d13b0f68c2b87dfd281b35e449a1d466fd9eebc14a', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/books3.tar.gz'),
+        ], extract=True)
 
     def documents(self):
         self._download()
@@ -376,14 +353,9 @@ class UbuntuIRCDataset(Dataset):
         return "Ubuntu IRC"
 
     def _download(self):
-        if not os.path.exists('components/ubuntu_irc'):
-            sh("""
-            mkdir -p components/ubuntu_irc
-            cd components/ubuntu_irc
-
-            wget https://eaidata.bmk.sh/data/ubuntu_irc_until_2020_9_1.jsonl.zst
-            """)
-            sha256sum('components/ubuntu_irc/ubuntu_irc_until_2020_9_1.jsonl.zst', 'b2bd119beb2741f428c7f1de954794718ce6e8090e3125be5e64845bb320767e')
+        download('components/ubuntu_irc/ubuntu_irc_until_2020_9_1.jsonl.zst', 'b2bd119beb2741f428c7f1de954794718ce6e8090e3125be5e64845bb320767e', [
+            Source('direct', 'https://eaidata.bmk.sh/data/ubuntu_irc_until_2020_9_1.jsonl.zst'),
+        ])
 
     def documents(self):
         self._download()
@@ -405,13 +377,10 @@ class ArXivDataset(Dataset):
         return "ArXiv"
 
     def _download(self):
-        if not os.path.exists('components/arxiv'):
-            sh("""
-            mkdir -p components/arxiv
-            cd components/arxiv
-            wget https://battle.shawwn.com/sdb/arxiv/2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz
-            tar xf 2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz
-            """)
+        download('components/arxiv/2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz', '1bc9fa7e1fc2e5181168790df43c00484c6d3e37aa5cbe41c1796e028ea53d14', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz'),
+            Source('direct', 'https://battle.shawwn.com/sdb/arxiv/2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz'),
+        ], extract=True)
 
     def documents(self):
         self._download()
