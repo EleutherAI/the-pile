@@ -87,6 +87,11 @@ def tar_xf(x):
 class ExitCodeError(Exception): pass
 
 
+def stableorder(x):
+    arr = [(elem, sha256str(elem.encode('utf-8'))) for elem in x]
+    arr.sort(key=lambda x: x[1])
+    return [elem for elem,_ in arr]
+
 def id(x):
     return x
 
@@ -105,7 +110,7 @@ def fread(fname):
         return fh.read()
 
 def ls(x):
-    return [x + '/' + fn for fn in os.listdir(x)]
+    return [x + '/' + fn for fn in stableorder(os.listdir(x))]
 
 
 def cycle_documents(dataset):
@@ -119,6 +124,12 @@ def concat(xs):
 
 def flatMap(f, x):
     return reduce(operator.add, map(f, x), [])
+
+
+def sha256str(s):
+    h = hashlib.sha256()
+    h.update(s)
+    return h.hexdigest()
 
 
 def sha256sum(filename, expected=None):
