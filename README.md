@@ -46,6 +46,11 @@ Install:
 pip install -e .
 ```
 
+To download all data:
+```
+python the_pile/pile.py --download
+```
+
 To generate fasttext training data for CC filtering (OWT2 only):
 ```
 python the_pile/pile.py --make_fasttext_wt_only
