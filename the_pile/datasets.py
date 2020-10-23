@@ -380,6 +380,7 @@ class ArXivDataset(Dataset):
         download('components/arxiv/2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz', '1bc9fa7e1fc2e5181168790df43c00484c6d3e37aa5cbe41c1796e028ea53d14', [
             Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz'),
             Source('direct', 'https://battle.shawwn.com/sdb/arxiv/2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz'),
+            Source('direct', 'https://eaidata.bmk.sh/data/2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz'),
         ], extract=True)
 
     def documents(self):
@@ -731,7 +732,7 @@ class GithubDataset(Dataset):
             mkdir -p components/github
             cd components/github
 
-            wget https://eaidata.bmk.sh/data/github.tar -O github.jsonl.zst.tar
+            wget https://the-eye.eu/public/AI/pile_preliminary_components/github.tar -O github.jsonl.zst.tar
             """)
 
     def documents(self):
