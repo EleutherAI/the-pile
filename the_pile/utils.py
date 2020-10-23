@@ -13,6 +13,9 @@ import requests
 import shutil
 from tqdm import tqdm
 
+def touch(x):
+    Path(x).touch()
+
 def download_file(url, to):
     # modified from https://stackoverflow.com/a/37573701
     print('Downloading {}'.format(url))
@@ -31,14 +34,17 @@ def download_file(url, to):
 Source = collections.namedtuple('Source', ['type', 'url'])
 
 def download(fname, checksum, sources, extract=False):
+    if os.path.exists(fname + '.done'): return
     if os.path.exists(fname):
         try:
             sha256sum(fname, expected=checksum)
+            touch(fname + '.done')
             return
         except AssertionError:
             print('{} exists but doesn\'t match checksum!'.format(fname))
             rm_if_exists(fname)
             
+    print('Finding souce for', fname)
 
     parentdir = Path(fname).parent
     os.makedirs(parentdir, exist_ok=True)
@@ -56,6 +62,8 @@ def download(fname, checksum, sources, extract=False):
 
             if extract:
                 tar_xf(fname)
+                rm_if_exists(fname)
+            touch(fname + '.done')
             return
         except KeyboardInterrupt:
             raise
