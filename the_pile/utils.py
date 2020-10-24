@@ -51,6 +51,7 @@ def download(fname, checksum, sources, extract=False):
 
     for source in sources:
         try:
+            # todo: implement torrent handling
             if source.type == 'direct':
                 download_file(source.url, fname)
             elif source.type == 'gdrive':

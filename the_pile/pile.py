@@ -68,7 +68,7 @@ datasets = [
 ]
 
 datasets_new = []
-target_size = 800 * 1024 * 1024 * 1024
+target_size = 950 * 1024 * 1024 * 1024
 for dsets, tgt_frac in datasets:
     dsets_size_wt = sum([x.size()*w for x, w in dsets])
     dsets_twt     = sum([w          for _, w in dsets])
@@ -79,6 +79,9 @@ for dsets, tgt_frac in datasets:
         datasets_new.append((dset, frac_of_section * tgt_size / dset.size()))
 
 datasets = datasets_new
+
+# add CC
+datasets.append((CommonCrawlDataset(), 1.))
 
 
 def take(n, iter):
@@ -95,7 +98,7 @@ def mk_table(datasets):
 
     total_weight = sum([x[1] * x[0].size() for x in datasets])
 
-    train_chars = 1.2e12
+    train_chars = 1200 * 1024 * 1024 * 1024
 
     for dataset, weight in datasets:
         size = dataset.size()
@@ -174,6 +177,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--download', action='store_true', help='force download all')
+parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
 parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
 parser.add_argument('--make_fasttext_wt_only', action='store_true', help='make data for fasttext using only OpenWebText2Dataset')
 
@@ -207,6 +211,14 @@ if __name__ == '__main__':
     if args.download:
         for dset, _ in datasets:
             dset._download()
+    
+    if args.make_lmd:
+        ar = lmd.Archive('pile_output')
+        for doc in pile.documents():
+            ar.add_data(doc)
+        
+        ar.commit()
+
     if args.make_fasttext:
         make_fasttext(pile.documents(), 0.1)
     elif args.make_fasttext_wt_only:
