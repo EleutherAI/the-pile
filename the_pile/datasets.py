@@ -72,16 +72,9 @@ class OpensubtitlesDataset(Dataset):
         return "OpenSubtitles"
 
     def _download(self):
-        if not os.path.exists('components/opensubtitles'):
-            # todo: host result
-            sh("""
-            git clone https://github.com/sdtblck/Opensubtitles_dataset components/opensubtitles
-            cd components/opensubtitles
-            virtualenv env
-            . env/bin/activate
-            pip install -r requirements.txt
-            python3 parse_opensubtitle_xml.py
-            """)
+        download('components/opensubtitles/opensubtitles_out.tar', 'f3039709677292f899bb0a8fa2dbc6ae785f9e33ffd7613f94f4f722f2dfd95c', [
+            Source('direct', 'https://eaidata.bmk.sh/data/opensubtitles_out.tar'),
+        ], extract=True)
 
     def documents(self):
         self._download()
@@ -105,6 +98,7 @@ class BookCorpusDataset(Dataset):
 
     def _download(self):
         download('components/bookcorpus/books1.tar.gz', 'e3c993cc825df2bdf0f78ef592f5c09236f0b9cd6bb1877142281acc50f446f9', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/books1.tar.gz'),
             Source('direct', 'http://battle.shawwn.com/sdb/books1/books1.tar.gz'),
         ], extract=True)
 
@@ -233,17 +227,9 @@ class EnronEmailsDataset(Dataset):
         return "Enron Emails"
 
     def _download(self):
-        if not os.path.exists('components/enron_emails'):
-            sh("""
-            mkdir -p components/enron_emails
-            cd components/enron_emails
-            git clone https://github.com/EleutherAI/pile_enron_emails .
-            virtualenv env
-            . env/bin/activate
-            pip install -r requirements.txt
-            python main.py
-            """)
-            sha256sum('components/enron_emails/enron_mail_20150507.tar.gz', 'b3da1b3fe0369ec3140bb4fbce94702c33b7da810ec15d718b3fadf5cd748ca7')
+        download('components/enron_emails/enron_mail_20150507.tar.gz', 'b3da1b3fe0369ec3140bb4fbce94702c33b7da810ec15d718b3fadf5cd748ca7', [
+            Source('direct', 'https://eaidata.bmk.sh/data/enron_mail_20150507.tar.gz'),
+        ])
 
     def documents(self):
         self._download()
@@ -267,6 +253,7 @@ class LiteroticaDataset(Dataset):
 
     def _download(self):
         download('components/literotica/Literotica.jsonl.zst', '3c6b968f851831c6345f175b394416f7521da3bacd90fdc827093f0d310bd4ef', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/Literotica.jsonl.zst'),
             Source('gdrive', 'https://drive.google.com/uc?id=1Nx63w9BFZZSI_s2pmJnhcBU9c-y803T7'),
         ])
 
@@ -354,6 +341,7 @@ class UbuntuIRCDataset(Dataset):
 
     def _download(self):
         download('components/ubuntu_irc/ubuntu_irc_until_2020_9_1.jsonl.zst', 'b2bd119beb2741f428c7f1de954794718ce6e8090e3125be5e64845bb320767e', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/ubuntu_irc_until_2020_9_1.jsonl.zst'),
             Source('direct', 'https://eaidata.bmk.sh/data/ubuntu_irc_until_2020_9_1.jsonl.zst'),
         ])
 
@@ -404,6 +392,7 @@ class PubMedDataset(Dataset):
 
     def _download(self):
         download('components/pubmed/PUBMED_title_abstracts_2019_baseline.jsonl.zst', '15c26a83ac2b11378b8e6ba5a16bab92428de29bacb85709834948cfcf1f029b', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/PUBMED_title_abstracts_2019_baseline.jsonl.zst'),
             Source('direct', 'https://eaidata.bmk.sh/data/PUBMED_title_abstracts_2019_baseline.jsonl.zst'),
         ])
 
@@ -428,6 +417,7 @@ class ExPorterDataset(Dataset):
 
     def _download(self):
         download('components/exporter/NIH_ExPORTER_awarded_grant_text.jsonl.zst', 'be7fc69b9a3652391b6567891b99277ac99e7dfd5892ba19cb312f909357c458', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/NIH_ExPORTER_awarded_grant_text.jsonl.zst'),
             Source('gdrive', 'https://drive.google.com/uc?id=11mO-0LuL2YeKoqqWXyHPHf3d2ODnjVPP'),
         ])
 
@@ -452,6 +442,7 @@ class StackExchangeDataset(Dataset):
 
     def _download(self):
         download('components/stackexchange/stackexchange_dataset.tar', 'f64f31d20db8d8692c1a019314a14974b4911a34ffef126feaf42da88860c666', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/stackexchange_dataset.tar'),
             Source('direct', 'https://eaidata.bmk.sh/data/stackexchange_dataset.tar'),
         ], extract=True)
 
@@ -476,6 +467,7 @@ class FreeLawDataset(Dataset):
 
     def _download(self):
         download('components/freelaw/FreeLaw_Opinions.jsonl.zst', '7d7ba907cf397e8585bb3ef148b3e9678edbf142b2247460f907c16aecbaed2d', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/FreeLaw_Opinions.jsonl.zst'),
             Source('gdrive', 'https://drive.google.com/uc?id=1L-x3g3V888gHNUVHQWDkJBJHs5N02Kjz'),
         ])
 
@@ -500,6 +492,7 @@ class PubMedCentralDataset(Dataset):
 
     def _download(self):
         download('components/pubmedcentral/PMC_extracts.tar.gz', 'dd2ecc79480bd5b78c29ea78af96941c69f6bda3d36a7d510019ccc4848fb867', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/PMC_extracts.tar.gz'),
             Source('direct', 'https://eaidata.bmk.sh/data/PMC_extracts.tar.gz'),
         ])
 
@@ -556,6 +549,7 @@ class PhilPapersDataset(Dataset):
 
     def _download(self):
         download('components/philpapers/PhilArchive.jsonl.zst', 'e90529b9b3961328d1e34b60534a8e0f73d5ad1f104e22a217de53cd53c41fea', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/PhilArchive.jsonl.zst'),
             Source('gdrive', 'https://drive.google.com/uc?id=1u01vkBNAS8jtu0AZeQW56bzf-6QbeSRB'),
         ])
 
@@ -580,6 +574,7 @@ class USPTODataset(Dataset):
 
     def _download(self):
         download('components/uspto/pile_uspto.jsonl.zst.tar', '7a7d2c8e21df2ad0324810a8e675f4d8bdc5ee40b17914a6c0542ddfda1560fd', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/pile_uspto.tar'),
             Source('direct', 'https://eaidata.bmk.sh/data/pile_uspto.tar'),
         ])
 
@@ -604,6 +599,7 @@ class EuroParlDataset(Dataset):
 
     def _download(self):
         download('components/europarl/EuroParliamentProceedings_1996_2011.jsonl.zst', '6111400e7b7f75ce91fed1b5fc0a3630b8263217bd01ce75f7d8701f26ac0e98', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/EuroParliamentProceedings_1996_2011.jsonl.zst'),
             Source('gdrive', 'https://drive.google.com/uc?id=12Q23Y7IKQyjF28xH0Aw6yZaYEx2YIOiB'),
         ])
 
@@ -628,6 +624,7 @@ class YTSubtitlesDataset(Dataset):
 
     def _download(self):
         download('components/youtubesubtitles/yt_subs.jsonl.zst', '0b9130b8c92290eba360337fea90c2617721f65d955f785f8755cb5f4a8e319c', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/yt_subs.jsonl.zst'),
             Source('direct', 'https://eaidata.bmk.sh/data/yt_subs.jsonl.zst'),
         ])
 
@@ -652,6 +649,7 @@ class HackerNewsDataset(Dataset):
 
     def _download(self):
         download('components/hackernews/hn.tar.gz', '6220e1dcd5d9d71821fee552e4e154ee1ee5f62744e3eab9a4c5001f52e27067', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/hn.tar.gz'),
             Source('direct', 'https://eaidata.bmk.sh/data/hn.tar.gz'),
         ])
 
@@ -677,6 +675,7 @@ class GithubDataset(Dataset):
     def _download(self):
         download('components/github/github.jsonl.zst.tar', 'f7a66e8226baf075a42628d10d8eba234460da73b0ffd300736036db9be3b3c3', [
             Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/github.tar'),
+            Source('direct', 'https://eaidata.bmk.sh/data/github.tar'),
         ])
 
     def documents(self):
@@ -700,6 +699,7 @@ class OpenWebText2Dataset(Dataset):
 
     def _download(self):
         download('components/openwebtext2/openwebtext2.jsonl.zst.tar', '9043d1b93c35ff1a38a17e16c73c009d4617dcaab6da15adc0faf4779739a027', [
+            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/openwebtext2.jsonl.zst.tar'),
             Source('direct', 'https://eaidata.bmk.sh/data/openwebtext2.jsonl.zst.tar'),
         ])
 
