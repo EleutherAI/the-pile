@@ -122,7 +122,36 @@ def dataset_tqdm(dset):
         pbar.update(utf8len(doc))
         yield doc 
 
-class ThePile:
+
+class Profiler:
+    def __init__(self, profile):
+        self.i = 0
+        self.profile = profile
+        self.time_per_dataset = collections.defaultdict(lambda: [0, 0])
+
+    def measured_next(self, name, iter):
+        if not self.profile:
+            # no-op
+            return next(iter)
+        else:
+            self.i += 1
+            start = time.time()
+            doc = next(iter)
+            elapsed = time.time() - start
+
+            self.time_per_dataset[name][0] += elapsed
+            self.time_per_dataset[name][1] += 1
+
+            if self.i % 10000 == 0:
+                times = [(dsname, total, ct) for dsname, (total, ct) in self.time_per_dataset.items()]
+                times.sort(key=lambda x: x[1])
+                for name, total, ct in times:
+                    print(name.ljust(22), '{:.8f}'.format(total / ct), str(ct).rjust(8), '{:.4f}'.format(total))
+            
+            return doc
+
+
+class ThePile(Dataset):
     def __init__(self, datasets, dataset_bytes):
         self.datasets = datasets
         self.dataset_bytes = dataset_bytes
@@ -130,7 +159,7 @@ class ThePile:
     def name(self):
         return "The Pile"
 
-    def documents(self):
+    def documents(self, profile=True):
         datasets = []
         weights = []
 
@@ -139,7 +168,7 @@ class ThePile:
         for dataset, weight in self.datasets:
             size = dataset.size()
             relative_weight = weight * dataset.num_docs() / total_weight
-            datasets.append(cycle_documents(dataset))
+            datasets.append((dataset.name(), cycle_documents(dataset)))
             weights.append(relative_weight)
 
         random.seed(42)
@@ -147,10 +176,13 @@ class ThePile:
         # yield from dataset until right number of bytes
         total_bytes = 0
         pbar = tqdm(total=self.dataset_bytes, unit='B', unit_scale=True, unit_divisor=1024)
+
+
+        profiler = Profiler(profile=profile)
         while True:
             chunk = random.choices(population=datasets, weights=weights, k=1000)
-            for dset in chunk:
-                doc = next(dset)
+            for name, dset in chunk:
+                doc = profiler.measured_next(name, dset)
 
                 size = utf8len(doc)
                 total_bytes += size
@@ -159,7 +191,6 @@ class ThePile:
 
                 if total_bytes > self.dataset_bytes:
                     return
-
 
     def clean(self):
         for dataset, _ in self.datasets: dataset.clean()
