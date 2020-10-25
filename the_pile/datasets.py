@@ -52,6 +52,9 @@ class WikipediaDataset(Dataset):
         self._download()
 
         for file in ls('components/wikipedia_en/output'):
+            if not file.endswith('.json'):
+                continue
+
             with open(file) as fh:
                 ob = json.load(fh)
                 yield from ob
