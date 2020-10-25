@@ -1,10 +1,11 @@
+import time
 import random
 import fasttext
 
 from pytablewriter import MarkdownTableWriter
 from tqdm import tqdm
 
-from the_pile.utils import humanbytes
+from the_pile.utils import humanbytes, parse_size
 from the_pile.datasets import *
 
 
@@ -79,9 +80,6 @@ for dsets, tgt_frac in datasets:
         datasets_new.append((dset, frac_of_section * tgt_size / dset.size()))
 
 datasets = datasets_new
-
-# add CC
-datasets.append((CommonCrawlDataset(), 1.))
 
 
 def take(n, iter):
@@ -199,6 +197,34 @@ class ThePile(Dataset):
         return self.dataset_bytes
 
 
+class LimitedDataset(Dataset):
+    def __init__(self, dataset, limit_size):
+        self.dataset = dataset
+        self.limit_size = limit_size
+    
+    def name(self):
+        return self.dataset.name() + " (truncated)"
+
+    def documents(self):
+        numer = self.limit_size
+        denom = self.dataset.size()
+        for doc in self.dataset.documents():
+            docsize = utf8len(doc)
+            if random.random() < numer / denom:
+                yield doc
+                numer -= docsize
+            denom -= docsize
+
+            if numer <= 0 or denom <= 0:
+                break
+    
+    def clean(self):
+        self.dataset.clean()
+    
+    def size(self):
+        return self.limit_size
+
+
 def preprocess_for_fasttext(x):
     return x.replace('\n', ' ').replace('\r', ' ')[:4000][-1500:]
 
@@ -208,9 +234,11 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--download', action='store_true', help='force download all')
+parser.add_argument('--limit', type=str, help='limit output size')
+parser.add_argument('--using', type=str, default='pile', help='the dataset to use')
 parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
 parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
-parser.add_argument('--make_fasttext_wt_only', action='store_true', help='make data for fasttext using only OpenWebText2Dataset')
+parser.add_argument('--make_analysis', action='store_true', help='make analysis data')
 
 args = parser.parse_args()
 
@@ -234,24 +262,46 @@ def lang_stats(pile):
         n += 1
         print('\n'.join([k + ',' + str(v / n).ljust(9) for k,v in sorted(list(langs.items()), key=lambda x: -x[1])]))
 
+
+def docs_for_dedupe():
+    # format: ((priority, offset, sha256sum), document)
+    dset = CommonCrawlDataset()
+    for i, doc in dset.documents():
+        yield (100, i, sha256str(doc)), doc
+
+
 if __name__ == '__main__':
     random.seed(42)
+
+    if args.using != 'pile_no_cc':
+        # add CC
+        datasets.append((CommonCrawlDataset(), 1.))
+
     print(mk_table(datasets))
 
-    pile = ThePile(datasets, int(1.2e12))
+    if args.using == 'pile' or args.using == 'pile_no_cc':
+        pile = ThePile(datasets, int(1.2e12))
+    elif args.using == 'cc':
+        pile = dataset_tqdm(CommonCrawlDataset())
+    elif args.using == 'owt2':
+        pile = dataset_tqdm(OpenWebText2Dataset())
+    else:
+        print('Unknown dataset!')
+
     if args.download:
         for dset, _ in datasets:
             dset._download()
     
+    if args.limit:
+        size_limit = parse_size(args.limit)
+        pile = LimitedDataset(pile, size_limit)
+
     if args.make_lmd:
         ar = lmd.Archive('pile_output')
         for doc in pile.documents():
             ar.add_data(doc)
         
-        ar.commit()
+        ar.commit(archive_name=args.using)
 
     if args.make_fasttext:
         make_fasttext(pile.documents(), 0.1)
-    elif args.make_fasttext_wt_only:
-        make_fasttext(dataset_tqdm(OpenWebText2Dataset()), 1)
-
