@@ -4,3 +4,4 @@ gdown
 concurrent_iterator
 pytablewriter
 gitpython
+fasttext
