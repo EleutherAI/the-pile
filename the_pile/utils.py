@@ -37,6 +37,7 @@ def download(fname, checksum, sources, extract=False):
     if os.path.exists(fname + '.done'): return
     if os.path.exists(fname):
         try:
+            print(fname, 'already exists, verifying checksum')
             sha256sum(fname, expected=checksum)
             touch(fname + '.done')
             return
@@ -44,7 +45,7 @@ def download(fname, checksum, sources, extract=False):
             print('{} exists but doesn\'t match checksum!'.format(fname))
             rm_if_exists(fname)
             
-    print('Finding souce for', fname)
+    print('Finding source for', fname)
 
     parentdir = Path(fname).parent
     os.makedirs(parentdir, exist_ok=True)
@@ -116,7 +117,7 @@ def ls(x):
 
 def cycle_documents(dataset):
     while True:
-        yield from Producer(filter(id, dataset.documents()), 1000)
+        yield from filter(id, dataset.documents())
 
 def concat(xs):
     for x in xs:
@@ -191,3 +192,19 @@ def compose(*fs):
         return x
 
     return _f
+
+
+def parse_size(sizestr):
+    unit = sizestr[-1]
+    size = float(sizestr[:-1])
+
+    if unit.upper() == 'B':
+        return size
+    if unit.upper() == 'K':
+        return size * 1024
+    if unit.upper() == 'M':
+        return size * 1024 * 1024
+    if unit.upper() == 'G':
+        return size * 1024 * 1024 * 1024
+    if unit.upper() == 'T':
+        return size * 1024 * 1024 * 1024 * 1024
