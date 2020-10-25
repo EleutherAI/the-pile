@@ -68,6 +68,8 @@ datasets = [
     ),
 ]
 
+train_chars = 1200 * 1024 * 1024 * 1024
+
 datasets_new = []
 target_size = 950 * 1024 * 1024 * 1024
 for dsets, tgt_frac in datasets:
@@ -95,8 +97,6 @@ def mk_table(datasets):
     values = []
 
     total_weight = sum([x[1] * x[0].size() for x in datasets])
-
-    train_chars = 1200 * 1024 * 1024 * 1024
 
     for dataset, weight in datasets:
         size = dataset.size()
@@ -140,7 +140,7 @@ class Profiler:
             self.time_per_dataset[name][0] += elapsed
             self.time_per_dataset[name][1] += 1
 
-            if self.i % 10000 == 0:
+            if self.i % 100000 == 0:
                 times = [(dsname, total, ct) for dsname, (total, ct) in self.time_per_dataset.items()]
                 times.sort(key=lambda x: x[1])
                 for name, total, ct in times:
@@ -150,14 +150,15 @@ class Profiler:
 
 
 class ThePile(Dataset):
-    def __init__(self, datasets, dataset_bytes):
+    def __init__(self, datasets, dataset_bytes, profile=False):
         self.datasets = datasets
         self.dataset_bytes = dataset_bytes
+        self.profile = profile
     
     def name(self):
         return "The Pile"
 
-    def documents(self, profile=True):
+    def documents(self):
         datasets = []
         weights = []
 
@@ -176,7 +177,7 @@ class ThePile(Dataset):
         pbar = tqdm(total=self.dataset_bytes, unit='B', unit_scale=True, unit_divisor=1024)
 
 
-        profiler = Profiler(profile=profile)
+        profiler = Profiler(profile=self.profile)
         while True:
             chunk = random.choices(population=datasets, weights=weights, k=1000)
             for name, dset in chunk:
@@ -239,6 +240,7 @@ parser.add_argument('--using', type=str, default='pile', help='the dataset to us
 parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
 parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
 parser.add_argument('--make_analysis', action='store_true', help='make analysis data')
+parser.add_argument('--profile', action='store_true', help='turn on profiler')
 
 args = parser.parse_args()
 
@@ -280,7 +282,7 @@ if __name__ == '__main__':
     print(mk_table(datasets))
 
     if args.using == 'pile' or args.using == 'pile_no_cc':
-        pile = ThePile(datasets, int(1.2e12))
+        pile = ThePile(datasets, train_chars, profile=args.profile)
     elif args.using == 'cc':
         pile = dataset_tqdm(CommonCrawlDataset())
     elif args.using == 'owt2':
