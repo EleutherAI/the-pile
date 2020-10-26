@@ -49,38 +49,38 @@ def get_minhash_lsh_cassandra():
     )
     return lsh
 
-def minhash_lsh_dedupe_cassandra(lsh, minhash, priority, offset):
+def minhash_lsh_dedupe_cassandra(lsh, minhash, priority, offset, sha256sum):
     logger.info("Detecting duplicates")     
 
     results = lsh.query(minhash)
 
     for json_results in results:
-        found_priority, found_offset = json.loads(json_results)
+        found_priority, found_offset, found_sha256sum = json.loads(json_results)
 
         if priority < found_priority:
-            return (priority, offset)
+            return (priority, offset, sha256sum)
 
         if priority == found_priority:
             if offset == found_offset: # Self          
                 return None
             else:
-                return (priority, offset)
+                return (priority, offset, sha256sum)
 
         # Want to keep document from higher priority set
         if priority > found_priority:
             lsh.remove(json_results)
-            lsh.insert(json.dumps((priority, offset)), minhash)
+            lsh.insert(json.dumps((priority, offset, sha256sum)), minhash)
             return json_results
 
     # Duplicate not found, insert self
-    lsh.insert(json.dumps((priority, offset)), minhash)    
+    lsh.insert(json.dumps((priority, offset, sha256sum)), minhash)    
 
 # Multiprocessed
 def process_document(priority, offset, document, sha256sum, tqdm_func, global_tqdm):
     minhash = generate_minhash(document)
     logger.info(minhash)
     lsh = get_minhash_lsh_cassandra()
-    duplicate = minhash_lsh_dedupe_cassandra(lsh, minhash)
+    duplicate = minhash_lsh_dedupe_cassandra(lsh, minhash, priority, offset, sha256sum)
     global_tqdm.update(len(document))
     return duplicate
 
@@ -118,8 +118,8 @@ def main(working_directory, process_count):
                 results = pool.map(process_count, progress, tasks, on_error, on_done)
                 for result in results:
                     if result:
-                        priority, offset = result
-                        fh.write(f"{priority} {offset}\n")
+                        priority, offset, sha256sum = result
+                        fh.write(f"{priority} {offset} {sha256sum}\n")
 
                 pickle.dump(offset, open(checkpoint_file, "wb"))
                 batch = []
