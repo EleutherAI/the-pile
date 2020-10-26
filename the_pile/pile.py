@@ -67,6 +67,8 @@ datasets = [
     ),
 ]
 
+train_chars = 1200 * 1024 * 1024 * 1024
+
 datasets_new = []
 target_size = 800 * 1024 * 1024 * 1024
 for dsets, tgt_frac in datasets:
@@ -119,10 +121,40 @@ def dataset_tqdm(dset):
         pbar.update(utf8len(doc))
         yield doc 
 
-class ThePile:
-    def __init__(self, datasets, dataset_bytes):
+
+class Profiler:
+    def __init__(self, profile):
+        self.i = 0
+        self.profile = profile
+        self.time_per_dataset = collections.defaultdict(lambda: [0, 0])
+
+    def measured_next(self, name, iter):
+        if not self.profile:
+            # no-op
+            return next(iter)
+        else:
+            self.i += 1
+            start = time.time()
+            doc = next(iter)
+            elapsed = time.time() - start
+
+            self.time_per_dataset[name][0] += elapsed
+            self.time_per_dataset[name][1] += 1
+
+            if self.i % 100000 == 0:
+                times = [(dsname, total, ct) for dsname, (total, ct) in self.time_per_dataset.items()]
+                times.sort(key=lambda x: x[1])
+                for name, total, ct in times:
+                    print(name.ljust(22), '{:.8f}'.format(total / ct), str(ct).rjust(8), '{:.4f}'.format(total))
+            
+            return doc
+
+
+class ThePile(Dataset):
+    def __init__(self, datasets, dataset_bytes, profile=False):
         self.datasets = datasets
         self.dataset_bytes = dataset_bytes
+        self.profile = profile
     
     def name(self):
         return "The Pile"
@@ -144,6 +176,9 @@ class ThePile:
         # yield from dataset until right number of bytes
         total_bytes = 0
         pbar = tqdm(total=self.dataset_bytes, unit='B', unit_scale=True, unit_divisor=1024)
+
+
+        profiler = Profiler(profile=self.profile)
         while True:
             chunk = random.choices(population=datasets, weights=weights, k=1000)
             for dset in chunk:
@@ -176,6 +211,8 @@ parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--download', action='store_true', help='force download all')
 parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
 parser.add_argument('--make_fasttext_wt_only', action='store_true', help='make data for fasttext using only OpenWebText2Dataset')
+parser.add_argument('--make_analysis', action='store_true', help='make analysis data')
+parser.add_argument('--profile', action='store_true', help='turn on profiler')
 
 args = parser.parse_args()
 
@@ -203,7 +240,15 @@ if __name__ == '__main__':
     random.seed(42)
     print(mk_table(datasets))
 
-    pile = ThePile(datasets, int(1.2e12))
+    if args.using == 'pile' or args.using == 'pile_no_cc':
+        pile = ThePile(datasets, train_chars, profile=args.profile)
+    elif args.using == 'cc':
+        pile = dataset_tqdm(CommonCrawlDataset())
+    elif args.using == 'owt2':
+        pile = dataset_tqdm(OpenWebText2Dataset())
+    else:
+        print('Unknown dataset!')
+
     if args.download:
         for dset, _ in datasets:
             dset._download()
