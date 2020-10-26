@@ -29,7 +29,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
 
-    python_requires='>=3.7',
+    python_requires='>=3.6',
     extras_require=extras_require,
     packages=['the_pile'],
     package_data={'the_pile': ['LICENCE', 'requirements-dev.txt']},
