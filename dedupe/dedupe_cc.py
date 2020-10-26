@@ -90,7 +90,7 @@ def docs_for_dedupe():
     i = -1
     for doc in dset.documents():
         i += 1
-        yield (100, i, sha256str(doc)), doc
+        yield (100, i, sha256str(doc.encode('utf-8'))), doc
 
 def main(working_directory, process_count):
 
