@@ -370,7 +370,7 @@ class ArXivDataset(Dataset):
     def _download(self):
         download('components/arxiv/arxiv.jsonl.zst', '084b894f513986076a7d97e5c323c7fa8ebef1733f151a7fbdb139c19c07b571', [
             Source('direct', 'https://eaidata.bmk.sh/data/arxiv.jsonl.zst'),
-        ], extract=True)
+        ])
 
     def documents(self):
         self._download()
