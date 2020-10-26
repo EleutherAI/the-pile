@@ -97,8 +97,6 @@ def mk_table(datasets):
 
     total_weight = sum([x[1] * x[0].size() for x in datasets])
 
-    train_chars = 1.2e12
-
     for dataset, weight in datasets:
         size = dataset.size()
         relative_weight = size * weight / total_weight
