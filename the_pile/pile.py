@@ -1,11 +1,10 @@
-import time
 import random
 import fasttext
 
 from pytablewriter import MarkdownTableWriter
 from tqdm import tqdm
 
-from the_pile.utils import humanbytes, parse_size
+from the_pile.utils import humanbytes
 from the_pile.datasets import *
 
 
@@ -69,7 +68,7 @@ datasets = [
 ]
 
 datasets_new = []
-target_size = 950 * 1024 * 1024 * 1024
+target_size = 800 * 1024 * 1024 * 1024
 for dsets, tgt_frac in datasets:
     dsets_size_wt = sum([x.size()*w for x, w in dsets])
     dsets_twt     = sum([w          for _, w in dsets])
@@ -96,7 +95,7 @@ def mk_table(datasets):
 
     total_weight = sum([x[1] * x[0].size() for x in datasets])
 
-    train_chars = 1200 * 1024 * 1024 * 1024
+    train_chars = 1.2e12
 
     for dataset, weight in datasets:
         size = dataset.size()
@@ -120,36 +119,7 @@ def dataset_tqdm(dset):
         pbar.update(utf8len(doc))
         yield doc 
 
-
-class Profiler:
-    def __init__(self, profile):
-        self.i = 0
-        self.profile = profile
-        self.time_per_dataset = collections.defaultdict(lambda: [0, 0])
-
-    def measured_next(self, name, iter):
-        if not self.profile:
-            # no-op
-            return next(iter)
-        else:
-            self.i += 1
-            start = time.time()
-            doc = next(iter)
-            elapsed = time.time() - start
-
-            self.time_per_dataset[name][0] += elapsed
-            self.time_per_dataset[name][1] += 1
-
-            if self.i % 10000 == 0:
-                times = [(dsname, total, ct) for dsname, (total, ct) in self.time_per_dataset.items()]
-                times.sort(key=lambda x: x[1])
-                for name, total, ct in times:
-                    print(name.ljust(22), '{:.8f}'.format(total / ct), str(ct).rjust(8), '{:.4f}'.format(total))
-            
-            return doc
-
-
-class ThePile(Dataset):
+class ThePile:
     def __init__(self, datasets, dataset_bytes):
         self.datasets = datasets
         self.dataset_bytes = dataset_bytes
@@ -157,7 +127,7 @@ class ThePile(Dataset):
     def name(self):
         return "The Pile"
 
-    def documents(self, profile=True):
+    def documents(self):
         datasets = []
         weights = []
 
@@ -166,7 +136,7 @@ class ThePile(Dataset):
         for dataset, weight in self.datasets:
             size = dataset.size()
             relative_weight = weight * dataset.num_docs() / total_weight
-            datasets.append((dataset.name(), cycle_documents(dataset)))
+            datasets.append(cycle_documents(dataset))
             weights.append(relative_weight)
 
         random.seed(42)
@@ -174,13 +144,10 @@ class ThePile(Dataset):
         # yield from dataset until right number of bytes
         total_bytes = 0
         pbar = tqdm(total=self.dataset_bytes, unit='B', unit_scale=True, unit_divisor=1024)
-
-
-        profiler = Profiler(profile=profile)
         while True:
             chunk = random.choices(population=datasets, weights=weights, k=1000)
-            for name, dset in chunk:
-                doc = profiler.measured_next(name, dset)
+            for dset in chunk:
+                doc = next(dset)
 
                 size = utf8len(doc)
                 total_bytes += size
@@ -190,39 +157,12 @@ class ThePile(Dataset):
                 if total_bytes > self.dataset_bytes:
                     return
 
+
     def clean(self):
         for dataset, _ in self.datasets: dataset.clean()
     
     def size(self):
         return self.dataset_bytes
-
-
-class LimitedDataset(Dataset):
-    def __init__(self, dataset, limit_size):
-        self.dataset = dataset
-        self.limit_size = limit_size
-    
-    def name(self):
-        return self.dataset.name() + " (truncated)"
-
-    def documents(self):
-        numer = self.limit_size
-        denom = self.dataset.size()
-        for doc in self.dataset.documents():
-            docsize = utf8len(doc)
-            if random.random() < numer / denom:
-                yield doc
-                numer -= docsize
-            denom -= docsize
-
-            if numer <= 0 or denom <= 0:
-                break
-    
-    def clean(self):
-        self.dataset.clean()
-    
-    def size(self):
-        return self.limit_size
 
 
 def preprocess_for_fasttext(x):
@@ -234,11 +174,8 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--download', action='store_true', help='force download all')
-parser.add_argument('--limit', type=str, help='limit output size')
-parser.add_argument('--using', type=str, default='pile', help='the dataset to use')
-parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
 parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
-parser.add_argument('--make_analysis', action='store_true', help='make analysis data')
+parser.add_argument('--make_fasttext_wt_only', action='store_true', help='make data for fasttext using only OpenWebText2Dataset')
 
 args = parser.parse_args()
 
@@ -262,46 +199,16 @@ def lang_stats(pile):
         n += 1
         print('\n'.join([k + ',' + str(v / n).ljust(9) for k,v in sorted(list(langs.items()), key=lambda x: -x[1])]))
 
-
-def docs_for_dedupe():
-    # format: ((priority, offset, sha256sum), document)
-    dset = CommonCrawlDataset()
-    for i, doc in dset.documents():
-        yield (100, i, sha256str(doc)), doc
-
-
 if __name__ == '__main__':
     random.seed(42)
-
-    if args.using != 'pile_no_cc':
-        # add CC
-        datasets.append((CommonCrawlDataset(), 1.))
-
     print(mk_table(datasets))
 
-    if args.using == 'pile' or args.using == 'pile_no_cc':
-        pile = ThePile(datasets, int(1.2e12))
-    elif args.using == 'cc':
-        pile = dataset_tqdm(CommonCrawlDataset())
-    elif args.using == 'owt2':
-        pile = dataset_tqdm(OpenWebText2Dataset())
-    else:
-        print('Unknown dataset!')
-
+    pile = ThePile(datasets, int(1.2e12))
     if args.download:
         for dset, _ in datasets:
             dset._download()
-    
-    if args.limit:
-        size_limit = parse_size(args.limit)
-        pile = LimitedDataset(pile, size_limit)
-
-    if args.make_lmd:
-        ar = lmd.Archive('pile_output')
-        for doc in pile.documents():
-            ar.add_data(doc)
-        
-        ar.commit(archive_name=args.using)
-
     if args.make_fasttext:
         make_fasttext(pile.documents(), 0.1)
+    elif args.make_fasttext_wt_only:
+        make_fasttext(dataset_tqdm(OpenWebText2Dataset()), 1)
+

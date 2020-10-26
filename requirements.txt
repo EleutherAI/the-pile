@@ -6,5 +6,7 @@ pytablewriter
 gitpython
 
 datasketch
+nltk
+fasttext
 tqdm-multiprocess
 cassandra-driver
