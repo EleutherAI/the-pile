@@ -103,7 +103,7 @@ def main(working_directory, process_count):
 
         batch = []
 
-        for doc in docs_for_dedupe:
+        for doc in docs_for_dedupe():
             batch.append(doc)
 
             if len(batch) == batch_size:
