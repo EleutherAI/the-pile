@@ -78,7 +78,7 @@ def minhash_lsh_dedupe_cassandra(lsh, minhash, priority, offset):
 # Multiprocessed
 def process_document(priority, offset, document, sha256sum, tqdm_func, global_tqdm):
     minhash = generate_minhash(document)
-    print(minhash)
+    logger.info(minhash)
     lsh = get_minhash_lsh_cassandra()
     duplicate = minhash_lsh_dedupe_cassandra(lsh, minhash)
     global_tqdm.update(len(document))
