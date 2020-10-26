@@ -115,6 +115,8 @@ def mk_table(datasets):
 
 
 def dataset_tqdm(dset):
+    if isinstance(dset, ThePile):
+        return dset.documents()
     pbar = tqdm(total=dset.size(), unit='B', unit_scale=True, unit_divisor=1024)
     for doc in dset.documents():
         pbar.update(utf8len(doc))
@@ -154,6 +156,7 @@ class ThePile(Dataset):
         self.datasets = datasets
         self.dataset_bytes = dataset_bytes
         self.profile = profile
+        self.rnd = random.Random(42)
     
     def name(self):
         return "The Pile"
@@ -169,8 +172,6 @@ class ThePile(Dataset):
             relative_weight = weight * dataset.num_docs() / total_weight
             datasets.append((dataset.name(), cycle_documents(dataset)))
             weights.append(relative_weight)
-
-        random.seed(42)
         
         # yield from dataset until right number of bytes
         total_bytes = 0
@@ -179,7 +180,7 @@ class ThePile(Dataset):
 
         profiler = Profiler(profile=self.profile)
         while True:
-            chunk = random.choices(population=datasets, weights=weights, k=1000)
+            chunk = self.rnd.choices(population=datasets, weights=weights, k=1000)
             for name, dset in chunk:
                 doc = profiler.measured_next(name, dset)
 
@@ -202,6 +203,7 @@ class LimitedDataset(Dataset):
     def __init__(self, dataset, limit_size):
         self.dataset = dataset
         self.limit_size = limit_size
+        self.rnd = random.Random(42)
     
     def name(self):
         return self.dataset.name() + " (truncated)"
@@ -209,9 +211,9 @@ class LimitedDataset(Dataset):
     def documents(self):
         numer = self.limit_size
         denom = self.dataset.size()
-        for doc in self.dataset.documents():
+        for doc in dataset_tqdm(self.dataset):
             docsize = utf8len(doc)
-            if random.random() < numer / denom:
+            if self.rnd.random() < numer / denom:
                 yield doc
                 numer -= docsize
             denom -= docsize
@@ -284,9 +286,9 @@ if __name__ == '__main__':
     if args.using == 'pile' or args.using == 'pile_no_cc':
         pile = ThePile(datasets, train_chars, profile=args.profile)
     elif args.using == 'cc':
-        pile = dataset_tqdm(CommonCrawlDataset())
+        pile = CommonCrawlDataset()
     elif args.using == 'owt2':
-        pile = dataset_tqdm(OpenWebText2Dataset())
+        pile = OpenWebText2Dataset()
     else:
         print('Unknown dataset!')
 
