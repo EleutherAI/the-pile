@@ -235,17 +235,6 @@ def preprocess_for_fasttext(x):
 import collections
 import argparse
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--download', action='store_true', help='force download all')
-parser.add_argument('--limit', type=str, help='limit output size')
-parser.add_argument('--using', type=str, default='pile', help='the dataset to use')
-parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
-parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
-parser.add_argument('--make_analysis', action='store_true', help='make analysis data')
-parser.add_argument('--profile', action='store_true', help='turn on profiler')
-
-args = parser.parse_args()
-
 def make_fasttext(pile, keep_frac):
     with open('fasttext_pile.txt', 'w') as fh, open('pile_sample.txt', 'w') as fh2:
         for x in pile:
@@ -275,6 +264,17 @@ def docs_for_dedupe():
 
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--download', action='store_true', help='force download all')
+    parser.add_argument('--limit', type=str, help='limit output size')
+    parser.add_argument('--using', type=str, default='pile', help='the dataset to use')
+    parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
+    parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
+    parser.add_argument('--make_analysis', action='store_true', help='make analysis data')
+    parser.add_argument('--profile', action='store_true', help='turn on profiler')
+
+    args = parser.parse_args()
     random.seed(42)
 
     if args.using != 'pile_no_cc':
