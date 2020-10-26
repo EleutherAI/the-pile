@@ -87,7 +87,9 @@ def process_document(priority, offset, document, sha256sum, tqdm_func, global_tq
 def docs_for_dedupe():
     # format: ((priority, offset, sha256sum), document)
     dset = CommonCrawlDataset()
-    for i, doc in dset.documents():
+    i = -1
+    for doc in dset.documents():
+        i += 1
         yield (100, i, sha256str(doc)), doc
 
 def main(working_directory, process_count):
