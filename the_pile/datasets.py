@@ -368,16 +368,14 @@ class ArXivDataset(Dataset):
         return "ArXiv"
 
     def _download(self):
-        download('components/arxiv/2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz', '1bc9fa7e1fc2e5181168790df43c00484c6d3e37aa5cbe41c1796e028ea53d14', [
-            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz'),
-            Source('direct', 'https://battle.shawwn.com/sdb/arxiv/2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz'),
-            Source('direct', 'https://eaidata.bmk.sh/data/2020-09-08-arxiv-extracts-nofallback-until-2007-068.tar.gz'),
+        download('components/arxiv/arxiv.jsonl.zst', '084b894f513986076a7d97e5c323c7fa8ebef1733f151a7fbdb139c19c07b571', [
+            Source('direct', 'https://eaidata.bmk.sh/data/arxiv.jsonl.zst'),
         ], extract=True)
 
     def documents(self):
         self._download()
 
-        yield from map(compose(strip_markdown_colons, fread), ls('components/arxiv/documents'))
+        yield from lmd.Reader('components/arxiv/arxiv.jsonl.zst').stream_data()
 
     def clean(self):
         rm_if_exists('components/arxiv')
