@@ -13,7 +13,7 @@ from the_pile.datasets import CommonCrawlDataset
 from the_pile.utils import sha256str
 
 import logging
-from logger import setup_logger_tqdm
+from the_pile.logger import setup_logger_tqdm
 logger = logging.getLogger(__name__)
 
 def extract_ngrams(data, num):
