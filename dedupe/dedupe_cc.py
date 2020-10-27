@@ -2,6 +2,7 @@ import argparse
 import os
 import pickle
 import json
+import sys
 
 import nltk
 from nltk.util import ngrams
@@ -94,6 +95,16 @@ def docs_for_dedupe():
 
 def main(working_directory, process_count):
 
+    # workaround for datasketch MinHashLSH bug
+    first_run_file = os.path.join(args.working_directory)
+    if not os.path.exists(first_run_file):
+        get_minhash_lsh_cassandra()
+        with open(first_run_file, "w") as fh:
+            fh.write("hello")
+        sys.exit(0) 
+
+    nltk.download('punkt')
+
     batch_size = 100
 
     total_file_size = CommonCrawlDataset().size()
@@ -143,8 +154,6 @@ parser.add_argument("-procs", "--process_count", type=int, default=4)
 if __name__ == '__main__':
     logfile_path = "dedupe_cc.log"
     setup_logger_tqdm(logfile_path)
-
-    nltk.download('punkt')
 
     args = parser.parse_args()
     main(args.working_directory, args.process_count)
