@@ -105,7 +105,17 @@ def main(working_directory, process_count):
 
         batch = []
 
+        if os.path.exists(checkpoint_file):
+            checkpoint_offset = pickle.load(open(checkpoint_file, "rb")) + 1
+        else:
+            checkpoint_offset = 0
+
         for doc in docs_for_dedupe():
+            ((priority, offset, sha256sum), document) = doc
+
+            if offset < checkpoint_offset:
+                continue
+
             batch.append(doc)
 
             if len(batch) == batch_size:
