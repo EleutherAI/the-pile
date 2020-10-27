@@ -55,6 +55,7 @@ python the_pile/pile.py --download
 
 To generate fasttext training data for CC filtering (OWT2 only):
 ```
+sudo apt install build-essential
 python the_pile/pile.py --using owt2 --make_fasttext 
 ```
 
