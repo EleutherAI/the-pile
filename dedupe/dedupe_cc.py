@@ -35,7 +35,7 @@ def get_minhash_lsh_cassandra():
     lsh = MinHashLSH(
         threshold=0.5, num_perm=10, storage_config={
             'type': 'cassandra',
-            'basename': b'minhash_lsh',
+            'basename': b'minhashlsh',
             'cassandra': {
                 'seeds': ['127.0.0.1'],
                 'keyspace': 'cc_dedupe',
