@@ -58,8 +58,9 @@ def download(fname, checksum, sources, extract=False):
             elif source.type == 'gdrive':
                 gdown.download(source.url, fname, quiet=False)
             elif source.type == 'gcloud':
-                raise NotImplementedError('gcloud download not implemented!')
+                raise NotImplementedError('gcloud download not implemented!')            
             
+            print("Calculating sha256 checksum")
             sha256sum(fname, expected=checksum)
 
             if extract:
@@ -134,11 +135,12 @@ def sha256str(s):
     return h.hexdigest()
 
 
-def sha256sum(filename, expected=None):
+def sha256sum(filename, expected=None):    
     h  = hashlib.sha256()
     b  = bytearray(128*1024)
-    mv = memoryview(b)
-    with open(filename, 'rb', buffering=0) as f:
+    mv = memoryview(b)    
+    with open(filename, 'rb', buffering=0) as f, \
+        tqdm(total=os.path.size(filename), dynamic_ncols=True, unit_scale=True, unit="byte"):
         for n in iter(lambda : f.readinto(mv), 0):
             h.update(mv[:n])
     
