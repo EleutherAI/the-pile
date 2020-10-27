@@ -139,10 +139,11 @@ def sha256sum(filename, expected=None):
     h  = hashlib.sha256()
     b  = bytearray(128*1024)
     mv = memoryview(b)    
-    with open(filename, 'rb', buffering=0) as f, \
-        tqdm(total=os.path.size(filename), dynamic_ncols=True, unit_scale=True, unit="byte"):
+    progress = tqdm(total=os.path.size(filename), dynamic_ncols=True, unit_scale=True, unit="byte")
+    with open(filename, 'rb', buffering=0) as f:
         for n in iter(lambda : f.readinto(mv), 0):
             h.update(mv[:n])
+            progress.update(n)
     
     if expected:
         assert h.hexdigest() == expected
