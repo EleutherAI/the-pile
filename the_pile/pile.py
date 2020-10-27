@@ -289,8 +289,10 @@ if __name__ == '__main__':
         pile = CommonCrawlDataset()
     elif args.using == 'owt2':
         pile = OpenWebText2Dataset()
+    elif args.using == 'bibliotik':
+        pile = BibliotikDataset()
     else:
-        print('Unknown dataset!')
+        print('We don\'t have a shortcut for that yet!')
 
     if args.download:
         for dset, _ in datasets:
