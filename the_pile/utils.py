@@ -144,6 +144,7 @@ def sha256sum(filename, expected=None):
         for n in iter(lambda : f.readinto(mv), 0):
             h.update(mv[:n])
             progress.update(n)
+    progress.close()
     
     if expected:
         assert h.hexdigest() == expected
