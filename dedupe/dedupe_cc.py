@@ -51,8 +51,6 @@ def get_minhash_lsh_cassandra():
     return lsh
 
 def minhash_lsh_dedupe_cassandra(lsh, minhash, priority, offset, sha256sum):
-    logger.info("Detecting duplicates")     
-
     results = lsh.query(minhash)
 
     for json_results in results:
@@ -79,7 +77,6 @@ def minhash_lsh_dedupe_cassandra(lsh, minhash, priority, offset, sha256sum):
 # Multiprocessed
 def process_document(priority, offset, document, sha256sum, tqdm_func, global_tqdm):
     minhash = generate_minhash(document)
-    logger.info(minhash)
     lsh = get_minhash_lsh_cassandra()
     duplicate = minhash_lsh_dedupe_cassandra(lsh, minhash, priority, offset, sha256sum)
     global_tqdm.update(len(document))
@@ -119,8 +116,10 @@ def main(working_directory, process_count):
 
         if os.path.exists(checkpoint_file):
             checkpoint_offset = pickle.load(open(checkpoint_file, "rb")) + 1
+            logger.info(f"Checkpoint found, starting from offset {checkpoint_offset}")
         else:
             checkpoint_offset = 0
+            logger.info("No checkpoint found, starting from offset 0")            
 
         for doc in docs_for_dedupe():
             ((priority, offset, sha256sum), document) = doc
