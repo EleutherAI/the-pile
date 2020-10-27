@@ -96,7 +96,7 @@ def docs_for_dedupe():
 def main(working_directory, process_count):
 
     # workaround for datasketch MinHashLSH bug
-    first_run_file = os.path.join(args.working_directory)
+    first_run_file = os.path.join(args.working_directory, ".first_run")
     if not os.path.exists(first_run_file):
         get_minhash_lsh_cassandra()
         with open(first_run_file, "w") as fh:
