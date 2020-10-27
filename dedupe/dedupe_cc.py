@@ -125,6 +125,7 @@ def main(working_directory, process_count):
             ((priority, offset, sha256sum), document) = doc
 
             if offset < checkpoint_offset:
+                progress.update(len(document))
                 continue
 
             batch.append(doc)
