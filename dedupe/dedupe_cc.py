@@ -113,6 +113,7 @@ def main(working_directory, process_count):
          open(duplicates_file, "a") as fh:
 
         batch = []
+        pool = TqdmMultiProcessPool(process_count)
 
         if os.path.exists(checkpoint_file):
             checkpoint_offset = pickle.load(open(checkpoint_file, "rb")) + 1
@@ -131,7 +132,6 @@ def main(working_directory, process_count):
             batch.append(doc)
 
             if len(batch) == batch_size:
-                pool = TqdmMultiProcessPool()
                 tasks = []
                 for ((priority, offset, sha256sum), document) in batch:
                     task = (process_document, (priority, offset, document, sha256sum))
@@ -139,7 +139,7 @@ def main(working_directory, process_count):
 
                 on_done = lambda _ : None
                 on_error = on_done
-                results = pool.map(process_count, progress, tasks, on_error, on_done)
+                results = pool.map(progress, tasks, on_error, on_done)
                 for result in results:
                     if result:
                         priority, offset, sha256sum = result
