@@ -5,3 +5,5 @@ concurrent_iterator
 pytablewriter
 gitpython
 fasttext
+rehash
+best-download
