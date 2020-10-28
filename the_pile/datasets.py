@@ -63,8 +63,7 @@ class WikipediaDataset(Dataset):
         rm_if_exists('components/wikipedia_en')
     
     def size(self):
-        self._download()
-        return sum(os.path.getsize(f) for f in ls('components/wikipedia_en/output'))
+        return 6847462907
     
     def num_docs(self):
         return 6033151
@@ -159,18 +158,14 @@ class GutenbergDataset(Dataset):
         return "Gutenberg (PG-19)"
 
     def _download(self):
-        if not os.path.exists('components/gutenberg'):
-            # todo: convert after gcloud download is implemented
-            sh("""
-            mkdir -p components/gutenberg
-            cd components/gutenberg
-            virtualenv env
-            . env/bin/activate
-            pip install gsutil
-            mkdir -p pg19_train
-            gsutil -m rsync gs://deepmind-gutenberg/train ./pg19_train
+        download_directory = "components/gutenberg/pg19_train"
+        done_file = os.path.join(download_directory, "download.done")
+        if not os.path.exists(done_file):
+            os.makedirs(download_directory, exist_ok=True)
+            sh(f"gsutil -m rsync gs://deepmind-gutenberg/train {download_directory}")
 
-            """)
+            with open(done_file, "w") as fh:
+                fh.write("done!")
 
     def documents(self):
         self._download()
@@ -181,8 +176,7 @@ class GutenbergDataset(Dataset):
         rm_if_exists('components/gutenberg')
     
     def size(self):
-        self._download()
-        return sum(os.path.getsize(f) for f in ls('components/gutenberg/pg19_train'))
+        return 11678184672
     
     def num_docs(self):
         return 28602
