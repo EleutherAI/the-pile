@@ -10,3 +10,4 @@ nltk
 fasttext
 tqdm-multiprocess
 cassandra-driver
+motor
