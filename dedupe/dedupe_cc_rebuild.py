@@ -22,7 +22,7 @@ def extract_ngrams(data, num):
     n_grams = ngrams(nltk.word_tokenize(data), num)
     return [ ' '.join(grams) for grams in n_grams]
 
-def generate_minhash(document, stuff, stuff):
+def generate_minhash(document, tqdm_func, global_tqdm):
 
     n_grams = extract_ngrams(document, 5)
     five_gram_set = set(n_grams)
