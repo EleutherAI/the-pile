@@ -112,7 +112,7 @@ def main(working_directory, process_count):
             checkpoint_offset = 0
             logger.info("No checkpoint found, starting from offset 0")            
 
-        checkpoint_frequency = 10000
+        checkpoint_frequency = 100
         count = 0
         for doc in docs_for_dedupe():
             ((priority, offset, sha256sum), document) = doc
