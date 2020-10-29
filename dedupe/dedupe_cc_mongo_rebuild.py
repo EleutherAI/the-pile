@@ -96,6 +96,8 @@ def process_document(priority, offset, document, sha256sum):
     duplicate = asyncio.run(minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum))
     elapsed = time.perf_counter() - start
     print(f"Full document took {elapsed:0.5f} seconds.")
+    print("")
+    print("")    
     return duplicate
 
 def docs_for_dedupe():
