@@ -77,14 +77,14 @@ def docs_for_dedupe():
 
 def main(working_directory, process_count):
 
-    # workaround for datasketch MinHashLSH bug
-    first_run_file = os.path.join(args.working_directory, ".first_run")
-    if not os.path.exists(first_run_file):
-        get_minhash_lsh_cassandra()
-        with open(first_run_file, "w") as fh:
-            fh.write("hello")
-        logger.info("Cassandra connection created on first run to bypass a bug. Please run the script again.")
-        sys.exit(0) 
+    # # workaround for datasketch MinHashLSH bug
+    # first_run_file = os.path.join(args.working_directory, ".first_run")
+    # if not os.path.exists(first_run_file):
+    #     get_minhash_lsh_cassandra()
+    #     with open(first_run_file, "w") as fh:
+    #         fh.write("hello")
+    #     logger.info("Cassandra connection created on first run to bypass a bug. Please run the script again.")
+    #     sys.exit(0) 
 
     nltk.download('punkt')
 
