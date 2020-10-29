@@ -9,6 +9,7 @@ import nltk
 from nltk.util import ngrams
 from datasketch import MinHash, LeanMinHash, MinHashLSH
 import tqdm
+from tqdm_multiprocess import TqdmMultiProcessPool
 
 from the_pile.datasets import CommonCrawlDataset
 from the_pile.utils import sha256str
@@ -64,18 +65,6 @@ def minhash_lsh_dedupe(lsh, minhash, priority, offset, sha256sum):
     # elapsed = time.perf_counter() - start
     # print(f"Insert took {elapsed:0.5f} seconds.")
 
-def process_document(lsh, priority, offset, document, sha256sum):    
-    # start = time.perf_counter()
-    minhash = generate_minhash(document)
-    # elapsed = time.perf_counter() - start
-    # print(f"Generate minhash took {elapsed:0.5f} seconds.")
-    duplicate = minhash_lsh_dedupe(lsh, minhash, priority, offset, sha256sum)
-    # elapsed = time.perf_counter() - start
-    # print(f"Full document took {elapsed:0.5f} seconds.")
-    # print("")
-    # print("")    
-    return duplicate
-
 def docs_for_dedupe():
     # format: ((priority, offset, sha256sum), document)
     dset = CommonCrawlDataset()
@@ -83,6 +72,8 @@ def docs_for_dedupe():
     for doc in dset.documents():
         i += 1
         yield (100, i, sha256str(doc.encode('utf-8'))), doc
+
+from pathlib import Path
 
 def main(working_directory, process_count):
 
@@ -99,21 +90,26 @@ def main(working_directory, process_count):
 
     total_file_size = CommonCrawlDataset().size()
     checkpoint_file = os.path.join(working_directory, "checkpoint.pkl")
-    duplicates_file = os.path.join(working_directory, "duplicates.txt")
+    checkpoint_old_file = os.path.join(working_directory, "checkpoint_old.pkl")    
+    transaction_lock = os.path.join(working_directory, ".transaction_lock")
 
-    with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit_scale=1) as progress, \
-         open(duplicates_file, "a") as fh:
+    if os.path.exists(transaction_lock):
+        logger.info("Program crashed during transaction, you need to fix the files...")
 
+    with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit_scale=1) as progress:
         if os.path.exists(checkpoint_file):
             lsh, checkpoint_offset = pickle.load(open(checkpoint_file, "rb")) + 1
-            logger.info(f"Checkpoint found, starting from offset {checkpoint_offset}")
+            logger.info(f"Checkpoint found, starting from offset {checkpoint_offset}")            
         else:
+            logger.info("No checkpoint found, starting from offset 0")
             lsh = MinHashLSH(threshold=0.5, num_perm=10)
-            checkpoint_offset = 0
-            logger.info("No checkpoint found, starting from offset 0")            
+            checkpoint_offset = 0            
+            pickle.dump((lsh, 0), open(checkpoint_file, "wb"))
 
-        checkpoint_frequency = 100
-        count = 0
+        batch_size = 1000
+        batch = []
+        pool = TqdmMultiProcessPool(process_count)
+
         for doc in docs_for_dedupe():
             ((priority, offset, sha256sum), document) = doc
 
@@ -121,19 +117,48 @@ def main(working_directory, process_count):
                 progress.update(len(document))
                 continue
 
-            result = process_document(lsh, priority, offset, document, sha256sum)
-            progress.update(len(document))
-            if result:
-                priority, offset, sha256sum = result
-                fh.write(f"{priority} {offset} {sha256sum}\n")
+            batch.append(doc)
 
-            count += 1
-            if count == checkpoint_frequency:
-                start = time.perf_counter()
-                pickle.dump((lsh, offset), open(checkpoint_file, "wb"))
-                elapsed = time.perf_counter() - start
-                print(f"Checkpoint took {elapsed:0.5f} seconds.")
-                count = 0
+            if len(batch) == batch_size:
+                # Generate minhashes with pool
+                tasks = []
+                for ((priority, offset, sha256sum), document) in batch:
+                    task = (generate_minhash, (document,))
+                    tasks.append(task)
+
+                on_done = lambda _ : None
+                on_error = on_done
+                minhashes = pool.map(progress, tasks, on_error, on_done)
+
+                # Commence Transaction
+                Path(transaction_lock).touch()
+
+                # Operate On LSH                
+                start_offset = batch[0][0][1]
+                duplicate_file = os.path.join(working_directory, f"duplicates_{start_offset}.txt")
+                duplicate_file_temp = os.path.join(working_directory, f"duplicates_{start_offset}_temp.txt")
+                with open(duplicate_file_temp,"w") as fh:
+                    for i, minhash in enumerate(minhashes):
+                        ((priority, offset, sha256sum), document) = batch[i]
+                        result = minhash_lsh_dedupe(lsh, minhash, priority, offset, sha256sum)
+                        if result:
+                            priority, offset, sha256sum = result
+                            fh.write(f"{priority} {offset} {sha256sum}\n")
+
+                        progress.update(len(document))
+
+                # Dump Checkpoint
+                checkpoint_temp = os.path.join(working_directory, "checkpoint_temp.pkl")
+                pickle.dump((lsh, offset), open(checkpoint_temp, "wb"))
+
+                # Move stuff around safely in case of failure
+                os.rename(checkpoint_file, checkpoint_old_file)
+                os.rename(checkpoint_temp, checkpoint_file)
+                os.rename(duplicate_file_temp, duplicate_file)
+
+                # Transaction Finished
+                os.path.remove(transaction_lock)
+                batch = []
 
 parser = argparse.ArgumentParser(description='Dedupe from provided indexes.')
 parser.add_argument("-dir", "--working_directory", default="")
