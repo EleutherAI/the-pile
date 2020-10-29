@@ -32,10 +32,10 @@ def generate_minhash(document):
     return LeanMinHash(minhash)
 
 def minhash_lsh_dedupe(lsh, minhash, priority, offset, sha256sum):
-    start = time.perf_counter()
+    # start = time.perf_counter()
     results = lsh.query(minhash)
-    elapsed = time.perf_counter() - start
-    print(f"Query took {elapsed:0.5f} seconds.")
+    # elapsed = time.perf_counter() - start
+    # print(f"Query took {elapsed:0.5f} seconds.")
 
     for json_results in results:
         found_priority, found_offset, found_sha256sum = json.loads(json_results)
@@ -51,29 +51,29 @@ def minhash_lsh_dedupe(lsh, minhash, priority, offset, sha256sum):
 
         # Want to keep document from higher priority set
         if priority > found_priority:
-            start = time.perf_counter()
+            # start = time.perf_counter()
             lsh.remove(json_results)
             lsh.insert(json.dumps((priority, offset, sha256sum)), minhash)
-            elapsed = time.perf_counter() - start
-            print(f"Remove and insert took {elapsed:0.5f} seconds.")
+            # elapsed = time.perf_counter() - start
+            # print(f"Remove and insert took {elapsed:0.5f} seconds.")
             return json_results
 
     # Duplicate not found, insert self
-    start = time.perf_counter()
+    # start = time.perf_counter()
     lsh.insert(json.dumps((priority, offset, sha256sum)), minhash)   
-    elapsed = time.perf_counter() - start
-    print(f"Insert took {elapsed:0.5f} seconds.")
+    # elapsed = time.perf_counter() - start
+    # print(f"Insert took {elapsed:0.5f} seconds.")
 
 def process_document(lsh, priority, offset, document, sha256sum):    
-    start = time.perf_counter()    
+    # start = time.perf_counter()
     minhash = generate_minhash(document)
-    elapsed = time.perf_counter() - start
-    print(f"Generate minhash took {elapsed:0.5f} seconds.")
+    # elapsed = time.perf_counter() - start
+    # print(f"Generate minhash took {elapsed:0.5f} seconds.")
     duplicate = minhash_lsh_dedupe(lsh, minhash, priority, offset, sha256sum)
-    elapsed = time.perf_counter() - start
-    print(f"Full document took {elapsed:0.5f} seconds.")
-    print("")
-    print("")    
+    # elapsed = time.perf_counter() - start
+    # print(f"Full document took {elapsed:0.5f} seconds.")
+    # print("")
+    # print("")    
     return duplicate
 
 def docs_for_dedupe():
@@ -100,7 +100,6 @@ def main(working_directory, process_count):
     total_file_size = CommonCrawlDataset().size()
     checkpoint_file = os.path.join(working_directory, "checkpoint.pkl")
     duplicates_file = os.path.join(working_directory, "duplicates.txt")
-
 
     with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit_scale=1) as progress, \
          open(duplicates_file, "a") as fh:
@@ -130,7 +129,10 @@ def main(working_directory, process_count):
 
             count += 1
             if count == checkpoint_frequency:
+                start = time.perf_counter()
                 pickle.dump((lsh, offset), open(checkpoint_file, "wb"))
+                elapsed = time.perf_counter() - start
+                print(f"Checkpoint took {elapsed:0.5f} seconds.")
                 count = 0
 
 parser = argparse.ArgumentParser(description='Dedupe from provided indexes.')
