@@ -158,7 +158,7 @@ def main(working_directory, process_count):
                 os.rename(duplicate_file_temp, duplicate_file)
 
                 # Transaction Finished
-                os.path.remove(transaction_lock)
+                os.remove(transaction_lock)
                 logger.info("Transaction Complete.")
                 batch = []
 
