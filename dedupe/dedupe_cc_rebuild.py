@@ -132,6 +132,7 @@ def main(working_directory, process_count):
 
                 # Commence Transaction
                 Path(transaction_lock).touch()
+                logger.info("Commencing transaction. Don't ctrl-c now unless you want to clean up files.")
 
                 # Operate On LSH                
                 start_offset = batch[0][0][1]
@@ -158,6 +159,7 @@ def main(working_directory, process_count):
 
                 # Transaction Finished
                 os.path.remove(transaction_lock)
+                logger.info("Transaction Complete.")
                 batch = []
 
 parser = argparse.ArgumentParser(description='Dedupe from provided indexes.')
