@@ -36,7 +36,7 @@ def generate_minhash(document):
 _storage = {'type': 'aiomongo', 'mongo': {'host': 'localhost', 'port': 27017, 'db': 'lsh_test'}}
 
 async def minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum):
-    lsh = await AsyncMinHashLSH(storage_config=_storage, threshold=0.5, num_perm=16)
+    lsh = await AsyncMinHashLSH(storage_config=_storage, threshold=0.5, num_perm=10)
     results = await lsh.query(minhash)
 
     for json_results in results:
