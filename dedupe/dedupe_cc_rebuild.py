@@ -4,6 +4,8 @@ import pickle
 import json
 import sys
 import time
+import signal
+from signal import SIGINT, SIG_IGN
 
 import nltk
 from nltk.util import ngrams
@@ -76,7 +78,7 @@ def docs_for_dedupe():
 from pathlib import Path
 
 def main(working_directory, process_count):
-    
+
     nltk.download('punkt')
 
     total_file_size = CommonCrawlDataset().size()
@@ -121,8 +123,8 @@ def main(working_directory, process_count):
                 minhashes = pool.map(progress, tasks, on_error, on_done)
 
                 # Commence Transaction
+                previous_signal_int = signal.signal(SIGINT, SIG_IGN)
                 Path(transaction_lock).touch()
-                logger.info("Commencing transaction. Don't ctrl-c now unless you want to clean up files.")
 
                 # Operate On LSH                
                 start_offset = batch[0][0][1]
@@ -151,7 +153,7 @@ def main(working_directory, process_count):
 
                 # Transaction Finished
                 os.remove(transaction_lock)
-                logger.info("Transaction Complete.")
+                signal.signal(SIGINT, previous_signal_int)
                 batch = []
 
 parser = argparse.ArgumentParser(description='Dedupe from provided indexes.')
