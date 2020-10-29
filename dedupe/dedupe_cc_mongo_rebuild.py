@@ -4,6 +4,7 @@ import pickle
 import json
 import sys
 import asyncio
+import time
 
 import nltk
 from nltk.util import ngrams
@@ -36,34 +37,65 @@ def generate_minhash(document):
 _storage = {'type': 'aiomongo', 'mongo': {'host': 'localhost', 'port': 27017, 'db': 'lsh_test'}}
 
 async def minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum):
+    start = time.perf_counter()
     lsh = await AsyncMinHashLSH(storage_config=_storage, threshold=0.5, num_perm=10)
+    elapsed = time.perf_counter() - start
+    print(f"Get mongo connection took {elapsed:0.5f} seconds.")
+
+    start = time.perf_counter()
     results = await lsh.query(minhash)
+    elapsed = time.perf_counter() - start
+    print(f"Query took took {elapsed:0.5f} seconds.")
 
     for json_results in results:
         found_priority, found_offset, found_sha256sum = json.loads(json_results)
 
         if priority < found_priority:
+            start = time.perf_counter()
+            await lsh.close()
+            print(f"Close took {elapsed:0.5f} seconds.")
             return (priority, offset, sha256sum)
 
         if priority == found_priority:
             if offset == found_offset: # Self          
+                start = time.perf_counter()
+                await lsh.close()
+                print(f"Close took {elapsed:0.5f} seconds.")
                 return None
             else:
+                start = time.perf_counter()
+                await lsh.close()
+                print(f"Close took {elapsed:0.5f} seconds.")
                 return (priority, offset, sha256sum)
 
         # Want to keep document from higher priority set
         if priority > found_priority:
+            start = time.perf_counter()
             await lsh.remove(json_results)
             await lsh.insert(json.dumps((priority, offset, sha256sum)), minhash)
+            elapsed = time.perf_counter() - start
+            print(f"Remove and insert took {elapsed:0.5f} seconds.")
             return json_results
 
     # Duplicate not found, insert self
-    await lsh.insert(json.dumps((priority, offset, sha256sum)), minhash)    
-    await lsh.close()
+    start = time.perf_counter()
+    await lsh.insert(json.dumps((priority, offset, sha256sum)), minhash)   
+    elapsed = time.perf_counter() - start
+    print(f"Insert took {elapsed:0.5f} seconds.") 
 
-def process_document(priority, offset, document, sha256sum):
+    start = time.perf_counter()
+    await lsh.close()
+    print(f"Close took {elapsed:0.5f} seconds.")
+
+
+def process_document(priority, offset, document, sha256sum):    
+    start = time.perf_counter()    
     minhash = generate_minhash(document)
-    duplicate = asyncio.run(minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum))    
+    elapsed = time.perf_counter() - start
+    print(f"Generate minhash took {elapsed:0.5f} seconds.")
+    duplicate = asyncio.run(minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum))
+    elapsed = time.perf_counter() - start
+    print(f"Full document took {elapsed:0.5f} seconds.")
     return duplicate
 
 def docs_for_dedupe():
