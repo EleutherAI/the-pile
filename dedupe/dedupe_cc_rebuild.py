@@ -89,7 +89,7 @@ def main(working_directory, process_count):
     if os.path.exists(transaction_lock):
         logger.info("Program crashed during transaction, you need to fix the files...")
 
-    with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit_scale=1) as progress:
+    with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit="byte", unit_scale=1) as progress:
         if os.path.exists(checkpoint_file):
             lsh, checkpoint_offset = pickle.load(open(checkpoint_file, "rb"))
             logger.info(f"Checkpoint found, starting from offset {checkpoint_offset}")            
