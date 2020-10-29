@@ -61,10 +61,9 @@ async def minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum):
     await lsh.insert(json.dumps((priority, offset, sha256sum)), minhash)    
     await lsh.close()
 
-def process_document(priority, offset, document, sha256sum, tqdm_func, global_tqdm):
+def process_document(priority, offset, document, sha256sum):
     minhash = generate_minhash(document)
-    duplicate = asyncio.run(minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum))
-    global_tqdm.update(len(document))
+    duplicate = asyncio.run(minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum))    
     return duplicate
 
 def docs_for_dedupe():
@@ -110,6 +109,7 @@ def main(working_directory, process_count):
                 continue
 
             result = process_document(priority, offset, document, sha256sum)
+            progress.update(len(document))
             if result:
                 priority, offset, sha256sum = result
                 fh.write(f"{priority} {offset} {sha256sum}\n")
