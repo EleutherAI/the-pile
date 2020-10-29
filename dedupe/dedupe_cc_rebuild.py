@@ -98,13 +98,12 @@ def main(working_directory, process_count):
 
     with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit_scale=1) as progress:
         if os.path.exists(checkpoint_file):
-            lsh, checkpoint_offset = pickle.load(open(checkpoint_file, "rb")) + 1
+            lsh, checkpoint_offset = pickle.load(open(checkpoint_file, "rb"))
             logger.info(f"Checkpoint found, starting from offset {checkpoint_offset}")            
         else:
             logger.info("No checkpoint found, starting from offset 0")
             lsh = MinHashLSH(threshold=0.5, num_perm=10)
-            checkpoint_offset = 0            
-            pickle.dump((lsh, 0), open(checkpoint_file, "wb"))
+            checkpoint_offset = 0
 
         batch_size = 1000
         batch = []
@@ -153,7 +152,8 @@ def main(working_directory, process_count):
                 pickle.dump((lsh, offset), open(checkpoint_temp, "wb"))
 
                 # Move stuff around safely in case of failure
-                os.rename(checkpoint_file, checkpoint_old_file)
+                if os.path.exists(checkpoint_file):
+                    os.rename(checkpoint_file, checkpoint_old_file)
                 os.rename(checkpoint_temp, checkpoint_file)
                 os.rename(duplicate_file_temp, duplicate_file)
 
