@@ -59,7 +59,7 @@ async def minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum):
 
     # Duplicate not found, insert self
     await lsh.insert(json.dumps((priority, offset, sha256sum)), minhash)    
-    lsh.close()
+    await lsh.close()
 
 # Multiprocessed
 def process_document(priority, offset, document, sha256sum, tqdm_func, global_tqdm):
