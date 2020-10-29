@@ -135,6 +135,7 @@ def main(working_directory, process_count):
 
                 # Operate On LSH                
                 start_offset = batch[0][0][1]
+                last_offset = batch[-1][0][1]
                 duplicate_file = os.path.join(working_directory, f"duplicates_{start_offset}.txt")
                 duplicate_file_temp = os.path.join(working_directory, f"duplicates_{start_offset}_temp.txt")
                 with open(duplicate_file_temp,"w") as fh:
@@ -149,7 +150,7 @@ def main(working_directory, process_count):
 
                 # Dump Checkpoint
                 checkpoint_temp = os.path.join(working_directory, "checkpoint_temp.pkl")
-                pickle.dump((lsh, offset), open(checkpoint_temp, "wb"))
+                pickle.dump((lsh, last_offset), open(checkpoint_temp, "wb"))
 
                 # Move stuff around safely in case of failure
                 if os.path.exists(checkpoint_file):
