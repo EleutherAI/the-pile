@@ -69,7 +69,7 @@ def process_document(lsh, priority, offset, document, sha256sum):
     minhash = generate_minhash(document)
     elapsed = time.perf_counter() - start
     print(f"Generate minhash took {elapsed:0.5f} seconds.")
-    duplicate = minhash_lsh_dedupe(minhash, priority, offset, sha256sum)
+    duplicate = minhash_lsh_dedupe(lsh, minhash, priority, offset, sha256sum)
     elapsed = time.perf_counter() - start
     print(f"Full document took {elapsed:0.5f} seconds.")
     print("")
