@@ -101,18 +101,20 @@ def main(working_directory, process_count):
     checkpoint_file = os.path.join(working_directory, "checkpoint.pkl")
     duplicates_file = os.path.join(working_directory, "duplicates.txt")
 
-    lsh = MinHashLSH(threshold=0.5, num_perm=10)
 
     with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit_scale=1) as progress, \
          open(duplicates_file, "a") as fh:
 
         if os.path.exists(checkpoint_file):
-            checkpoint_offset = pickle.load(open(checkpoint_file, "rb")) + 1
+            lsh, checkpoint_offset = pickle.load(open(checkpoint_file, "rb")) + 1
             logger.info(f"Checkpoint found, starting from offset {checkpoint_offset}")
         else:
+            lsh = MinHashLSH(threshold=0.5, num_perm=10)
             checkpoint_offset = 0
             logger.info("No checkpoint found, starting from offset 0")            
 
+        checkpoint_frequency = 10000
+        count = 0
         for doc in docs_for_dedupe():
             ((priority, offset, sha256sum), document) = doc
 
@@ -125,6 +127,11 @@ def main(working_directory, process_count):
             if result:
                 priority, offset, sha256sum = result
                 fh.write(f"{priority} {offset} {sha256sum}\n")
+
+            count += 1
+            if count == checkpoint_frequency:
+                pickle.dump((lsh, offset), open(checkpoint_file, "wb"))
+                count = 0
 
 parser = argparse.ArgumentParser(description='Dedupe from provided indexes.')
 parser.add_argument("-dir", "--working_directory", default="")

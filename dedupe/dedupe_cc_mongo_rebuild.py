@@ -45,7 +45,7 @@ async def minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum):
     start = time.perf_counter()
     results = await lsh.query(minhash)
     elapsed = time.perf_counter() - start
-    print(f"Query took took {elapsed:0.5f} seconds.")
+    print(f"Query took {elapsed:0.5f} seconds.")
 
     for json_results in results:
         found_priority, found_offset, found_sha256sum = json.loads(json_results)
