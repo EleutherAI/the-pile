@@ -3,6 +3,7 @@ import os
 import pickle
 import json
 import sys
+import asyncio
 
 import nltk
 from nltk.util import ngrams
@@ -63,7 +64,7 @@ async def minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum):
 # Multiprocessed
 def process_document(priority, offset, document, sha256sum, tqdm_func, global_tqdm):
     minhash = generate_minhash(document)
-    duplicate = minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum)
+    duplicate = asyncio.run(minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum))
     global_tqdm.update(len(document))
     return duplicate
 
