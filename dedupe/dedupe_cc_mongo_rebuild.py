@@ -53,6 +53,7 @@ async def minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum):
         if priority < found_priority:
             start = time.perf_counter()
             await lsh.close()
+            elapsed = time.perf_counter() - start
             print(f"Close took {elapsed:0.5f} seconds.")
             return (priority, offset, sha256sum)
 
@@ -60,11 +61,13 @@ async def minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum):
             if offset == found_offset: # Self          
                 start = time.perf_counter()
                 await lsh.close()
+                elapsed = time.perf_counter() - start
                 print(f"Close took {elapsed:0.5f} seconds.")
                 return None
             else:
                 start = time.perf_counter()
                 await lsh.close()
+                elapsed = time.perf_counter() - start
                 print(f"Close took {elapsed:0.5f} seconds.")
                 return (priority, offset, sha256sum)
 
@@ -85,6 +88,7 @@ async def minhash_lsh_dedupe_mongo(minhash, priority, offset, sha256sum):
 
     start = time.perf_counter()
     await lsh.close()
+    elapsed = time.perf_counter() - start    
     print(f"Close took {elapsed:0.5f} seconds.")
 
 
