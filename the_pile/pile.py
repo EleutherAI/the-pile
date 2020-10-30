@@ -269,6 +269,7 @@ if __name__ == '__main__':
     parser.add_argument('--download', action='store_true', help='force download all')
     parser.add_argument('--limit', type=str, help='limit output size')
     parser.add_argument('--using', type=str, default='pile', help='the dataset to use')
+    parser.add_argument('--chunk', type=str, help='output chunk size (for make_lmd)')
     parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
     parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
     parser.add_argument('--make_analysis', action='store_true', help='make analysis data')
@@ -304,8 +305,17 @@ if __name__ == '__main__':
 
     if args.make_lmd:
         ar = lmd.Archive('pile_output')
+
+        if args.chunk:
+            chunk_size = parse_size(args.chunk)
+
+        cursize = 0
         for doc in pile.documents():
             ar.add_data(doc)
+            cursize += len(doc)
+            if args.chunk and cursize > chunk_size:
+                cursize = 0
+                ar.commit(archive_name=args.using)
         
         ar.commit(archive_name=args.using)
 
