@@ -266,7 +266,7 @@ def docs_for_dedupe():
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('--download', action='store_true', help='force download all')
+    parser.add_argument('--force_download', action='store_true', help='force download all')
     parser.add_argument('--limit', type=str, help='limit output size')
     parser.add_argument('--using', type=str, default='pile', help='the dataset to use')
     parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
