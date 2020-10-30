@@ -68,8 +68,6 @@ datasets = [
     ),
 ]
 
-train_chars = 1200 * 1024 * 1024 * 1024
-
 datasets_new = []
 target_size = 950 * 1024 * 1024 * 1024
 for dsets, tgt_frac in datasets:
@@ -93,7 +91,7 @@ def take(n, iter):
             break
     return ret
 
-def mk_table(datasets):
+def mk_table(datasets, train_chars):
     values = []
 
     total_weight = sum([x[1] * x[0].size() for x in datasets])
@@ -267,13 +265,14 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('--force_download', action='store_true', help='force download all')
-    parser.add_argument('--limit', type=str, help='limit output size')
+    parser.add_argument('--limit', type=str, help='limit output size - this option causes pile_size tokens to be generated and then limit tokens to be sampled')
     parser.add_argument('--using', type=str, default='pile', help='the dataset to use')
     parser.add_argument('--chunk', type=str, help='output chunk size (for make_lmd)')
     parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
     parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
     parser.add_argument('--make_analysis', action='store_true', help='make analysis data')
     parser.add_argument('--profile', action='store_true', help='turn on profiler')
+    parser.add_argument('--pile_size', type=str, default='1200T', help='the size of the data read from the set')
 
     args = parser.parse_args()
     random.seed(42)
@@ -282,10 +281,10 @@ if __name__ == '__main__':
         # add CC
         datasets.append((CommonCrawlDataset(), 1.))
 
-    print(mk_table(datasets))
+    print(mk_table(datasets, parse_size(args.pile_size)))
 
     if args.using == 'pile' or args.using == 'pile_no_cc':
-        pile = ThePile(datasets, train_chars, profile=args.profile)
+        pile = ThePile(datasets, parse_size(args.pile_size), profile=args.profile)
     elif args.using == 'cc':
         pile = CommonCrawlDataset()
     elif args.using == 'owt2':
