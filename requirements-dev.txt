@@ -5,4 +5,5 @@ concurrent_iterator
 pytablewriter
 gitpython
 fasttext
+best-download
 gsutil
