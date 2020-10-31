@@ -163,7 +163,7 @@ def main(working_directory, process_count, instance_count, instance):
                 batch = []
 
         if len(batch) != 0:
-            process_batch(pool, batch, working_directory)
+            process_batch(pool, batch, progress, working_directory)
 
 parser = argparse.ArgumentParser(description='Generating minhashes for cc')
 parser.add_argument("-dir", "--working_directory", default="")
