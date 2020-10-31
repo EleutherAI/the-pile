@@ -60,7 +60,12 @@ def docs_for_dedupe():
 
 from pathlib import Path
 
-def process_batch(pool, batch):
+def process_batch(pool, batch, progress, working_directory):
+    checkpoint_file = os.path.join(working_directory, "checkpoint.pkl")
+    checkpoint_temp_file = os.path.join(working_directory, "checkpoint_temp.pkl")
+    checkpoint_old_file = os.path.join(working_directory, "checkpoint_old.pkl")    
+    transaction_lock = os.path.join(working_directory, ".transaction_lock")
+
     # Generate minhashes with pool
     tasks = []
     for ((priority, offset, sha256sum), document) in batch:
@@ -158,11 +163,11 @@ def main(working_directory, process_count, instance_count, instance):
             batch.append(doc)
 
             if len(batch) == batch_size:
-                process_batch(pool, batch)
+                process_batch(pool, batch, working_directory)
                 batch = []
 
         if len(batch) != 0:
-            process_batch(pool, batch)
+            process_batch(pool, batch, working_directory)
 
 parser = argparse.ArgumentParser(description='Generating minhashes for cc')
 parser.add_argument("-dir", "--working_directory", default="")
