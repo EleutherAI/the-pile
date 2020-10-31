@@ -132,7 +132,7 @@ def main(working_directory, process_count, instance_count, instance):
 
         os.remove(transaction_lock)        
 
-    with tqdm.tqdm(total=docs_per_instance, dynamic_ncols=True, unit="docs") as progress:
+    
         if os.path.exists(checkpoint_file):
             checkpoint_offset = pickle.load(open(checkpoint_file, "rb"))
             logger.info(f"Checkpoint found, starting from offset {checkpoint_offset:,}")            
@@ -144,27 +144,30 @@ def main(working_directory, process_count, instance_count, instance):
         batch = []
         pool = TqdmMultiProcessPool(process_count)
 
-        for doc in docs_for_dedupe():
-            ((priority, offset, sha256sum), document) = doc
+        with tqdm.tqdm(total=checkpoint_offset, dynamic_ncols=True, unit="docs") as progress:
+            for doc in docs_for_dedupe():
+                ((priority, offset, sha256sum), document) = doc
 
-            if offset < checkpoint_offset:
-                if offset >= offset_start:
+                if offset < checkpoint_offset:
                     progress.update()
-                continue
+                    continue
+                    
+                if offset == checkpoint_offset:
+                    progress.reset(total=docs_per_instance)
 
-            if not offset < next_offset:
-                break
+                if not offset < next_offset:
+                    break
 
-            batch.append(doc)
+                batch.append(doc)
 
-            if len(batch) == batch_size:
+                if len(batch) == batch_size:
+                    process_batch(pool, batch, working_directory)
+                    batch = []
+                    progress.update(batch_size)
+
+            if len(batch) != 0:
                 process_batch(pool, batch, working_directory)
-                batch = []
-                progress.update(batch_size)
-
-        if len(batch) != 0:
-            process_batch(pool, batch, working_directory)
-            progress.update(len(batch))
+                progress.update(len(batch))
 
 parser = argparse.ArgumentParser(description='Generating minhashes for cc')
 parser.add_argument("-dir", "--working_directory", default="")
