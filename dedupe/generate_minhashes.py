@@ -60,11 +60,61 @@ def docs_for_dedupe():
 
 from pathlib import Path
 
-def main(working_directory, process_count):
+def process_batch(pool, batch):
+    # Generate minhashes with pool
+    tasks = []
+    for ((priority, offset, sha256sum), document) in batch:
+        task = (generate_minhash, (document,))
+        tasks.append(task)
+
+    on_done = lambda _ : None
+    on_error = on_done
+    minhashes = pool.map(progress, tasks, on_error, on_done)
+
+    # Commence Transaction
+    previous_signal_int = signal.signal(SIGINT, SIG_IGN)
+    Path(transaction_lock).touch()
+    start_offset = batch[0][0][1]
+    last_offset = batch[-1][0][1]
+
+    # Dump Minhashes
+    minhashes_and_meta = []               
+
+    for i, minhash in enumerate(minhashes):
+        ((priority, offset, sha256sum), document) = batch[i]
+        minhashes_and_meta.append((priority, offset, sha256sum, minhash))
+        progress.update(len(document))
+
+    minhashes_file = os.path.join(working_directory, f"minhashes_{start_offset}.pkl")
+    pickle.dump(minhashes_and_meta, open(minhashes_file, "wb"))
+
+    # Dump Checkpoint                
+    pickle.dump(last_offset, open(checkpoint_temp_file, "wb"))
+
+    # Move stuff around safely in case of failure
+    if os.path.exists(checkpoint_file):
+        os.rename(checkpoint_file, checkpoint_old_file)
+    os.rename(checkpoint_temp_file, checkpoint_file)
+
+    # Transaction Finished
+    os.remove(transaction_lock)
+    signal.signal(SIGINT, previous_signal_int)    
+
+def main(working_directory, process_count, instance_count, instance):
 
     nltk.download('punkt')
 
     total_file_size = CommonCrawlDataset().size()
+    document_count = CommonCrawlDataset().num_docs()
+    docs_per_instance = int(document_count / instance_count)
+    offset_start = docs_per_instance * instance
+    next_offset = offset_start + docs_per_instance
+    logger.info(f"Number of instances: {instance_count}")
+    logger.info(f"Docs per instance: {docs_per_instance}")
+    logger.info(f"Currently running instance: {instance}")
+    logger.info(f"Offset Start: {offset_start}")
+    logger.info(f"Next Offset Start: {next_offset}")
+
     checkpoint_file = os.path.join(working_directory, "checkpoint.pkl")
     checkpoint_temp_file = os.path.join(working_directory, "checkpoint_temp.pkl")
     checkpoint_old_file = os.path.join(working_directory, "checkpoint_old.pkl")    
@@ -87,8 +137,8 @@ def main(working_directory, process_count):
             checkpoint_offset = pickle.load(open(checkpoint_file, "rb"))
             logger.info(f"Checkpoint found, starting from offset {checkpoint_offset}")            
         else:
-            logger.info("No checkpoint found, starting from offset 0")
-            checkpoint_offset = 0
+            logger.info(f"No checkpoint found, starting from offset {offset_start}")
+            checkpoint_offset = offset_start
 
         batch_size = 1000
         batch = []
@@ -101,56 +151,27 @@ def main(working_directory, process_count):
                 progress.update(len(document))
                 continue
 
+            if not offset < next_offset:
+                break
+
             batch.append(doc)
 
             if len(batch) == batch_size:
-                # Generate minhashes with pool
-                tasks = []
-                for ((priority, offset, sha256sum), document) in batch:
-                    task = (generate_minhash, (document,))
-                    tasks.append(task)
-
-                on_done = lambda _ : None
-                on_error = on_done
-                minhashes = pool.map(progress, tasks, on_error, on_done)
-
-                # Commence Transaction
-                previous_signal_int = signal.signal(SIGINT, SIG_IGN)
-                Path(transaction_lock).touch()
-                start_offset = batch[0][0][1]
-                last_offset = batch[-1][0][1]
-
-                # Dump Minhashes
-                minhashes_and_meta = []               
-
-                for i, minhash in enumerate(minhashes):
-                    ((priority, offset, sha256sum), document) = batch[i]
-                    minhashes_and_meta.append((priority, offset, sha256sum, minhash))
-                    progress.update(len(document))
-
-                minhashes_file = os.path.join(working_directory, f"minhashes_{start_offset}.pkl")
-                pickle.dump(minhashes_and_meta, open(minhashes_file, "wb"))
-
-                # Dump Checkpoint                
-                pickle.dump(last_offset, open(checkpoint_temp_file, "wb"))
-
-                # Move stuff around safely in case of failure
-                if os.path.exists(checkpoint_file):
-                    os.rename(checkpoint_file, checkpoint_old_file)
-                os.rename(checkpoint_temp_file, checkpoint_file)
-
-                # Transaction Finished
-                os.remove(transaction_lock)
-                signal.signal(SIGINT, previous_signal_int)
+                process_batch(pool, batch)
                 batch = []
+
+        if len(batch) != 0:
+            process_batch(pool, batch)
 
 parser = argparse.ArgumentParser(description='Generating minhashes for cc')
 parser.add_argument("-dir", "--working_directory", default="")
 parser.add_argument("-procs", "--process_count", type=int, default=4)
+parser.add_argument("--instance_count", type=int, default=1)
+parser.add_argument("--instance", type=int, default=0)
 
 if __name__ == '__main__':
     logfile_path = "dedupe_cc.log"
     setup_logger_tqdm(logfile_path)
 
     args = parser.parse_args()
-    main(args.working_directory, args.process_count)
+    main(args.working_directory, args.process_count, args.instance_count, args.instance)
