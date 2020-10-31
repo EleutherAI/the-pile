@@ -56,7 +56,7 @@ def docs_for_dedupe():
 
 from pathlib import Path
 
-def process_batch(pool, batch, progress, working_directory):
+def process_batch(pool, batch, working_directory):
     checkpoint_file = os.path.join(working_directory, "checkpoint.pkl")
     checkpoint_temp_file = os.path.join(working_directory, "checkpoint_temp.pkl")
     checkpoint_old_file = os.path.join(working_directory, "checkpoint_old.pkl")    
@@ -70,7 +70,7 @@ def process_batch(pool, batch, progress, working_directory):
 
     on_done = lambda _ : None
     on_error = on_done
-    minhashes = pool.map(progress, tasks, on_error, on_done)
+    minhashes = pool.map(None, tasks, on_error, on_done)
 
     # Commence Transaction
     previous_signal_int = signal.signal(SIGINT, SIG_IGN)
@@ -84,7 +84,6 @@ def process_batch(pool, batch, progress, working_directory):
     for i, minhash in enumerate(minhashes):
         ((priority, offset, sha256sum), document) = batch[i]
         minhashes_and_meta.append((priority, offset, sha256sum, minhash))
-        progress.update(len(document))
 
     minhashes_file = os.path.join(working_directory, f"minhashes_{start_offset}.pkl")
     pickle.dump(minhashes_and_meta, open(minhashes_file, "wb"))
@@ -105,7 +104,6 @@ def main(working_directory, process_count, instance_count, instance):
 
     nltk.download('punkt')
 
-    total_file_size = CommonCrawlDataset().size()
     document_count = CommonCrawlDataset().num_docs()
     docs_per_instance = int(document_count / instance_count)
     offset_start = docs_per_instance * instance
@@ -134,7 +132,7 @@ def main(working_directory, process_count, instance_count, instance):
 
         os.remove(transaction_lock)        
 
-    with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit="byte", unit_scale=1) as progress:
+    with tqdm.tqdm(total=docs_per_instance, dynamic_ncols=True, unit="docs") as progress:
         if os.path.exists(checkpoint_file):
             checkpoint_offset = pickle.load(open(checkpoint_file, "rb"))
             logger.info(f"Checkpoint found, starting from offset {checkpoint_offset:,}")            
@@ -142,7 +140,7 @@ def main(working_directory, process_count, instance_count, instance):
             logger.info(f"No checkpoint found, starting from offset {offset_start:,}")
             checkpoint_offset = offset_start
 
-        batch_size = 1000
+        batch_size = 1000 # Used elsewhere - careful!
         batch = []
         pool = TqdmMultiProcessPool(process_count)
 
@@ -150,7 +148,6 @@ def main(working_directory, process_count, instance_count, instance):
             ((priority, offset, sha256sum), document) = doc
 
             if offset < checkpoint_offset:
-                progress.update(len(document))
                 continue
 
             if not offset < next_offset:
@@ -159,11 +156,13 @@ def main(working_directory, process_count, instance_count, instance):
             batch.append(doc)
 
             if len(batch) == batch_size:
-                process_batch(pool, batch, progress, working_directory)
+                process_batch(pool, batch, working_directory)
                 batch = []
+                progress.update(batch_size)
 
         if len(batch) != 0:
-            process_batch(pool, batch, progress, working_directory)
+            process_batch(pool, batch, working_directory)
+            progress.update(len(batch))
 
 parser = argparse.ArgumentParser(description='Generating minhashes for cc')
 parser.add_argument("-dir", "--working_directory", default="")

@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 from pathlib import Path
 
 def process_batch(pool, batch, progress, working_directory):
+    pass
     # checkpoint_file = os.path.join(working_directory, "checkpoint.pkl")
     # checkpoint_temp_file = os.path.join(working_directory, "checkpoint_temp.pkl")
     # checkpoint_old_file = os.path.join(working_directory, "checkpoint_old.pkl")    
@@ -80,19 +81,41 @@ def process_batch(pool, batch, progress, working_directory):
     # os.remove(transaction_lock)
     # signal.signal(SIGINT, previous_signal_int)    
 
+def load_minhashes(working_directory):
+    minhashes_files = []
+    document_count = CommonCrawlDataset().num_docs()
+    batch_size = 1000 # Used elsewhere - careful!
+    offset = 0
+    total_file_size = 0
+    while offset < document_count:
+        minhashes_file = os.path.join(working_directory, f"minhashes_{offset}.pkl")
+        offset += batch_size
+        total_file_size += (os.path.getsize(minhashes_file))
 
+    minhashes = []
+    with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit="byte", unit_scale=1) as progress:
+        for minhashes_file in minhashes_files:
+            minhashes_temp = pickle.load(open(minhashes_file, "rb"))
+            for minhash in minhashes_temp:
+                minhashes.append(minhash)
+            progress.update(os.path.getsize(minhashes_file))
+
+    return minhashes
 
 def main(working_directory, process_count, instance_count, instance):
 
     # Load All Pairs
-    pairs_file = os.path.join(working_directory, "all_pairs.pkl")
+    pairs_file = os.path.join(working_directory, "all_pairs.pkl")    
     if not os.path.exists(pairs_file):
         logger.info("Please generate pairs first with generate_all_pairs.py")
         sys.exit(0)
 
+    logger.info(f"Loading pairs file {pairs_file}")
     pairs = pickle.load(open(pairs_file, "rb"))
 
     # Load All Minhashes
+    logger.info(f"Loading minhashes {pairs_file}")
+    minhashes = load_minhashes(working_directory)
 
     total_file_size = CommonCrawlDataset().size()
     document_count = CommonCrawlDataset().num_docs()
