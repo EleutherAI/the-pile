@@ -74,7 +74,8 @@ def main(working_directory, process_count):
         logger.info("Program crashed during transaction, fixing files...")
         # Just re-do from last safe checkpoint (overwrite minhashes)
         if os.path.exists(checkpoint_temp_file):
-            os.remove(checkpoint_old_file)
+            if os.path.exists(checkpoint_old_file):
+                os.rename(checkpoint_old_file, checkpoint_file)
             os.remove(checkpoint_temp_file)
         else:
             pass
