@@ -8,7 +8,6 @@ import logging
 from the_pile.logger import setup_logger_tqdm
 logger = logging.getLogger(__name__)
 
-
 def main(working_directory):
     document_count = CommonCrawlDataset().num_docs()
     logger.info(f"Document count: {document_count:,}")
@@ -23,7 +22,7 @@ def main(working_directory):
     pairs_file = os.path.join(working_directory, "all_pairs.pkl")
     pickle.dump(pairs, open(pairs_file, "wb"))
 
-parser = argparse.ArgumentParser(description='Generating minhashes for cc')
+parser = argparse.ArgumentParser(description='Generating all pairs for cc')
 parser.add_argument("-dir", "--working_directory", default="")
 
 if __name__ == '__main__':
