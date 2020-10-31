@@ -130,47 +130,46 @@ def main(working_directory, process_count, instance_count, instance):
         else:
             pass
 
-        os.remove(transaction_lock)        
-
+        os.remove(transaction_lock)
     
-        if os.path.exists(checkpoint_file):
-            checkpoint_offset = pickle.load(open(checkpoint_file, "rb"))
-            logger.info(f"Checkpoint found, starting from offset {checkpoint_offset:,}")            
-        else:
-            logger.info(f"No checkpoint found, starting from offset {offset_start:,}")
-            checkpoint_offset = offset_start
+    if os.path.exists(checkpoint_file):
+        checkpoint_offset = pickle.load(open(checkpoint_file, "rb"))
+        logger.info(f"Checkpoint found, starting from offset {checkpoint_offset:,}")            
+    else:
+        logger.info(f"No checkpoint found, starting from offset {offset_start:,}")
+        checkpoint_offset = offset_start
 
-        batch_size = 1000 # Used elsewhere - careful!
-        batch = []
-        pool = TqdmMultiProcessPool(process_count)
+    batch_size = 1000 # Used elsewhere - careful!
+    batch = []
+    pool = TqdmMultiProcessPool(process_count)
 
-        if checkpoint_offset != 0:
-            logger.info(f"Iterating too offset {checkpoint_offset}")
-            
-        with tqdm.tqdm(total=checkpoint_offset, dynamic_ncols=True, unit="docs") as progress:
-            for doc in docs_for_dedupe():
-                ((priority, offset, sha256sum), document) = doc
+    if checkpoint_offset != 0:
+        logger.info(f"Iterating too offset {checkpoint_offset}")
 
-                if offset < checkpoint_offset:
-                    progress.update()
-                    continue
+    with tqdm.tqdm(total=checkpoint_offset, dynamic_ncols=True, unit="docs") as progress:
+        for doc in docs_for_dedupe():
+            ((priority, offset, sha256sum), document) = doc
 
-                if offset == checkpoint_offset:
-                    progress.reset(total=docs_per_instance)
+            if offset < checkpoint_offset:
+                progress.update()
+                continue
 
-                if not offset < next_offset:
-                    break
+            if offset == checkpoint_offset:
+                progress.reset(total=docs_per_instance)
 
-                batch.append(doc)
+            if not offset < next_offset:
+                break
 
-                if len(batch) == batch_size:
-                    process_batch(pool, batch, working_directory)
-                    batch = []
-                    progress.update(batch_size)
+            batch.append(doc)
 
-            if len(batch) != 0:
+            if len(batch) == batch_size:
                 process_batch(pool, batch, working_directory)
-                progress.update(len(batch))
+                batch = []
+                progress.update(batch_size)
+
+        if len(batch) != 0:
+            process_batch(pool, batch, working_directory)
+            progress.update(len(batch))
 
 parser = argparse.ArgumentParser(description='Generating minhashes for cc')
 parser.add_argument("-dir", "--working_directory", default="")
