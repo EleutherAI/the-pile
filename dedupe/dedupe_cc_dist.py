@@ -117,14 +117,13 @@ def main(working_directory, process_count, instance_count, instance):
     logger.info(f"Loading minhashes {pairs_file}")
     minhashes = load_minhashes(working_directory)
 
-    total_file_size = CommonCrawlDataset().size()
-    document_count = CommonCrawlDataset().num_docs()
-    docs_per_instance = int(document_count / instance_count)
-    offset_start = docs_per_instance * instance
-    next_offset = offset_start + docs_per_instance
-    logger.info(f"Total documents in dataset: {document_count:,}")
+    pair_count = len(minhashes)
+    pairs_per_instance = int(pair_count / instance_count)
+    offset_start = pairs_per_instance * instance
+    next_offset = offset_start + pairs_per_instance
+    logger.info(f"Total pairs: {pair_count:,}")
     logger.info(f"Number of instances: {instance_count}")
-    logger.info(f"Docs per instance: {docs_per_instance:,}")
+    logger.info(f"Pairs per instance: {pairs_per_instance:,}")
     logger.info(f"Currently running instance: {instance}")
     logger.info(f"Offset Start: {offset_start:,}")
     logger.info(f"Next Offset Start: {next_offset:,}")
@@ -146,7 +145,7 @@ def main(working_directory, process_count, instance_count, instance):
 
         os.remove(transaction_lock)        
 
-    with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit="byte", unit_scale=1) as progress:
+    with tqdm.tqdm(total=pairs_per_instance, dynamic_ncols=True, unit="pairs") as progress:
         if os.path.exists(checkpoint_file):
             checkpoint_offset = pickle.load(open(checkpoint_file, "rb"))
             logger.info(f"Checkpoint found, starting from offset {checkpoint_offset:,}")            
@@ -154,21 +153,19 @@ def main(working_directory, process_count, instance_count, instance):
             logger.info(f"No checkpoint found, starting from offset {offset_start:,}")
             checkpoint_offset = offset_start
 
-        batch_size = 1000
+        batch_size = 100000
         batch = []
         pool = TqdmMultiProcessPool(process_count)
 
-        for doc in docs_for_dedupe():
-            ((priority, offset, sha256sum), document) = doc
-
+        for offset, pair in enumerate(pairs):
             if offset < checkpoint_offset:
-                progress.update(len(document))
+                progress.update()
                 continue
 
             if not offset < next_offset:
                 break
 
-            batch.append(doc)
+            batch.append(pair)
 
             if len(batch) == batch_size:
                 process_batch(pool, batch, working_directory)
