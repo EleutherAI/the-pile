@@ -144,7 +144,7 @@ def main(working_directory, process_count, instance_count, instance):
     pool = TqdmMultiProcessPool(process_count)
 
     if checkpoint_offset != 0:
-        logger.info(f"Iterating too offset {checkpoint_offset}")
+        logger.info(f"Iterating to offset {checkpoint_offset}")
 
     with tqdm.tqdm(total=checkpoint_offset, dynamic_ncols=True, unit="docs") as progress:
         for doc in docs_for_dedupe():
