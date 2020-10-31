@@ -1,12 +1,8 @@
 import argparse
 import os
 import pickle
-import json
-import sys
-import time
 import signal
 from signal import SIGINT, SIG_IGN
-import multiprocessing
 
 import nltk
 from nltk.util import ngrams
