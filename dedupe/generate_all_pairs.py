@@ -20,6 +20,7 @@ def main(working_directory):
     logger.info(f"Generated pairs: {len(pairs):,}")
 
     pairs_file = os.path.join(working_directory, "all_pairs.pkl")
+    logger.info(f"Dumping pairs to file {pairs_file}")
     pickle.dump(pairs, open(pairs_file, "wb"))
 
 parser = argparse.ArgumentParser(description='Generating all pairs for cc')

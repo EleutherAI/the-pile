@@ -159,7 +159,7 @@ def main(working_directory, process_count, instance_count, instance):
             batch.append(doc)
 
             if len(batch) == batch_size:
-                process_batch(pool, batch, working_directory)
+                process_batch(pool, batch, progress, working_directory)
                 batch = []
 
         if len(batch) != 0:
