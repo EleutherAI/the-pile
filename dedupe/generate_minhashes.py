@@ -148,6 +148,7 @@ def main(working_directory, process_count, instance_count, instance):
             ((priority, offset, sha256sum), document) = doc
 
             if offset < checkpoint_offset:
+                progress.update()
                 continue
 
             if not offset < next_offset:
