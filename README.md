@@ -73,3 +73,4 @@ To claim responsibility for implementing an unclaimed dataset, leave a comment o
 
 To raise an issue that is not proposing a new dataset, open an issue with the tag [![Feature Request](https://img.shields.io/github/labels/EleutherAI/The-Pile/Feature%20Request)](https://github.com/EleutherAI/The-Pile/labels/Feature%20Request) or [![Bug](https://img.shields.io/github/labels/EleutherAI/The-Pile/Bug)](https://github.com/EleutherAI/The-Pile/labels/Bug) as appropriate.
 
+**In preparation for the initial release, we are no longer accepting additions to the *master* branch. If you would like to contribute a dataset, please submit the pull request to the *Version2* branch.**
