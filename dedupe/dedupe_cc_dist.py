@@ -35,51 +35,55 @@ logger = logging.getLogger(__name__)
 
 from pathlib import Path
 
-def process_batch(pool, batch, progress, working_directory):
-    pass
-    # checkpoint_file = os.path.join(working_directory, "checkpoint.pkl")
-    # checkpoint_temp_file = os.path.join(working_directory, "checkpoint_temp.pkl")
-    # checkpoint_old_file = os.path.join(working_directory, "checkpoint_old.pkl")    
-    # transaction_lock = os.path.join(working_directory, ".transaction_lock")
+# Multiprocessing
+def compare_pair(m1, m2, tqdm_func, global_tqdm):
+    return m1.jaccard(m2) > 0.5
 
-    # # Generate minhashes with pool
-    # tasks = []
-    # for ((priority, offset, sha256sum), document) in batch:
-    #     task = (generate_minhash, (document,))
-    #     tasks.append(task)
+def process_batch(pool, batch, start_offset, working_directory): 
+    checkpoint_file = os.path.join(working_directory, "checkpoint.pkl")
+    checkpoint_temp_file = os.path.join(working_directory, "checkpoint_temp.pkl")
+    checkpoint_old_file = os.path.join(working_directory, "checkpoint_old.pkl")    
+    transaction_lock = os.path.join(working_directory, ".transaction_lock")
 
-    # on_done = lambda _ : None
-    # on_error = on_done
-    # minhashes = pool.map(progress, tasks, on_error, on_done)
+    # Generate minhashes with pool
+    tasks = []
+    for (pair, m1, m2) in batch:
+        task = (compare_pair, (pair, m1, m2))
+        tasks.append(task)
 
-    # # Commence Transaction
-    # previous_signal_int = signal.signal(SIGINT, SIG_IGN)
-    # Path(transaction_lock).touch()
-    # start_offset = batch[0][0][1]
-    # last_offset = batch[-1][0][1]
+    on_done = lambda _ : None
+    on_error = lambda _ : None
+    results = pool.map(None, tasks, on_error, on_done)
 
-    # # Dump Minhashes
-    # minhashes_and_meta = []               
+    # Commence Transaction
+    previous_signal_int = signal.signal(SIGINT, SIG_IGN)
+    Path(transaction_lock).touch()
+    last_offset = start_offset + len(batch)
 
-    # for i, minhash in enumerate(minhashes):
-    #     ((priority, offset, sha256sum), document) = batch[i]
-    #     minhashes_and_meta.append((priority, offset, sha256sum, minhash))
-    #     progress.update(len(document))
+    # Dump Duplicates
+    duplicates = []
 
-    # minhashes_file = os.path.join(working_directory, f"minhashes_{start_offset}.pkl")
-    # pickle.dump(minhashes_and_meta, open(minhashes_file, "wb"))
+    for i, is_duplicate in enumerate(results):
+        if not is_duplicate:
+            continue
 
-    # # Dump Checkpoint                
-    # pickle.dump(last_offset, open(checkpoint_temp_file, "wb"))
+        pair, _, _ = batch[i]
+        duplicates.append(pair)
 
-    # # Move stuff around safely in case of failure
-    # if os.path.exists(checkpoint_file):
-    #     os.rename(checkpoint_file, checkpoint_old_file)
-    # os.rename(checkpoint_temp_file, checkpoint_file)
+    duplicates_file = os.path.join(working_directory, f"duplicates_{start_offset}.pkl")
+    pickle.dump(duplicates, open(duplicates_file, "wb"))
 
-    # # Transaction Finished
-    # os.remove(transaction_lock)
-    # signal.signal(SIGINT, previous_signal_int)    
+    # Dump Checkpoint                
+    pickle.dump(last_offset, open(checkpoint_temp_file, "wb"))
+
+    # Move stuff around safely in case of failure
+    if os.path.exists(checkpoint_file):
+        os.rename(checkpoint_file, checkpoint_old_file)
+    os.rename(checkpoint_temp_file, checkpoint_file)
+
+    # Transaction Finished
+    os.remove(transaction_lock)
+    signal.signal(SIGINT, previous_signal_int)    
 
 def load_minhashes(working_directory):
     minhashes_files = []
@@ -114,10 +118,10 @@ def main(working_directory, process_count, instance_count, instance):
     pairs = pickle.load(open(pairs_file, "rb"))
 
     # Load All Minhashes
-    logger.info(f"Loading minhashes {pairs_file}")
+    logger.info(f"Loading minhashes")
     minhashes = load_minhashes(working_directory)
 
-    pair_count = len(minhashes)
+    pair_count = len(pairs)
     pairs_per_instance = int(pair_count / instance_count)
     offset_start = pairs_per_instance * instance
     next_offset = offset_start + pairs_per_instance
@@ -145,27 +149,31 @@ def main(working_directory, process_count, instance_count, instance):
 
         os.remove(transaction_lock)        
 
-    with tqdm.tqdm(total=pairs_per_instance, dynamic_ncols=True, unit="pairs") as progress:
-        if os.path.exists(checkpoint_file):
-            checkpoint_offset = pickle.load(open(checkpoint_file, "rb"))
-            logger.info(f"Checkpoint found, starting from offset {checkpoint_offset:,}")            
-        else:
-            logger.info(f"No checkpoint found, starting from offset {offset_start:,}")
-            checkpoint_offset = offset_start
+    if os.path.exists(checkpoint_file):
+        checkpoint_offset = pickle.load(open(checkpoint_file, "rb"))
+        logger.info(f"Checkpoint found, starting from offset {checkpoint_offset:,}")            
+    else:
+        logger.info(f"No checkpoint found, starting from offset {offset_start:,}")
+        checkpoint_offset = offset_start
 
-        batch_size = 100000
-        batch = []
-        pool = TqdmMultiProcessPool(process_count)
+    batch_size = 100000 # Pair batch size, not minhash batch size
+    batch = []
+    pool = TqdmMultiProcessPool(process_count)
 
+    with tqdm.tqdm(total=checkpoint_offset, dynamic_ncols=True, unit="pairs") as progress:
         for offset, pair in enumerate(pairs):
             if offset < checkpoint_offset:
                 progress.update()
                 continue
 
+            if offset == checkpoint_offset:
+                progress.reset(total=pairs_per_instance)
+
             if not offset < next_offset:
                 break
 
-            batch.append(pair)
+            index1, index2 = pair
+            batch.append(pair, minhashes[index1], minhashes[index2])
 
             if len(batch) == batch_size:
                 process_batch(pool, batch, working_directory)
@@ -174,7 +182,7 @@ def main(working_directory, process_count, instance_count, instance):
         if len(batch) != 0:
             process_batch(pool, batch, working_directory)
 
-parser = argparse.ArgumentParser(description='Generating minhashes for cc')
+parser = argparse.ArgumentParser(description='Distributed dedupe using minhash.')
 parser.add_argument("-dir", "--working_directory", default="")
 parser.add_argument("-procs", "--process_count", type=int, default=4)
 parser.add_argument("--instance_count", type=int, default=1)
