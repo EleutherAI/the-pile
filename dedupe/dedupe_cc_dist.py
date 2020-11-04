@@ -86,42 +86,57 @@ def process_batch(pool, batch, start_offset, working_directory):
     signal.signal(SIGINT, previous_signal_int)    
 
 def load_minhashes(working_directory):
-    minhashes_files = []
     document_count = CommonCrawlDataset().num_docs()
-    batch_size = 1000 # Used elsewhere - careful!
-    offset = 0
-    total_file_size = 0
-    while offset < document_count:
-        minhashes_file = os.path.join(working_directory, f"minhashes_{offset}.pkl")
-        offset += batch_size
-        total_file_size += (os.path.getsize(minhashes_file))
 
-    minhashes = []
+    files = glob.glob(os.path.join(working_directory, "minhashes*"))
+
+    total_file_size = 0
+    for file in files:
+        total_file_size += (os.path.getsize(file))
+
+    count = 0
+    minhashes = [None] * document_count
+    logger.info(f"minhash array length {len(minhashes):,}")
     with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit="byte", unit_scale=1) as progress:
-        for minhashes_file in minhashes_files:
-            minhashes_temp = pickle.load(open(minhashes_file, "rb"))
-            for minhash in minhashes_temp:
-                minhashes.append(minhash)
-            progress.update(os.path.getsize(minhashes_file))
+        for file in files:
+            document_data = pickle.load(open(file, "rb"))
+            for document in document_data:
+                (priority, offset, sha256sum, minhash) = document
+                if not minhashes[offset]:
+                    count += 1
+
+                minhashes[offset] = document
+
+            progress.update(os.path.getsize(file))
+
+    difference = document_count - count
+    logger.info(f"Expected document count: {document_count:,}")
+    logger.info(f"Loaded documents with minhashes count: {count:,}")
+    logger.info(f"Difference {difference:,}")
 
     return minhashes
 
-def main(working_directory, process_count, instance_count, instance):
+def get_pair_count(working_directory):
+    pair_count_file = os.path.join(working_directory, "pair_count.pkl")
+    if os.path.exists(pair_count_file):
+        return pickle.load(open(pair_count_file, "rb"))
 
-    # Load All Pairs
-    pairs_file = os.path.join(working_directory, "all_pairs.pkl")    
-    if not os.path.exists(pairs_file):
-        logger.info("Please generate pairs first with generate_all_pairs.py")
-        sys.exit(0)
+    document_count = CommonCrawlDataset().num_docs()
+    pair_count = 0
+    for i in range(document_count):
+        for j in range(i+1, document_count):
+            pair_count += 1
 
-    logger.info(f"Loading pairs file {pairs_file}")
-    pairs = pickle.load(open(pairs_file, "rb"))
+    pickle.dump(pair_count, open(pair_count_file, "wb"))
+    return pair_count
 
+def main(working_directory, process_count, instance_count, instance):  
     # Load All Minhashes
     logger.info(f"Loading minhashes")
     minhashes = load_minhashes(working_directory)
 
-    pair_count = len(pairs)
+    # Batching
+    pair_count = get_pair_count(working_directory)
     pairs_per_instance = int(pair_count / instance_count)
     offset_start = pairs_per_instance * instance
     next_offset = offset_start + pairs_per_instance
@@ -161,27 +176,33 @@ def main(working_directory, process_count, instance_count, instance):
     pool = TqdmMultiProcessPool(process_count)
 
     with tqdm.tqdm(total=checkpoint_offset, dynamic_ncols=True, unit="pairs") as progress:
-        for offset, pair in enumerate(pairs):
-            if offset < checkpoint_offset:
-                progress.update()
-                continue
+        offset = -1
+        document_count = CommonCrawlDataset().num_docs()
+        for i in range(document_count):
+            for j in range(i+1, document_count):
+                offset += 1
 
-            if offset == checkpoint_offset:
-                progress.reset(total=pairs_per_instance)
-                progress.update(checkpoint_offset - offset_start)
+                if offset < checkpoint_offset:
+                    progress.update()
+                    continue
 
-            if not offset < next_offset:
-                break
+                if offset == checkpoint_offset:
+                    progress.reset(total=pairs_per_instance)
+                    progress.update(checkpoint_offset - offset_start)
 
-            index1, index2 = pair
-            batch.append(pair, minhashes[index1], minhashes[index2])
+                if not offset < next_offset:
+                    break
 
-            if len(batch) == batch_size:
+                batch.append((i,j), minhashes[i], minhashes[j])
+
+                if len(batch) == batch_size:
+                    process_batch(pool, batch, working_directory)
+                    batch = []
+                    progress.update(batch_size)
+
+            if len(batch) != 0:
                 process_batch(pool, batch, working_directory)
-                batch = []
-
-        if len(batch) != 0:
-            process_batch(pool, batch, working_directory)
+                progress.update(len(batch))
 
 parser = argparse.ArgumentParser(description='Distributed dedupe using minhash.')
 parser.add_argument("-dir", "--working_directory", default="")
