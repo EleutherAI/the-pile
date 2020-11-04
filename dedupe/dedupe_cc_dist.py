@@ -150,7 +150,7 @@ def main(working_directory, process_count, instance_count, instance):
         os.remove(transaction_lock)        
 
     if os.path.exists(checkpoint_file):
-        checkpoint_offset = pickle.load(open(checkpoint_file, "rb"))
+        checkpoint_offset = pickle.load(open(checkpoint_file, "rb")) + 1 
         logger.info(f"Checkpoint found, starting from offset {checkpoint_offset:,}")            
     else:
         logger.info(f"No checkpoint found, starting from offset {offset_start:,}")
@@ -168,6 +168,7 @@ def main(working_directory, process_count, instance_count, instance):
 
             if offset == checkpoint_offset:
                 progress.reset(total=pairs_per_instance)
+                progress.update(checkpoint_offset - offset_start)
 
             if not offset < next_offset:
                 break
@@ -189,7 +190,7 @@ parser.add_argument("--instance_count", type=int, default=1)
 parser.add_argument("--instance", type=int, default=0)
 
 if __name__ == '__main__':
-    logfile_path = "dedupe_cc.log"
+    logfile_path = "dedupe_cc_dist.log"
     setup_logger_tqdm(logfile_path)
 
     args = parser.parse_args()
