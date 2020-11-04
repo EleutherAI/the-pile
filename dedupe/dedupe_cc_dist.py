@@ -122,6 +122,7 @@ def get_pair_count(working_directory):
     if os.path.exists(pair_count_file):
         return pickle.load(open(pair_count_file, "rb"))
 
+    logger.info(f"Counting all pairs...")
     document_count = CommonCrawlDataset().num_docs()
     pair_count = 0
     for i in range(document_count):
@@ -133,7 +134,7 @@ def get_pair_count(working_directory):
 
 def main(working_directory, process_count, instance_count, instance):  
     # Load All Minhashes
-    logger.info(f"Loading minhashes")
+    logger.info(f"Loading minhashes...")
     minhashes = load_minhashes(working_directory)
 
     # Batching
