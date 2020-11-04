@@ -58,7 +58,9 @@ def load_minhashes(working_directory):
     return minhashes    
 
 def main(working_directory):
+    lol = input("Ding Ding")    
     minhashes = load_minhashes(working_directory)
+    lol = input("Ding Ding")
 
 parser = argparse.ArgumentParser(description='Fix minhashes')
 parser.add_argument("-dir", "--working_directory", default="")
