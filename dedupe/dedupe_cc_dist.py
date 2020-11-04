@@ -4,6 +4,7 @@ import pickle
 import signal
 from signal import SIGINT, SIG_IGN
 import sys
+import glob
 
 import nltk
 from nltk.util import ngrams
