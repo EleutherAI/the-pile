@@ -36,18 +36,17 @@ def load_minhashes(working_directory):
         total_file_size += (os.path.getsize(file))
 
     count = 0
-    minhashes = [None] * 10
+    minhashes = [None] * document_count
     logger.info(f"minhash array length {len(minhashes):,}")
     with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit="byte", unit_scale=1) as progress:
         for file in files:
-            minhashes_temp = pickle.load(open(file, "rb"))
-            for minhash in minhashes_temp:
-                (priority, offset, sha256sum, minhash) = minhash
-                try:
-                    if not minhashes[offset]:
-                        count += 1
-                except:
-                    logger.info(f"fucked offset: {offset:,}")
+            document_data = pickle.load(open(file, "rb"))
+            for document in document_data:
+                (priority, offset, sha256sum, minhash) = document
+                if not minhashes[offset]:
+                    count += 1
+
+                minhashes[offset] = document
 
             progress.update(os.path.getsize(file))
 
