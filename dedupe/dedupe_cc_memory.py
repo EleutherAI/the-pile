@@ -235,10 +235,10 @@ def fix_minhashes(working_directory):
         minhashes_file = os.path.join(fixed_directory, f"minhashes_{start_offset}.pkl")
         pickle.dump(batch, open(minhashes_file, "wb"))
 
-def get_lsh(working_directory):
-    logger.info("Loading lsh from pickle...")
+def get_lsh(working_directory):    
     lsh_file_path = os.path.join(working_directory, "lsh.pkl")
     if os.path.exists(lsh_file_path):
+        logger.info("Loading lsh from pickle...")
         lsh = pickle.load(open(lsh_file_path, "rb"))
         return lsh
 
@@ -251,6 +251,8 @@ def get_lsh(working_directory):
         progress.update()
     progress.close()
 
+    logger.info("Dumping LSH")
+    pickle.dump(lsh, open(lsh_file_path, "wb"))
     return lsh
 
 def main(working_directory, process_count, instance_count, instance):  
@@ -275,6 +277,7 @@ def main(working_directory, process_count, instance_count, instance):
     logger.info(f"Document count: {document_count:,}")
     logger.info(f"File count: {len(files):,}")
 
+    start_offset = 0
     for file in tqdm.tqdm(files, dynamic_ncols=True, unit="batches"):
         minhashes = pickle.load(open(file, "rb"))
 
@@ -287,8 +290,9 @@ def main(working_directory, process_count, instance_count, instance):
                     lsh.remove((priority, offset))
                     break
 
-        duplicates_file = file.replace("minhashes", "duplicates")
+        duplicates_file = os.path.join(fixed_directory, f"minhashes_{start_offset}.pkl")
         pickle.dump(duplicates, open(duplicates_file, "wb"))
+        start_offset += len(minhashes)
 
     # # Batching
     # document_count = CommonCrawlDataset().num_docs()
