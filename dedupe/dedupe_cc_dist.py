@@ -125,9 +125,8 @@ def get_pair_count(working_directory):
     logger.info(f"Counting all pairs...")
     document_count = CommonCrawlDataset().num_docs()
     pair_count = 0
-    for i in range(document_count):
-        for j in range(i+1, document_count):
-            pair_count += 1
+    for i in tqdm.tqdm(range(document_count)):
+        pair_count += document_count - (i + 1)
 
     pickle.dump(pair_count, open(pair_count_file, "wb"))
     return pair_count
