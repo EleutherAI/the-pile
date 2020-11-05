@@ -47,6 +47,8 @@ def process_batch(pool, batch, offset_start, working_directory):
     checkpoint_old_file = os.path.join(working_directory, "dedupe_checkpoint_old.pkl")
     transaction_lock = os.path.join(working_directory, ".transaction_lock_dedupe")
 
+batch.append(((i,j), minhashes[i], minhashes[j]))
+
     # Generate minhashes with pool
     tasks = []
     for (pair, m1, m2) in batch:
@@ -212,7 +214,7 @@ def main(working_directory, process_count, instance_count, instance):
     logger.info(f"Total 100k batches in set: {batch_count}")
 
     # Should be whole always as batch_size doesn't change?
-    batches_completed = int((next_offset - checkpoint_offset) / batch_size)
+    batches_completed = int((checkpoint_offset - offset_start) / batch_size)
     logger.info(f"Batches already completed: {batches_completed}")
 
     with tqdm.tqdm(total=batch_count, dynamic_ncols=True, unit="100k/batch") as progress:
@@ -226,7 +228,9 @@ def main(working_directory, process_count, instance_count, instance):
                 if not offset < next_offset:
                     break
 
-                batch.append(((i,j), minhashes[i], minhashes[j]))
+
+                # (priority, offset, sha256sum, minhash) = document
+                batch.append(((i,j), minhashes[i][3], minhashes[j][3]))
 
                 if len(batch) == batch_size:
                     process_batch(pool, batch, offset, working_directory)
