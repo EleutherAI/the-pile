@@ -199,7 +199,7 @@ def get_lsh(working_directory):
     lsh = MinHashLSH(threshold=0.5, num_perm=10)
     with tqdm.tqdm(total=len(minhashes), dynamic_ncols=True, unit="docs") as progress:
         for (priority, offset, sha256sum, minhash) in minhashes:
-            lsh.insert(json.dumps((priority, offset)), minhash)
+            lsh.insert((priority, offset), minhash)
             progress.update()
 
     minhashes = None # Clear memory
@@ -239,7 +239,7 @@ def main(working_directory, process_count, instance_count, instance):
                 found_priority, found_offset = json.loads(result)
                 if found_offset != offset:
                     duplicates.append((priority, offset, sha256sum))
-                    lsh.remove((priority, offset))
+                    lsh.remove(json.dumps(priority, offset))
                     break
 
         duplicates_file = file.replace("minhashes", "duplicates")
