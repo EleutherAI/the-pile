@@ -158,7 +158,38 @@ def load_minhashes(working_directory):
 
 #     assert(get_pair_count(document_count, "") == offset)
 
-def main(working_directory, process_count, instance_count, instance):  
+# Remove dupes from dumbing
+def fix_minhashes(working_directory):
+    # Load All Minhashes
+    logger.info(f"Loading minhashes...")
+    minhashes = load_minhashes(working_directory)
+
+    fixed_directory = os.path.join(working_directory, "fixed_minhashes")
+    os.makedirs(fixed_directory, exist_ok=True)
+
+    batch_size = 1000
+    batch = []
+    start_offset = 0
+    for document in tqdm.tqdm(minhashes, dynamic_ncols=True, unit="docs"):
+        # (priority, offset, sha256sum, minhash) = document
+        batch.append(document)
+
+        if len(batch) == batch_size:
+            minhashes_file = os.path.join(fixed_directory, f"minhashes_{start_offset}.pkl")
+            pickle.dump(batch, open(minhashes_file, "wb"))
+            start_offset += 1000
+            batch = []
+
+    if len(batch) != 0:
+        minhashes_file = os.path.join(fixed_directory, f"minhashes_{start_offset}.pkl")
+        pickle.dump(batch, open(minhashes_file, "wb"))
+
+def get_lsh(working_directory):
+    lsh_file_path = os.path.join(working_directory, "lsh.pkl")
+    if os.path.exists(lsh_file_path):
+        lsh = pickle.load(open(lsh_file_path, "rb"))
+        return lsh
+
     # Load All Minhashes
     logger.info(f"Loading minhashes...")
     minhashes = load_minhashes(working_directory)
@@ -171,9 +202,15 @@ def main(working_directory, process_count, instance_count, instance):
             progress.update()
 
     minhashes = None # Clear memory
-    lsh_file_path = os.path.join(working_directory, "lsh.pkl")
     logger.info("Dumping lsh")
     pickle.dump(lsh, open(lsh_file_path, "wb"))
+    return lsh
+
+def main(working_directory, process_count, instance_count, instance):  
+
+    fix_minhashes(working_directory)
+
+    # lsh = get_lsh(working_directory)
 
     # # Batching
     # document_count = CommonCrawlDataset().num_docs()
