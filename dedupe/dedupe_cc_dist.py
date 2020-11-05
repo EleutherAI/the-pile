@@ -157,7 +157,7 @@ def test_pair_math():
             assert(returned == (i, j))
             offset += 1     
 
-    assert(get_pair_count(get_pair_count, "") == offset)
+    assert(get_pair_count(document_count, "") == offset)
 
 def main(working_directory, process_count, instance_count, instance):  
     # Load All Minhashes
