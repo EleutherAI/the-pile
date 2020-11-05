@@ -210,11 +210,13 @@ def main(working_directory, process_count, instance_count, instance):
     pool = TqdmMultiProcessPool(process_count)
 
     batch_count = int(math.ceil(pairs_per_instance / batch_size))
+    logger.info(f"Total 100k batches in set: {batch_count}")
 
     # Should be whole always as batch_size doesn't change?
     batches_completed = int((next_offset - checkpoint_offset) / batch_size)
+    logger.info(f"Batches already completed: {batches_completed}")
 
-    with tqdm.tqdm(total=batch_count, dynamic_ncols=True, unit="pairs") as progress:
+    with tqdm.tqdm(total=batch_count, dynamic_ncols=True, unit="100k/batch") as progress:
         progress.update(batches_completed)
         offset = checkpoint_offset
         for i in range(i_start, document_count):
