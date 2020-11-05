@@ -203,13 +203,11 @@ def get_lsh(working_directory):
             progress.update()
 
     minhashes = None # Clear memory
-
-    inputted = "l"
-    while inputted == "l":
-        inputted = input("Attempting to clear memory, press l to loop")
-
-    logger.info("Dumping lsh")
-    pickle.dump(lsh, open(lsh_file_path, "wb"))
+    # logger.info("Trying to sleep to force gc")
+    # for i in range(100):
+    #     sys.sleep(1)
+    # logger.info("Dumping lsh")
+    # pickle.dump(lsh, open(lsh_file_path, "wb"))
     return lsh
 
 def main(working_directory, process_count, instance_count, instance):  
