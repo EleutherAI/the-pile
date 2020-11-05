@@ -166,7 +166,7 @@ def main(working_directory, process_count, instance_count, instance):
 
     # Batching
     document_count = CommonCrawlDataset().num_docs()
-    pair_count = get_pair_count(working_directory, document_count)
+    pair_count = get_pair_count(document_count, working_directory)
     pairs_per_instance = int(pair_count / instance_count)
     offset_start = pairs_per_instance * instance
     next_offset = offset_start + pairs_per_instance
@@ -197,12 +197,12 @@ def main(working_directory, process_count, instance_count, instance):
     if os.path.exists(checkpoint_file):
         checkpoint_offset = pickle.load(open(checkpoint_file, "rb")) + 1
         logger.info(f"Checkpoint found, starting from offset {checkpoint_offset}")    
-        (i_start, j_start) = get_pair_from_offset(checkpoint_offset)
+        (i_start, j_start) = get_pair_from_offset(document_count, checkpoint_offset)
                 
     else:
         logger.info(f"No checkpoint found, starting from offset {offset_start}")   
         checkpoint_offset = offset_start
-        (i_start, j_start) = get_pair_from_offset(offset_start)
+        (i_start, j_start) = get_pair_from_offset(document_count, offset_start)
 
 
     batch_size = 100000 # Pair batch size, not minhash batch size
@@ -244,13 +244,13 @@ parser.add_argument("-procs", "--process_count", type=int, default=4)
 parser.add_argument("--instance_count", type=int, default=1)
 parser.add_argument("--instance", type=int, default=0)
 
-# if __name__ == '__main__':
-#     logfile_path = "dedupe_cc_dist.log"
-#     setup_logger_tqdm(logfile_path)
-
-#     args = parser.parse_args()
-#     main(args.working_directory, args.process_count, args.instance_count, args.instance)
-
 if __name__ == '__main__':
-    setup_logger_tqdm()
-    test_pair_math()
+    logfile_path = "dedupe_cc_dist.log"
+    setup_logger_tqdm(logfile_path)
+
+    args = parser.parse_args()
+    main(args.working_directory, args.process_count, args.instance_count, args.instance)
+
+# if __name__ == '__main__':
+#     setup_logger_tqdm()
+#     test_pair_math()
