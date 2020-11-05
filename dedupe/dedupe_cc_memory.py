@@ -235,7 +235,8 @@ def main(working_directory, process_count, instance_count, instance):
         duplicates = []
         for (priority, offset, sha256sum, minhash) in minhashes:
             results = lsh.query(minhash)
-            for found_priority, found_offset in results:
+            for result in results:
+                found_priority, found_offset = json.loads(result)
                 if found_offset != offset:
                     duplicates.append((priority, offset, sha256sum))
                     lsh.remove((priority, offset))
