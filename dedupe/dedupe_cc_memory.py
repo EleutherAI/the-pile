@@ -111,8 +111,7 @@ def verify_fixed_minhashes(working_directory):
     with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit="byte", unit_scale=1) as progress:
         for file in files:
             document_data = pickle.load(open(file, "rb"))
-            for document in document_data:
-                count += 1
+            count += len(document_data)
 
             progress.update(os.path.getsize(file))
 
@@ -120,6 +119,28 @@ def verify_fixed_minhashes(working_directory):
     logger.info(f"Expected document count: {document_count:,}")
     logger.info(f"Loaded documents with minhashes count: {count:,}")
     logger.info(f"Difference {difference:,}")
+
+def yield_minhashes(working_directory):
+    fixed_directory = os.path.join(working_directory, "fixed_minhashes")
+
+    batch_size = 1000
+    files = []
+    start_offset = 0
+    while True:
+        file = os.path.join(fixed_directory, f"minhashes_{start_offset}.pkl")
+        if not os.path.exists(file):
+            break
+        files.append(file)
+        start_offset += batch_size
+
+    total_file_size = 0
+    for file in files:
+        total_file_size += os.path.getsize(file)
+
+    for file in files:
+        document_data = pickle.load(open(file, "rb"))
+        for document in document_data:
+            yield document
 
 def load_minhashes_old(working_directory):
     pass
@@ -192,7 +213,7 @@ def load_minhashes_old(working_directory):
 def fix_minhashes(working_directory):
     # Load All Minhashes
     logger.info(f"Loading minhashes...")
-    minhashes = load_minhashes(working_directory)
+    minhashes = load_minhashes_old(working_directory)
 
     fixed_directory = os.path.join(working_directory, "fixed_minhashes")
     os.makedirs(fixed_directory, exist_ok=True)
@@ -221,23 +242,15 @@ def get_lsh(working_directory):
         lsh = pickle.load(open(lsh_file_path, "rb"))
         return lsh
 
-    # Load All Minhashes
-    logger.info(f"Loading minhashes...")
-    minhashes = load_minhashes(working_directory)
-
     logger.info(f"Building LSH")
     lsh = MinHashLSH(threshold=0.5, num_perm=10)
-    with tqdm.tqdm(total=len(minhashes), dynamic_ncols=True, unit="docs") as progress:
-        for (priority, offset, sha256sum, minhash) in minhashes:
-            lsh.insert((priority, offset), minhash)
-            progress.update()
+    document_count = CommonCrawlDataset().num_docs()
+    progress = tqdm.tqdm(total=document_count, dynamic_ncols=True, unit="docs")
+    for (priority, offset, sha256sum, minhash) in yield_minhashes(working_directory):
+        lsh.insert((priority, offset), minhash)
+        progress.update()
+    progress.close()
 
-    minhashes = None # Clear memory
-    # logger.info("Trying to sleep to force gc")
-    # for i in range(100):
-    #     sys.sleep(1)
-    # logger.info("Dumping lsh")
-    # pickle.dump(lsh, open(lsh_file_path, "wb"))
     return lsh
 
 def main(working_directory, process_count, instance_count, instance):  
