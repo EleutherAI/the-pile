@@ -203,6 +203,11 @@ def get_lsh(working_directory):
             progress.update()
 
     minhashes = None # Clear memory
+
+    inputted = "l"
+    while inputted == "l":
+        inputted = input("Attempting to clear memory, press l to loop")
+
     logger.info("Dumping lsh")
     pickle.dump(lsh, open(lsh_file_path, "wb"))
     return lsh
@@ -235,11 +240,10 @@ def main(working_directory, process_count, instance_count, instance):
         duplicates = []
         for (priority, offset, sha256sum, minhash) in minhashes:
             results = lsh.query(minhash)
-            for result in results:
-                found_priority, found_offset = json.loads(result)
+            for found_priority, found_offset in results:
                 if found_offset != offset:
                     duplicates.append((priority, offset, sha256sum))
-                    lsh.remove(json.dumps(priority, offset))
+                    lsh.remove((priority, offset))
                     break
 
         duplicates_file = file.replace("minhashes", "duplicates")
