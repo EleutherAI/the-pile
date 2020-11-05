@@ -47,8 +47,6 @@ def process_batch(pool, batch, offset_start, working_directory):
     checkpoint_old_file = os.path.join(working_directory, "dedupe_checkpoint_old.pkl")
     transaction_lock = os.path.join(working_directory, ".transaction_lock_dedupe")
 
-batch.append(((i,j), minhashes[i], minhashes[j]))
-
     # Generate minhashes with pool
     tasks = []
     for (pair, m1, m2) in batch:
