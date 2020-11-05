@@ -136,11 +136,13 @@ def get_pair_from_offset(offset):
     document_count = CommonCrawlDataset().num_docs()
     count = 0
     for i in range(document_count):
-        j_size = document_count - (i + 1)
+        j_start = i + 1
+        j_size = document_count - (j_start)
         if offset >= count + j_size:
+            count += j_size
             continue
 
-        j = offset - count
+        j = (offset - count) + j_start
         return (i, j)
 
 def test_pair_math():
