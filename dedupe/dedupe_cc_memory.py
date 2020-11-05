@@ -170,7 +170,7 @@ def main(working_directory, process_count, instance_count, instance):
             lsh.insert(json.dumps((priority, offset)), minhash)
             progress.update()
 
-    input("Done building LSH, check memory")
+    minhashes = None # Clear memory
     lsh_file_path = os.path.join(working_directory, "lsh.pkl")
     logger.info("Dumping lsh")
     pickle.dump(lsh, open(lsh_file_path, "wb"))
