@@ -42,10 +42,10 @@ def compare_pair(m1, m2, tqdm_func, global_tqdm):
     return m1.jaccard(m2) > 0.5
 
 def process_batch(pool, batch, offset_start, working_directory): 
-    checkpoint_file = os.path.join(working_directory, "checkpoint.pkl")
-    checkpoint_temp_file = os.path.join(working_directory, "checkpoint_temp.pkl")
-    checkpoint_old_file = os.path.join(working_directory, "checkpoint_old.pkl")    
-    transaction_lock = os.path.join(working_directory, ".transaction_lock")
+    checkpoint_file = os.path.join(working_directory, "dedupe_checkpoint.pkl")
+    checkpoint_temp_file = os.path.join(working_directory, "dedupe_checkpoint_temp.pkl")
+    checkpoint_old_file = os.path.join(working_directory, "dedupe_checkpoint_old.pkl")
+    transaction_lock = os.path.join(working_directory, ".transaction_lock_dedupe")
 
     # Generate minhashes with pool
     tasks = []
@@ -177,10 +177,10 @@ def main(working_directory, process_count, instance_count, instance):
     logger.info(f"Offset Start: {offset_start:,}")
     logger.info(f"Next Offset Start: {next_offset:,}")
 
-    checkpoint_file = os.path.join(working_directory, "checkpoint.pkl")
-    checkpoint_temp_file = os.path.join(working_directory, "checkpoint_temp.pkl")
-    checkpoint_old_file = os.path.join(working_directory, "checkpoint_old.pkl")    
-    transaction_lock = os.path.join(working_directory, ".transaction_lock")
+    checkpoint_file = os.path.join(working_directory, "dedupe_checkpoint.pkl")
+    checkpoint_temp_file = os.path.join(working_directory, "dedupe_checkpoint_temp.pkl")
+    checkpoint_old_file = os.path.join(working_directory, "dedupe_checkpoint_old.pkl")
+    transaction_lock = os.path.join(working_directory, ".transaction_lock_dedupe")
 
     if os.path.exists(transaction_lock):
         logger.info("Program crashed during transaction, fixing files...")
