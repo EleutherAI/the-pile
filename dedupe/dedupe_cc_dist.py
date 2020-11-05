@@ -249,4 +249,5 @@ parser.add_argument("--instance", type=int, default=0)
 #     main(args.working_directory, args.process_count, args.instance_count, args.instance)
 
 if __name__ == '__main__':
+    setup_logger_tqdm()
     test_pair_math()
