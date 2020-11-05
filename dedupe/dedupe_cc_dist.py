@@ -133,9 +133,7 @@ def get_pair_count(document_count, working_directory):
 
 def get_pair_from_offset(document_count, offset):
     count = 0
-    logger.info(f"offset: {offset}")
     for i in range(document_count):
-        logger.info(f"count: {count}")
         j_start = i + 1
         j_size = document_count - (j_start)
         if offset >= count + j_size:
@@ -209,6 +207,7 @@ def main(working_directory, process_count, instance_count, instance):
     batch = []
     pool = TqdmMultiProcessPool(process_count)
 
+    # Can't use total pair count as tqdm blows up    
     batch_count = int(math.ceil(pairs_per_instance / batch_size))
     logger.info(f"Total 100k batches in set: {batch_count}")
 
