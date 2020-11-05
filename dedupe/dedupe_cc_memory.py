@@ -290,7 +290,7 @@ def main(working_directory, process_count, instance_count, instance):
                     lsh.remove((priority, offset))
                     break
 
-        duplicates_file = os.path.join(fixed_directory, f"minhashes_{start_offset}.pkl")
+        duplicates_file = os.path.join(fixed_directory, f"duplicates_{start_offset}.pkl")
         pickle.dump(duplicates, open(duplicates_file, "wb"))
         start_offset += len(minhashes)
 
