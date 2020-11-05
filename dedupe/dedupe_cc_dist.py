@@ -154,8 +154,9 @@ def test_pair_math():
     for i in range(document_count):
         for j in range(i+1, document_count):
             logger.info(f"expected: {(i, j)}")
-            logger.info(f"returned: {get_pair_from_offset(offset)}")
-            assert(get_pair_from_offset(offset) == (i, j))
+            returned = get_pair_from_offset(offset)
+            logger.info(f"returned: {returned}")
+            assert(returned == (i, j))
             offset += 1     
 
     assert(get_pair_count(get_pair_count, "") == offset)
