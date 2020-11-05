@@ -185,6 +185,7 @@ def fix_minhashes(working_directory):
         pickle.dump(batch, open(minhashes_file, "wb"))
 
 def get_lsh(working_directory):
+    logger.info("Loading lsh from pickle...")
     lsh_file_path = os.path.join(working_directory, "lsh.pkl")
     if os.path.exists(lsh_file_path):
         lsh = pickle.load(open(lsh_file_path, "rb"))
