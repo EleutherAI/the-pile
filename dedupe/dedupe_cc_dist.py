@@ -135,9 +135,9 @@ def get_pair_from_offset(offset):
 
     document_count = CommonCrawlDataset().num_docs()
     count = 0
-    logger.info(offset)
+    logger.info(f"offset: {offset}")
     for i in range(document_count):
-        logger.info(count)
+        logger.info(f"count: {count}")
         j_start = i + 1
         j_size = document_count - (j_start)
         if offset >= count + j_size:
