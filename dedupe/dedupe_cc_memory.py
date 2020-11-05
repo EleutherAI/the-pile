@@ -232,9 +232,17 @@ def main(working_directory, process_count, instance_count, instance):
     for file in tqdm.tqdm(files, dynamic_ncols=True, unit="batches"):
         minhashes = pickle.load(open(file, "rb"))
 
+        duplicates = []
         for (priority, offset, sha256sum, minhash) in minhashes:
-            result = lsh.query(minhash)
+            results = lsh.query(minhash)
+            for found_priority, found_offset in results:
+                if found_offset != offset:
+                    duplicates.append((priority, offset, sha256sum))
+                    lsh.remove((priority, offset))
+                    break
 
+        duplicates_file = file.replace("minhashes", "duplicates")
+        pickle.dump(duplicates, open(duplicates_file, "wb"))
 
     # # Batching
     # document_count = CommonCrawlDataset().num_docs()
