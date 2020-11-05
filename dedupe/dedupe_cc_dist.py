@@ -131,9 +131,7 @@ def get_pair_count(document_count, working_directory):
     pickle.dump(pair_count, open(pair_count_file, "wb"))
     return pair_count
 
-def get_pair_from_offset(offset):
-
-    document_count = CommonCrawlDataset().num_docs()
+def get_pair_from_offset(document_count, offset):
     count = 0
     logger.info(f"offset: {offset}")
     for i in range(document_count):
@@ -154,7 +152,7 @@ def test_pair_math():
     for i in range(document_count):
         for j in range(i+1, document_count):
             logger.info(f"expected: {(i, j)}")
-            returned = get_pair_from_offset(offset)
+            returned = get_pair_from_offset(document_count, offset)
             logger.info(f"returned: {returned}")
             assert(returned == (i, j))
             offset += 1     
