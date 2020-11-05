@@ -88,27 +88,31 @@ from pathlib import Path
 #     os.remove(transaction_lock)
 #     signal.signal(SIGINT, previous_signal_int)    
 
-def load_minhashes(working_directory):
+def verify_fixed_minhashes(working_directory):
     document_count = CommonCrawlDataset().num_docs()
 
-    files = glob.glob(os.path.join(working_directory, "minhashes*"))
+    fixed_directory = os.path.join(working_directory, "fixed_minhashes")
+
+    batch_size = 1000
+    files = []
+    start_offset = 0
+    while True:
+        file = os.path.join(fixed_directory, f"minhashes_{start_offset}.pkl")
+        if not os.path.exists(file):
+            break
+        files.append(file)
+        start_offset += batch_size
 
     total_file_size = 0
     for file in files:
-        total_file_size += (os.path.getsize(file))
+        total_file_size += os.path.getsize(file)
 
     count = 0
-    minhashes = [None] * document_count
-    logger.info(f"minhash array length {len(minhashes):,}")
     with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit="byte", unit_scale=1) as progress:
         for file in files:
             document_data = pickle.load(open(file, "rb"))
             for document in document_data:
-                (priority, offset, sha256sum, minhash) = document
-                if not minhashes[offset]:
-                    count += 1
-
-                minhashes[offset] = document
+                count += 1
 
             progress.update(os.path.getsize(file))
 
@@ -117,7 +121,33 @@ def load_minhashes(working_directory):
     logger.info(f"Loaded documents with minhashes count: {count:,}")
     logger.info(f"Difference {difference:,}")
 
-    return minhashes
+def load_minhashes_old(working_directory):
+    pass
+    # total_file_size = 0
+    # for file in files:
+    #     total_file_size += (os.path.getsize(file))
+
+    # count = 0
+    # minhashes = [None] * document_count
+    # logger.info(f"minhash array length {len(minhashes):,}")
+    # with tqdm.tqdm(total=total_file_size, dynamic_ncols=True, unit="byte", unit_scale=1) as progress:
+    #     for file in files:
+    #         document_data = pickle.load(open(file, "rb"))
+    #         for document in document_data:
+    #             (priority, offset, sha256sum, minhash) = document
+    #             if not minhashes[offset]:
+    #                 count += 1
+
+    #             minhashes[offset] = document
+
+    #         progress.update(os.path.getsize(file))
+
+    # difference = document_count - count
+    # logger.info(f"Expected document count: {document_count:,}")
+    # logger.info(f"Loaded documents with minhashes count: {count:,}")
+    # logger.info(f"Difference {difference:,}")
+
+    # return minhashes
 
 # def get_pair_count(document_count, working_directory):
 #     pair_count_file = os.path.join(working_directory, "pair_count.pkl")
