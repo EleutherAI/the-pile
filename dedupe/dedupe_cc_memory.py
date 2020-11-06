@@ -469,7 +469,9 @@ def cc_remove_duplicates(working_directory):
 
     duplicate_count = offset - count
 
+    
     logger.info(f"Original Document Count: {offset:,}")
+    logger.info(f"Expected Duplicate Count: {len(duplicate_offsets):,}")    
     logger.info(f"Duplicate Count: {duplicate_count:,}")
     logger.info(f"Remaining documents: {count:,}")
 
