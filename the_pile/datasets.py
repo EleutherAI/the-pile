@@ -724,7 +724,7 @@ class CommonCrawlDataset(Dataset):
         return "CommonCrawl"
 
     def _download(self):
-        download('pile_cc_filtered_deduped.jsonl.zst', '', [
+        download('components/commoncrawl/pile_cc_filtered_deduped.jsonl.zst', '', [
             Source('direct', 'https://eaidata.bmk.sh/data/pile_cc_filtered_deduped.jsonl.zst'),
         ])
 
