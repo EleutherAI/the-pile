@@ -295,7 +295,7 @@ if __name__ == '__main__':
     else:
         print('We don\'t have a shortcut for that yet!')
 
-    if args.download:
+    if args.force_download:
         for dset, _ in datasets:
             dset._download()
     
