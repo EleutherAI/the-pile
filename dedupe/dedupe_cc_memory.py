@@ -373,7 +373,7 @@ def verify_dedupe(working_directory):
             results = lsh.query(minhash)
             for found_priority, found_offset in results:
                 if found_offset != offset:
-                    duplicates.append((priority, offset, sha256sum))
+                    duplicates.append((offset, found_offset))
                     lsh.remove((priority, offset))
                     break
 
