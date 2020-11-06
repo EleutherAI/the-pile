@@ -397,27 +397,28 @@ def output_verification(working_directory):
     duplicates_file = os.path.join(working_directory, f"verify_dedupe.pkl")
     duplicates = pickle.load(open(duplicates_file, "rb"))
 
-    remaining = 2 * len(duplicates)
-    cc_documents = {}    
-    for offset, found_offset in duplicates:
-        cc_documents[offset] = None
-        cc_documents[found_offset] = None
-
-    document_count = CommonCrawlDataset().num_docs()
-    with tqdm.tqdm(total=document_count, dynamic_ncols=True, unit="docs") as progress:
-        for doc in docs_for_dedupe():
-            ((priority, offset, sha256sum), document) = doc
-            if offset in cc_documents:
-                cc_documents[offset] = document
-                remaining -= 1
-
-            progress.update()
-
-            if remaining == 0:
-                break
-
     verify_cc_documents_file = os.path.join(working_directory, "verify_cc_documents.pkl")
-    duplicates = pickle.dump(cc_documents, open(verify_cc_documents_file, "wb"))
+    if os.path.exists(verify_cc_documents_file):
+        cc_documents = pickle.load(open(verify_cc_documents_file, "rb"))
+    else:
+        remaining = 2 * len(duplicates)
+        cc_documents = {}    
+        for offset, found_offset in duplicates:
+            cc_documents[offset] = None
+            cc_documents[found_offset] = None
+
+        document_count = CommonCrawlDataset().num_docs()
+        with tqdm.tqdm(total=document_count, dynamic_ncols=True, unit="docs") as progress:
+            for doc in docs_for_dedupe():
+                ((priority, offset, sha256sum), document) = doc
+                if offset in cc_documents:
+                    cc_documents[offset] = document
+                    remaining -= 1
+
+                progress.update()
+
+                if remaining == 0:
+                    break
 
     for offset, found_offset in duplicates:        
         logger.info("DOCUMENT")
