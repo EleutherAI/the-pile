@@ -724,8 +724,8 @@ class CommonCrawlDataset(Dataset):
         return "CommonCrawl"
 
     def _download(self):
-        download('components/commoncrawl/pile_cc_filtered.jsonl.zst.tar', 'b5310602517a90f02dfa1952edc73c9e791d4144ba49d9e0ea0fd17334108320', [
-            Source('direct', 'https://eaidata.bmk.sh/data/pile_cc_filtered.jsonl.zst.tar'),
+        download('pile_cc_filtered_deduped.jsonl.zst', '', [
+            Source('direct', 'https://eaidata.bmk.sh/data/pile_cc_filtered_deduped.jsonl.zst'),
         ])
 
     def documents(self):
@@ -739,5 +739,5 @@ class CommonCrawlDataset(Dataset):
     # def size(self):
     #     return 319297037855
     
-    # def num_docs(self):
-    #     return 74966902
+    def num_docs(self):
+        return 54,953,117
