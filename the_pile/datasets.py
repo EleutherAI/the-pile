@@ -721,20 +721,20 @@ class CommonCrawlDataset(Dataset):
         return "CommonCrawl"
 
     def _download(self):
-        download('components/commoncrawl/pile_cc_filtered.jsonl.zst.tar', 'b5310602517a90f02dfa1952edc73c9e791d4144ba49d9e0ea0fd17334108320', [
-            Source('direct', 'https://eaidata.bmk.sh/data/pile_cc_filtered.jsonl.zst.tar'),
+        download('components/commoncrawl/pile_cc_filtered_deduped.jsonl.zst', '4906a6731a7d2d9182c40a13d681078ed537508cf75b1d32ad7f7c491b2f272a', [
+            Source('direct', 'https://eaidata.bmk.sh/data/pile_cc_filtered_deduped.jsonl.zst'),
         ])
 
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/commoncrawl/pile_cc_filtered.jsonl.zst.tar').stream_data()
+        yield from lmd.Reader('components/commoncrawl/pile_cc_filtered_deduped.jsonl.zst').stream_data()
 
     def clean(self):
         rm_if_exists('components/commoncrawl')
     
     def size(self):
-        return 319297037855
+        return 243872121726
     
     def num_docs(self):
-        return 74966902
+        return 54953117
