@@ -731,7 +731,7 @@ class CommonCrawlDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/commoncrawl/pile_cc_filtered.jsonl.zst.tar').stream_data()
+        yield from lmd.Reader('components/commoncrawl/pile_cc_filtered_deduped.jsonl.zst').stream_data()
 
     def clean(self):
         rm_if_exists('components/commoncrawl')
