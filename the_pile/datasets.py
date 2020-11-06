@@ -736,8 +736,8 @@ class CommonCrawlDataset(Dataset):
     def clean(self):
         rm_if_exists('components/commoncrawl')
     
-    def size(self):
-        return 319297037855
+    # def size(self):
+    #     return 319297037855
     
-    def num_docs(self):
-        return 74966902
+    # def num_docs(self):
+    #     return 74966902
