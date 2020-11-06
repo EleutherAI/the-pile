@@ -521,7 +521,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     # main(args.working_directory, args.process_count, args.instance_count, args.instance)
-    verify_dedupe(args.working_directory)
+    # verify_dedupe(args.working_directory)
+    output_verification(args.working_directory)
 
 # if __name__ == '__main__':
 #     setup_logger_tqdm()
