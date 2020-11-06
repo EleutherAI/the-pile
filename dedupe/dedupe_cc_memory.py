@@ -341,6 +341,51 @@ def main(working_directory, process_count, instance_count, instance):
         pickle.dump(duplicates, open(duplicates_file, "wb"))
         start_offset += len(minhashes)
 
+def verify_dedupe(working_directory):
+
+    lsh = get_lsh(working_directory)
+
+    logger.info("Building file list")
+    document_count = CommonCrawlDataset().num_docs()
+    start_offset = 0
+    files = []
+    fixed_directory = os.path.join(working_directory, "fixed_minhashes")    
+    while True:
+        minhashes_file = os.path.join(fixed_directory, f"minhashes_{start_offset}.pkl")
+        if not os.path.exists(minhashes_file):
+            break
+
+        files.append(minhashes_file)
+        start_offset += 1000
+
+    logger.info(f"Document count: {document_count:,}")
+    logger.info(f"File count: {len(files):,}")
+    
+    duplicates = []
+    done = False
+    for file in tqdm.tqdm(files, dynamic_ncols=True, unit="batches"):
+        minhashes = pickle.load(open(file, "rb"))
+        
+        if done:
+            break
+
+        for (priority, offset, sha256sum, minhash) in minhashes:
+            results = lsh.query(minhash)
+            for found_priority, found_offset in results:
+                if found_offset != offset:
+                    duplicates.append((priority, offset, sha256sum))
+                    lsh.remove((priority, offset))
+                    break
+
+            if len(duplicates) == 1000:
+                done = True
+                break
+
+    duplicates_file = os.path.join(working_directory, f"verify_dedupe.pkl")
+    pickle.dump(duplicates, open(duplicates_file, "wb"))
+
+
+
     # # Batching
     # document_count = CommonCrawlDataset().num_docs()
     # pair_count = get_pair_count(document_count, working_directory)
