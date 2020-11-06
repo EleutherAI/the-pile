@@ -431,7 +431,8 @@ if __name__ == '__main__':
     setup_logger_tqdm(logfile_path)
 
     args = parser.parse_args()
-    main(args.working_directory, args.process_count, args.instance_count, args.instance)
+    # main(args.working_directory, args.process_count, args.instance_count, args.instance)
+    package_for_lm(args.working_directory)
 
 # if __name__ == '__main__':
 #     setup_logger_tqdm()
