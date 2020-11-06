@@ -456,20 +456,24 @@ def cc_remove_duplicates(working_directory):
     deduped_cc_path = os.path.join(working_directory, "pile_cc_filtered_deduped.jsonl.zst.tar")
     archiver = Archive(deduped_cc_path)
 
+    logger.info("Deduping CC")
     offset = 0
     count = 0
+    document_count = CommonCrawlDataset().num_docs()
+    progress = tqdm.tqdm(total=document_count, dynamic_ncols=True, unit="docs")
     for doc, meta in read_cc():
         if offset not in duplicate_offsets:
             archiver.add_data(doc, meta=meta)
             count += 1
 
         offset += 1
+        progress.update()
 
     archiver.commit()
 
     duplicate_count = offset - count
-
     
+    logger.info(f"Expected Document Count: {offset:,}")
     logger.info(f"Original Document Count: {offset:,}")
     logger.info(f"Expected Duplicate Count: {len(duplicate_offsets):,}")    
     logger.info(f"Duplicate Count: {duplicate_count:,}")
