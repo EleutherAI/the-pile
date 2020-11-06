@@ -17,6 +17,8 @@ from tqdm_multiprocess import TqdmMultiProcessPool
 from the_pile.datasets import CommonCrawlDataset
 from the_pile.utils import sha256str
 
+from dedupe.archiver import Archive, Reader
+
 import logging
 from the_pile.logger import setup_logger_tqdm
 logger = logging.getLogger(__name__)
@@ -254,6 +256,51 @@ def get_lsh(working_directory):
     logger.info("Dumping LSH")
     pickle.dump(lsh, open(lsh_file_path, "wb"))
     return lsh
+
+def package_for_lm(working_directory):
+    logger.info("Building file list")
+    document_count = CommonCrawlDataset().num_docs()
+    start_offset = 0
+    files = []
+    fixed_directory = os.path.join(working_directory, "fixed_minhashes")    
+    while True:
+        file = os.path.join(fixed_directory, f"duplicates_{start_offset}.pkl")
+        if not os.path.exists(file):
+            break
+
+        files.append(file)
+        start_offset += 1000
+
+    logger.info(f"File count: {len(files):,}")
+
+    duplicates_lm_file = os.path.join(working_directory, "duplicates.jsonl.zst")
+    archiver = Archive(duplicates_lm_file)
+
+    duplicate_count = 0
+    for file in tqdm.tqdm(files, dynamic_ncols=True, unit="batches"):
+        duplicates = pickle.load(open(file, "rb"))
+        for duplicate in duplicates:
+            duplicate_count += 1
+            archiver.add_data("", meta=list(duplicate))
+
+    archiver.commit()
+
+    logger.info(f"Original Doucment Count: {document_count:,}")
+    logger.info(f"Duplicate Count: {duplicate_count:,}")
+
+    logger.info(f"example data:")
+    reader = Reader()
+
+    limit = 10
+    count = 0
+    for _, meta in reader.read_jsonl(duplicates_lm_file, get_meta=True):
+        print(meta)
+
+        if count == limit:
+            break
+
+        count += 1
+
 
 def main(working_directory, process_count, instance_count, instance):  
 
