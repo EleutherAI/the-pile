@@ -70,6 +70,7 @@ datasets = [
 
 datasets_new = []
 target_size = 950 * 1024 * 1024 * 1024
+train_chars = 1200 * 1024 * 1024 * 1024
 for dsets, tgt_frac in datasets:
     dsets_size_wt = sum([x.size()*w for x, w in dsets])
     dsets_twt     = sum([w          for _, w in dsets])
