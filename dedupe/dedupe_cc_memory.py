@@ -431,6 +431,49 @@ def output_verification(working_directory):
         logger.info("")        
         input("Press enter for next document")
 
+import lm_dataformat as lmd
+
+def read_cc():
+    yield from lmd.Reader('components/commoncrawl/pile_cc_filtered.jsonl.zst.tar').stream_data(get_meta=True)
+
+def cc_remove_duplicates(working_directory):
+
+    duplicate_offsets = set()
+
+    logger.info("Loading all duplicates")
+    duplicates_lm_file = os.path.join(working_directory, "duplicates.jsonl.zst")    
+    progress = tqdm.tqdm(total=os.path.getsize(duplicates_lm_file), dynamic_ncols=True, unit_scale=True, unit="byte")
+    previous_file_position = 0
+    reader = Reader()    
+    for _, meta in reader.read_jsonl(duplicates_lm_file, get_meta=True):
+        priority, offset, sha256sum = tuple(meta)
+        duplicate_offsets.add(offset)
+
+        current_file_position = reader.fh.tell()
+        progress.update(current_file_position - previous_file_position)
+        previous_file_position = current_file_position
+
+    deduped_cc_path = os.path.join(working_directory, "pile_cc_filtered_deduped.jsonl.zst.tar")
+    archiver = Archive(deduped_cc_path)
+
+    offset = 0
+    count = 0
+    for doc, meta in read_cc():
+        if offset not in duplicate_offsets:
+            archiver.add_data(doc, meta=meta)
+            count += 1
+
+        offset += 1
+
+    archiver.commit()
+
+    duplicate_count = offset - count
+
+    logger.info(f"Original Document Count: {offset:,}")
+    logger.info(f"Duplicate Count: {duplicate_count:,}")
+    logger.info(f"Remaining documents: {count:,}")
+
+
     # # Batching
     # document_count = CommonCrawlDataset().num_docs()
     # pair_count = get_pair_count(document_count, working_directory)
@@ -523,7 +566,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     # main(args.working_directory, args.process_count, args.instance_count, args.instance)
     # verify_dedupe(args.working_directory)
-    output_verification(args.working_directory)
+    cc_remove_duplicates(args.working_directory)
 
 # if __name__ == '__main__':
 #     setup_logger_tqdm()
