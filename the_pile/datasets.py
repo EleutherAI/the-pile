@@ -647,24 +647,23 @@ class HackerNewsDataset(Dataset):
         return "HackerNews"
 
     def _download(self):
-        download('components/hackernews/hn.tar.gz', '6220e1dcd5d9d71821fee552e4e154ee1ee5f62744e3eab9a4c5001f52e27067', [
-            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/hn.tar.gz'),
-            Source('direct', 'http://eaidata.bmk.sh/data/hn.tar.gz'),
+        download('components/hackernews/hn.jsonl.zst', '9fbc978c92a466b1653cd578700eeb8b417ddcf8c66c7c468d5c1d11ef82aed7', [
+            Source('direct', 'http://eaidata.bmk.sh/data/hn.jsonl.zst'),
         ])
 
     def documents(self):
         self._download()
 
-        yield from dummy_meta(lmd.Reader('components/hackernews/hn.tar.gz').stream_data())
+        yield from lmd.Reader('components/hackernews/hn.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/hackernews')
     
     def size(self):
-        return 1704809038
+        return 4185091916
     
     def num_docs(self):
-        return 373028
+        return 831198
 
 
 class GithubDataset(Dataset):
