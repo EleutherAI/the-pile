@@ -45,7 +45,7 @@ class WikipediaDataset(Dataset):
 
     def _download(self):
         download('components/wikipedia_en/output/wikipedia-en.tar.gz', '87b78787f71297250bca644ab9d8e3992346eeb2e2ad91101487109e3d01e644', [
-            Source('direct', 'https://eaidata.bmk.sh/data/wikipedia-en.tar.gz'),
+            Source('direct', 'http://eaidata.bmk.sh/data/wikipedia-en.tar.gz'),
         ], extract=True)
 
     def documents(self):
@@ -75,7 +75,7 @@ class OpensubtitlesDataset(Dataset):
 
     def _download(self):
         download('components/opensubtitles/opensubtitles_out.tar', 'f3039709677292f899bb0a8fa2dbc6ae785f9e33ffd7613f94f4f722f2dfd95c', [
-            Source('direct', 'https://eaidata.bmk.sh/data/opensubtitles_out.tar'),
+            Source('direct', 'http://eaidata.bmk.sh/data/opensubtitles_out.tar'),
         ], extract=True)
 
     def documents(self):
@@ -228,7 +228,7 @@ class EnronEmailsDataset(Dataset):
 
     def _download(self):
         download('components/enron_emails/enron_mail_20150507.tar.gz', 'b3da1b3fe0369ec3140bb4fbce94702c33b7da810ec15d718b3fadf5cd748ca7', [
-            Source('direct', 'https://eaidata.bmk.sh/data/enron_mail_20150507.tar.gz'),
+            Source('direct', 'http://eaidata.bmk.sh/data/enron_mail_20150507.tar.gz'),
         ])
 
     def documents(self):
@@ -343,7 +343,7 @@ class UbuntuIRCDataset(Dataset):
     def _download(self):
         download('components/ubuntu_irc/ubuntu_irc_until_2020_9_1.jsonl.zst', 'b2bd119beb2741f428c7f1de954794718ce6e8090e3125be5e64845bb320767e', [
             Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/ubuntu_irc_until_2020_9_1.jsonl.zst'),
-            Source('direct', 'https://eaidata.bmk.sh/data/ubuntu_irc_until_2020_9_1.jsonl.zst'),
+            Source('direct', 'http://eaidata.bmk.sh/data/ubuntu_irc_until_2020_9_1.jsonl.zst'),
         ])
 
     def documents(self):
@@ -367,7 +367,7 @@ class ArXivDataset(Dataset):
 
     def _download(self):
         download('components/arxiv/arxiv.jsonl.zst', '084b894f513986076a7d97e5c323c7fa8ebef1733f151a7fbdb139c19c07b571', [
-            Source('direct', 'https://eaidata.bmk.sh/data/arxiv.jsonl.zst'),
+            Source('direct', 'http://eaidata.bmk.sh/data/arxiv.jsonl.zst'),
         ])
 
     def documents(self):
@@ -392,7 +392,7 @@ class PubMedDataset(Dataset):
     def _download(self):
         download('components/pubmed/PUBMED_title_abstracts_2019_baseline.jsonl.zst', '15c26a83ac2b11378b8e6ba5a16bab92428de29bacb85709834948cfcf1f029b', [
             Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/PUBMED_title_abstracts_2019_baseline.jsonl.zst'),
-            Source('direct', 'https://eaidata.bmk.sh/data/PUBMED_title_abstracts_2019_baseline.jsonl.zst'),
+            Source('direct', 'http://eaidata.bmk.sh/data/PUBMED_title_abstracts_2019_baseline.jsonl.zst'),
         ])
 
     def documents(self):
@@ -442,7 +442,7 @@ class StackExchangeDataset(Dataset):
     def _download(self):
         download('components/stackexchange/stackexchange_dataset.tar', 'f64f31d20db8d8692c1a019314a14974b4911a34ffef126feaf42da88860c666', [
             Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/stackexchange_dataset.tar'),
-            Source('direct', 'https://eaidata.bmk.sh/data/stackexchange_dataset.tar'),
+            Source('direct', 'http://eaidata.bmk.sh/data/stackexchange_dataset.tar'),
         ], extract=True)
 
     def documents(self):
@@ -492,7 +492,7 @@ class PubMedCentralDataset(Dataset):
     def _download(self):
         download('components/pubmedcentral/PMC_extracts.tar.gz', 'dd2ecc79480bd5b78c29ea78af96941c69f6bda3d36a7d510019ccc4848fb867', [
             Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/PMC_extracts.tar.gz'),
-            Source('direct', 'https://eaidata.bmk.sh/data/PMC_extracts.tar.gz'),
+            Source('direct', 'http://eaidata.bmk.sh/data/PMC_extracts.tar.gz'),
         ])
 
     def documents(self):
@@ -574,7 +574,7 @@ class USPTODataset(Dataset):
     def _download(self):
         download('components/uspto/pile_uspto.jsonl.zst.tar', '7a7d2c8e21df2ad0324810a8e675f4d8bdc5ee40b17914a6c0542ddfda1560fd', [
             Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/pile_uspto.tar'),
-            Source('direct', 'https://eaidata.bmk.sh/data/pile_uspto.tar'),
+            Source('direct', 'http://eaidata.bmk.sh/data/pile_uspto.tar'),
         ])
 
     def documents(self):
@@ -624,7 +624,7 @@ class YTSubtitlesDataset(Dataset):
     def _download(self):
         download('components/youtubesubtitles/yt_subs.jsonl.zst', '0b9130b8c92290eba360337fea90c2617721f65d955f785f8755cb5f4a8e319c', [
             Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/yt_subs.jsonl.zst'),
-            Source('direct', 'https://eaidata.bmk.sh/data/yt_subs.jsonl.zst'),
+            Source('direct', 'http://eaidata.bmk.sh/data/yt_subs.jsonl.zst'),
         ])
 
     def documents(self):
@@ -649,7 +649,7 @@ class HackerNewsDataset(Dataset):
     def _download(self):
         download('components/hackernews/hn.tar.gz', '6220e1dcd5d9d71821fee552e4e154ee1ee5f62744e3eab9a4c5001f52e27067', [
             Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/hn.tar.gz'),
-            Source('direct', 'https://eaidata.bmk.sh/data/hn.tar.gz'),
+            Source('direct', 'http://eaidata.bmk.sh/data/hn.tar.gz'),
         ])
 
     def documents(self):
@@ -674,7 +674,7 @@ class GithubDataset(Dataset):
     def _download(self):
         download('components/github/github.jsonl.zst.tar', 'f7a66e8226baf075a42628d10d8eba234460da73b0ffd300736036db9be3b3c3', [
             Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/github.tar'),
-            Source('direct', 'https://eaidata.bmk.sh/data/github.tar'),
+            Source('direct', 'http://eaidata.bmk.sh/data/github.tar'),
         ])
 
     def documents(self):
@@ -699,7 +699,7 @@ class OpenWebText2Dataset(Dataset):
     def _download(self):
         download('components/openwebtext2/openwebtext2.jsonl.zst.tar', '9043d1b93c35ff1a38a17e16c73c009d4617dcaab6da15adc0faf4779739a027', [
             Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/openwebtext2.jsonl.zst.tar'),
-            Source('direct', 'https://eaidata.bmk.sh/data/openwebtext2.jsonl.zst.tar'),
+            Source('direct', 'http://eaidata.bmk.sh/data/openwebtext2.jsonl.zst.tar'),
         ])
 
     def documents(self):
@@ -723,7 +723,7 @@ class CommonCrawlDataset(Dataset):
 
     def _download(self):
         download('components/commoncrawl/pile_cc_filtered_deduped.jsonl.zst', '4906a6731a7d2d9182c40a13d681078ed537508cf75b1d32ad7f7c491b2f272a', [
-            Source('direct', 'https://eaidata.bmk.sh/data/pile_cc_filtered_deduped.jsonl.zst'),
+            Source('direct', 'http://eaidata.bmk.sh/data/pile_cc_filtered_deduped.jsonl.zst'),
         ])
 
     def documents(self):
