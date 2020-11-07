@@ -7,3 +7,4 @@ gitpython
 fasttext
 best-download
 gsutil
+virtualenv
