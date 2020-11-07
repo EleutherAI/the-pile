@@ -197,3 +197,6 @@ def parse_size(sizestr):
         return size * 1024 * 1024 * 1024
     if unit.upper() == 'T':
         return size * 1024 * 1024 * 1024 * 1024
+
+def dummy_meta(xs):
+    return ((x, {}) for x in xs)

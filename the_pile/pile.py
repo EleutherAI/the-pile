@@ -181,12 +181,15 @@ class ThePile(Dataset):
         while True:
             chunk = self.rnd.choices(population=datasets, weights=weights, k=1000)
             for name, dset in chunk:
-                doc = profiler.measured_next(name, dset)
+                doc, meta = profiler.measured_next(name, dset)
 
                 size = utf8len(doc)
                 total_bytes += size
                 pbar.update(size)
-                yield doc
+
+                meta['pile_set_name'] = name
+
+                yield doc, meta
 
                 if total_bytes > self.dataset_bytes:
                     return
@@ -210,10 +213,10 @@ class LimitedDataset(Dataset):
     def documents(self):
         numer = self.limit_size
         denom = self.dataset.size()
-        for doc in dataset_tqdm(self.dataset):
+        for doc, meta in dataset_tqdm(self.dataset):
             docsize = utf8len(doc)
             if self.rnd.random() < numer / denom:
-                yield doc
+                yield doc, meta
                 numer -= docsize
             denom -= docsize
 
@@ -233,10 +236,11 @@ def preprocess_for_fasttext(x):
 
 import collections
 import argparse
+import json
 
 def make_fasttext(pile, keep_frac):
     with open('fasttext_pile.txt', 'w') as fh, open('pile_sample.txt', 'w') as fh2:
-        for x in pile:
+        for x, _ in pile:
             if random.random() < keep_frac:
                 p = preprocess_for_fasttext(x)
                 if len(p) > 100:
@@ -244,21 +248,57 @@ def make_fasttext(pile, keep_frac):
             if random.random() < 0.001:
                 fh2.write(x + '<|endoftext|>\n')
 
-def lang_stats(pile):
+def lang_stats(datasets):
     langdet = fasttext.load_model("lid.176.bin") 
-    n = 0
-    langs = collections.defaultdict(int)
-    for x in pile:
-        details = langdet.predict(x.replace('\n', ' '), k=5)
-        langs[details[0][0].replace('__label__', '')] += 1
-        n += 1
-        print('\n'.join([k + ',' + str(v / n).ljust(9) for k,v in sorted(list(langs.items()), key=lambda x: -x[1])]))
+    with open('language_stats.txt', 'w') as fout:
+        for dset, _ in datasets:
+            print(dset.name())
+            n = 0
+            langs = collections.defaultdict(int)
+            for x, _ in tqdm(dset.documents(), total=dset.num_docs()):
+                details = langdet.predict(x.replace('\n', ' ')[:3000], k=5)
+                langs[details[0][0].replace('__label__', '')] += 1
+                n += 1
+            print('\n'.join([k + ',' + str(v / n).ljust(9) for k,v in sorted(list(langs.items()), key=lambda x: -x[1])]))
+            fout.write(dset.name() + ' ' + json.dumps(langs) + '\n')
+
+
+def sample_from_sets(datasets):
+    random.seed(42)
+    sample_size = 512
+    max_read = 10000
+    with open('set_samples_latex.txt', 'w') as fout:
+        for dset, _ in tqdm(datasets):
+            print(dset.name())
+            fout.write('\\begin{samepage}\n\\subsection{' + dset.name() + '}\n')
+            readamt = random.randint(0, min(max_read, dset.num_docs()))
+            reader = dset.documents()
+            for _ in range(readamt): next(reader)
+            
+            doc, _ = next(reader)
+
+            spacing = max(len(doc) - sample_size, 0)
+            if spacing > 0:
+                offset = random.randrange(0, spacing)
+            else:
+                offset = 0
+            doc = doc[offset:offset+sample_size]
+
+            page = """
+\\begin{quote}
+""" + doc + """
+\\end{quote}
+\\end{samepage}
+"""
+            fout.write(page)
+            fout.flush()
+
 
 
 def docs_for_dedupe():
     # format: ((priority, offset, sha256sum), document)
     dset = CommonCrawlDataset()
-    for i, doc in dset.documents():
+    for i, (doc, _) in dset.documents():
         yield (100, i, sha256str(doc)), doc
 
 
@@ -266,14 +306,15 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('--force_download', action='store_true', help='force download all')
-    parser.add_argument('--limit', type=str, help='limit output size - this option causes pile_size tokens to be generated and then limit tokens to be sampled')
+    parser.add_argument('--limit', type=str, help='limit output size - this option causes read_amount tokens to be generated and then limit tokens to be sampled')
     parser.add_argument('--using', type=str, default='pile', help='the dataset to use')
     parser.add_argument('--chunk', type=str, help='output chunk size (for make_lmd)')
     parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
     parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
-    parser.add_argument('--make_analysis', action='store_true', help='make analysis data')
+    parser.add_argument('--make_lang_analysis', action='store_true', help='make language analysis data')
+    parser.add_argument('--make_dataset_samples', action='store_true', help='make dataset sample data')
     parser.add_argument('--profile', action='store_true', help='turn on profiler')
-    parser.add_argument('--pile_size', type=str, default='1200T', help='the size of the data read from the set')
+    parser.add_argument('--read_amount', type=str, default='1200G', help='the size of the data read from the set')
 
     args = parser.parse_args()
     random.seed(42)
@@ -282,10 +323,10 @@ if __name__ == '__main__':
         # add CC
         datasets.append((CommonCrawlDataset(), 1.))
 
-    print(mk_table(datasets, parse_size(args.pile_size)))
+    print(mk_table(datasets, parse_size(args.read_amount)))
 
     if args.using == 'pile' or args.using == 'pile_no_cc':
-        pile = ThePile(datasets, parse_size(args.pile_size), profile=args.profile)
+        pile = ThePile(datasets, parse_size(args.read_amount), profile=args.profile)
     elif args.using == 'cc':
         pile = CommonCrawlDataset()
     elif args.using == 'owt2':
@@ -310,8 +351,8 @@ if __name__ == '__main__':
             chunk_size = parse_size(args.chunk)
 
         cursize = 0
-        for doc in pile.documents():
-            ar.add_data(doc)
+        for doc, meta in pile.documents():
+            ar.add_data(doc, meta)
             cursize += len(doc)
             if args.chunk and cursize > chunk_size:
                 cursize = 0
@@ -321,3 +362,9 @@ if __name__ == '__main__':
 
     if args.make_fasttext:
         make_fasttext(pile.documents(), 0.1)
+    
+    if args.make_dataset_samples:
+        sample_from_sets(datasets)
+    
+    if args.make_lang_analysis:
+        lang_stats(datasets)
