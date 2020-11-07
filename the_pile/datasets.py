@@ -81,7 +81,7 @@ class OpensubtitlesDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(lmd.Reader('components/opensubtitles/out').stream_data())
+        return dummy_meta(lmd.Reader('components/opensubtitles/out').stream_data())
 
     def clean(self):
         rm_if_exists('components/opensubtitles')
@@ -107,7 +107,7 @@ class BookCorpusDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(map(fread, ls('components/bookcorpus/books1/epubtxt')))
+        return dummy_meta(map(fread, ls('components/bookcorpus/books1/epubtxt')))
 
     def clean(self):
         rm_if_exists('components/bookcorpus')
@@ -140,7 +140,7 @@ class OpenWebTextDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(lmd.Reader('components/openwebtext/openwebtext').stream_data())
+        return dummy_meta(lmd.Reader('components/openwebtext/openwebtext').stream_data())
 
     def clean(self):
         rm_if_exists('components/openwebtext')
@@ -173,7 +173,7 @@ class GutenbergDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(map(fread, ls('components/gutenberg/pg19_train')))
+        return dummy_meta(map(fread, ls('components/gutenberg/pg19_train')))
 
     def clean(self):
         rm_if_exists('components/gutenberg')
@@ -206,7 +206,7 @@ class DMMathDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(concat(
+        return dummy_meta(concat(
             map(
                 lambda x: map(fread, ls('components/dm_math/mathematics_dataset-v1.0/train-' + x)), 
                 ['easy', 'medium', 'hard'])
@@ -234,7 +234,7 @@ class EnronEmailsDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/enron_emails/out').stream_data(get_meta=True)
+        return lmd.Reader('components/enron_emails/out').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/enron_emails')
@@ -260,7 +260,7 @@ class LiteroticaDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/literotica/Literotica.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/literotica/Literotica.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/literotica')
@@ -324,7 +324,7 @@ class CORD19Dataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/cord19/out').stream_data(get_meta=True)
+        return lmd.Reader('components/cord19/out').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/cord19')
@@ -349,7 +349,7 @@ class UbuntuIRCDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/ubuntu_irc/ubuntu_irc_until_2020_9_1.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/ubuntu_irc/ubuntu_irc_until_2020_9_1.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/ubuntu_irc')
@@ -373,7 +373,7 @@ class ArXivDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/arxiv/arxiv.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/arxiv/arxiv.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/arxiv')
@@ -398,7 +398,7 @@ class PubMedDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/pubmed/PUBMED_title_abstracts_2019_baseline.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/pubmed/PUBMED_title_abstracts_2019_baseline.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/pubmed')
@@ -423,7 +423,7 @@ class ExPorterDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/exporter/NIH_ExPORTER_awarded_grant_text.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/exporter/NIH_ExPORTER_awarded_grant_text.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/exporter')
@@ -448,7 +448,7 @@ class StackExchangeDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(lmd.Reader('components/stackexchange/out').stream_data())
+        return dummy_meta(lmd.Reader('components/stackexchange/out').stream_data())
 
     def clean(self):
         rm_if_exists('components/stackexchange/out')
@@ -473,7 +473,7 @@ class FreeLawDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/freelaw/FreeLaw_Opinions.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/freelaw/FreeLaw_Opinions.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/freelaw')
@@ -498,7 +498,7 @@ class PubMedCentralDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(map(strip_markdown_colons, lmd.Reader('components/pubmedcentral/PMC_extracts.tar.gz').stream_data()))
+        return dummy_meta(map(strip_markdown_colons, lmd.Reader('components/pubmedcentral/PMC_extracts.tar.gz').stream_data()))
 
     def clean(self):
         rm_if_exists('components/pubmedcentral')
@@ -530,7 +530,7 @@ class CZICDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/czic/GOVINFO_CZIC_KL.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/czic/GOVINFO_CZIC_KL.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/czic')
@@ -555,7 +555,7 @@ class PhilPapersDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/philpapers/PhilArchive.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/philpapers/PhilArchive.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/philpapers')
@@ -580,7 +580,7 @@ class USPTODataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/uspto/pile_uspto.jsonl.zst.tar').stream_data(get_meta=True)
+        return lmd.Reader('components/uspto/pile_uspto.jsonl.zst.tar').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/uspto')
@@ -605,7 +605,7 @@ class EuroParlDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/europarl/EuroParliamentProceedings_1996_2011.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/europarl/EuroParliamentProceedings_1996_2011.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/europarl')
@@ -630,7 +630,7 @@ class YTSubtitlesDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/youtubesubtitles/yt_subs.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/youtubesubtitles/yt_subs.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/youtubesubtitles')
@@ -655,7 +655,7 @@ class HackerNewsDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(lmd.Reader('components/hackernews/hn.tar.gz').stream_data())
+        return dummy_meta(lmd.Reader('components/hackernews/hn.tar.gz').stream_data())
 
     def clean(self):
         rm_if_exists('components/hackernews')
@@ -680,7 +680,7 @@ class GithubDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from filter(lambda x: len(x[0]) < 100000, lmd.Reader('components/github/github.jsonl.zst.tar').stream_data(get_meta=True))
+        return filter(lambda x: len(x[0]) < 100000, lmd.Reader('components/github/github.jsonl.zst.tar').stream_data(get_meta=True))
 
     def clean(self):
         rm_if_exists('components/github')
@@ -705,7 +705,7 @@ class OpenWebText2Dataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from map(lambda x: (remove_advertisement(x[0]), x[1]), lmd.Reader('components/openwebtext2/openwebtext2.jsonl.zst.tar').stream_data(get_meta=True))
+        return map(lambda x: (remove_advertisement(x[0]), x[1]), lmd.Reader('components/openwebtext2/openwebtext2.jsonl.zst.tar').stream_data(get_meta=True))
 
     def clean(self):
         rm_if_exists('components/openwebtext2')
@@ -729,7 +729,7 @@ class CommonCrawlDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/commoncrawl/pile_cc_filtered_deduped.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/commoncrawl/pile_cc_filtered_deduped.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/commoncrawl')
