@@ -1,49 +1,24 @@
 import re
 import os
 import hashlib
-from concurrent_iterator.thread import Producer
 from functools import reduce
 import operator
 import collections
-import urllib.request
 from pathlib import Path
-import gdown
 import tarfile
-import requests
 import shutil
+
+import gdown
 from tqdm import tqdm
+from best_download import download_file
 
 def touch(x):
     Path(x).touch()
-
-def download_file(url, to):
-    # modified from https://stackoverflow.com/a/37573701
-    print('Downloading {}'.format(url))
-
-    response = requests.get(url, stream=True)
-    size = int(response.headers.get('content-length', 0))
-    block_size = 1024*1024
-    pbar = tqdm(total=size, unit='iB', unit_scale=True)
-    with open(to, 'wb') as fout:
-        for data in response.iter_content(block_size):
-            pbar.update(len(data))
-            fout.write(data)
-    pbar.close()
-    assert not (size != 0 and pbar.n != size)
 
 Source = collections.namedtuple('Source', ['type', 'url'])
 
 def download(fname, checksum, sources, extract=False):
     if os.path.exists(fname + '.done'): return
-    if os.path.exists(fname):
-        try:
-            print(fname, 'already exists, verifying checksum')
-            sha256sum(fname, expected=checksum)
-            touch(fname + '.done')
-            return
-        except AssertionError:
-            print('{} exists but doesn\'t match checksum!'.format(fname))
-            rm_if_exists(fname)
             
     print('Finding source for', fname)
 
@@ -54,26 +29,37 @@ def download(fname, checksum, sources, extract=False):
         try:
             # todo: implement torrent handling
             if source.type == 'direct':
-                download_file(source.url, fname)
+                download_file(source.url, fname, checksum)
             elif source.type == 'gdrive':
+                if os.path.exists(fname):
+                    try:
+                        print(fname, 'already exists.')
+                        sha256sum(fname, expected=checksum)
+                        touch(fname + '.done')
+                        return
+                    except AssertionError:
+                        print('{} exists but doesn\'t match checksum!'.format(fname))
+                        rm_if_exists(fname)
+
                 gdown.download(source.url, fname, quiet=False)
+                sha256sum(fname, expected=checksum)
             elif source.type == 'gcloud':
-                raise NotImplementedError('gcloud download not implemented!')
-            
-            sha256sum(fname, expected=checksum)
+                raise NotImplementedError('gcloud download not implemented!')   
 
             if extract:
                 tar_xf(fname)
                 rm_if_exists(fname)
             touch(fname + '.done')
             return
+        except SystemExit:
+            raise
         except KeyboardInterrupt:
             raise
         except:
             import traceback
             traceback.print_exc()
             print('Download method [{}] {} failed, trying next option'.format(source.type, source.url))
-            rm_if_exists(fname)
+            # rm_if_exists(fname)
             continue
 
         break
@@ -133,14 +119,17 @@ def sha256str(s):
     h.update(s)
     return h.hexdigest()
 
-
 def sha256sum(filename, expected=None):
     h  = hashlib.sha256()
     b  = bytearray(128*1024)
     mv = memoryview(b)
+    progress = tqdm(total=os.path.getsize(filename), unit="byte", unit_scale=1)
+    tqdm.write(f"Verifying checksum for {filename}")
     with open(filename, 'rb', buffering=0) as f:
         for n in iter(lambda : f.readinto(mv), 0):
             h.update(mv[:n])
+            progress.update(n)
+    progress.close()
     
     if expected:
         assert h.hexdigest() == expected
@@ -208,3 +197,6 @@ def parse_size(sizestr):
         return size * 1024 * 1024 * 1024
     if unit.upper() == 'T':
         return size * 1024 * 1024 * 1024 * 1024
+
+def dummy_meta(xs):
+    return ((x, {}) for x in xs)

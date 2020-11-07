@@ -68,10 +68,9 @@ datasets = [
     ),
 ]
 
-train_chars = 1200 * 1024 * 1024 * 1024
-
 datasets_new = []
 target_size = 950 * 1024 * 1024 * 1024
+train_chars = 1200 * 1024 * 1024 * 1024
 for dsets, tgt_frac in datasets:
     dsets_size_wt = sum([x.size()*w for x, w in dsets])
     dsets_twt     = sum([w          for _, w in dsets])
@@ -93,7 +92,7 @@ def take(n, iter):
             break
     return ret
 
-def mk_table(datasets):
+def mk_table(datasets, train_chars):
     values = []
 
     total_weight = sum([x[1] * x[0].size() for x in datasets])
@@ -115,6 +114,8 @@ def mk_table(datasets):
 
 
 def dataset_tqdm(dset):
+    if isinstance(dset, ThePile):
+        return dset.documents()
     pbar = tqdm(total=dset.size(), unit='B', unit_scale=True, unit_divisor=1024)
     for doc in dset.documents():
         pbar.update(utf8len(doc))
@@ -154,6 +155,7 @@ class ThePile(Dataset):
         self.datasets = datasets
         self.dataset_bytes = dataset_bytes
         self.profile = profile
+        self.rnd = random.Random(42)
     
     def name(self):
         return "The Pile"
@@ -169,8 +171,6 @@ class ThePile(Dataset):
             relative_weight = weight * dataset.num_docs() / total_weight
             datasets.append((dataset.name(), cycle_documents(dataset)))
             weights.append(relative_weight)
-
-        random.seed(42)
         
         # yield from dataset until right number of bytes
         total_bytes = 0
@@ -179,14 +179,17 @@ class ThePile(Dataset):
 
         profiler = Profiler(profile=self.profile)
         while True:
-            chunk = random.choices(population=datasets, weights=weights, k=1000)
+            chunk = self.rnd.choices(population=datasets, weights=weights, k=1000)
             for name, dset in chunk:
-                doc = profiler.measured_next(name, dset)
+                doc, meta = profiler.measured_next(name, dset)
 
                 size = utf8len(doc)
                 total_bytes += size
                 pbar.update(size)
-                yield doc
+
+                meta['pile_set_name'] = name
+
+                yield doc, meta
 
                 if total_bytes > self.dataset_bytes:
                     return
@@ -202,6 +205,7 @@ class LimitedDataset(Dataset):
     def __init__(self, dataset, limit_size):
         self.dataset = dataset
         self.limit_size = limit_size
+        self.rnd = random.Random(42)
     
     def name(self):
         return self.dataset.name() + " (truncated)"
@@ -209,10 +213,10 @@ class LimitedDataset(Dataset):
     def documents(self):
         numer = self.limit_size
         denom = self.dataset.size()
-        for doc in self.dataset.documents():
+        for doc, meta in dataset_tqdm(self.dataset):
             docsize = utf8len(doc)
-            if random.random() < numer / denom:
-                yield doc
+            if self.rnd.random() < numer / denom:
+                yield doc, meta
                 numer -= docsize
             denom -= docsize
 
@@ -232,21 +236,11 @@ def preprocess_for_fasttext(x):
 
 import collections
 import argparse
-
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--download', action='store_true', help='force download all')
-parser.add_argument('--limit', type=str, help='limit output size')
-parser.add_argument('--using', type=str, default='pile', help='the dataset to use')
-parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
-parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
-parser.add_argument('--make_analysis', action='store_true', help='make analysis data')
-parser.add_argument('--profile', action='store_true', help='turn on profiler')
-
-args = parser.parse_args()
+import json
 
 def make_fasttext(pile, keep_frac):
     with open('fasttext_pile.txt', 'w') as fh, open('pile_sample.txt', 'w') as fh2:
-        for x in pile:
+        for x, _ in pile:
             if random.random() < keep_frac:
                 p = preprocess_for_fasttext(x)
                 if len(p) > 100:
@@ -254,43 +248,95 @@ def make_fasttext(pile, keep_frac):
             if random.random() < 0.001:
                 fh2.write(x + '<|endoftext|>\n')
 
-def lang_stats(pile):
+def lang_stats(datasets):
     langdet = fasttext.load_model("lid.176.bin") 
-    n = 0
-    langs = collections.defaultdict(int)
-    for x in pile:
-        details = langdet.predict(x.replace('\n', ' '), k=5)
-        langs[details[0][0].replace('__label__', '')] += 1
-        n += 1
-        print('\n'.join([k + ',' + str(v / n).ljust(9) for k,v in sorted(list(langs.items()), key=lambda x: -x[1])]))
+    with open('language_stats.txt', 'w') as fout:
+        for dset, _ in datasets:
+            print(dset.name())
+            n = 0
+            langs = collections.defaultdict(int)
+            for x, _ in tqdm(dset.documents(), total=dset.num_docs()):
+                details = langdet.predict(x.replace('\n', ' ')[:3000], k=5)
+                langs[details[0][0].replace('__label__', '')] += 1
+                n += 1
+            print('\n'.join([k + ',' + str(v / n).ljust(9) for k,v in sorted(list(langs.items()), key=lambda x: -x[1])]))
+            fout.write(dset.name() + ' ' + json.dumps(langs) + '\n')
+
+
+def sample_from_sets(datasets):
+    random.seed(42)
+    sample_size = 512
+    max_read = 10000
+    with open('set_samples_latex.txt', 'w') as fout:
+        for dset, _ in tqdm(datasets):
+            print(dset.name())
+            fout.write('\\begin{samepage}\n\\subsection{' + dset.name() + '}\n')
+            readamt = random.randint(0, min(max_read, dset.num_docs()))
+            reader = dset.documents()
+            for _ in range(readamt): next(reader)
+            
+            doc, _ = next(reader)
+
+            spacing = max(len(doc) - sample_size, 0)
+            if spacing > 0:
+                offset = random.randrange(0, spacing)
+            else:
+                offset = 0
+            doc = doc[offset:offset+sample_size]
+
+            page = """
+\\begin{quote}
+""" + doc + """
+\\end{quote}
+\\end{samepage}
+"""
+            fout.write(page)
+            fout.flush()
+
 
 
 def docs_for_dedupe():
     # format: ((priority, offset, sha256sum), document)
     dset = CommonCrawlDataset()
-    for i, doc in dset.documents():
+    for i, (doc, _) in dset.documents():
         yield (100, i, sha256str(doc)), doc
 
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--force_download', action='store_true', help='force download all')
+    parser.add_argument('--limit', type=str, help='limit output size - this option causes read_amount tokens to be generated and then limit tokens to be sampled')
+    parser.add_argument('--using', type=str, default='pile', help='the dataset to use')
+    parser.add_argument('--chunk', type=str, help='output chunk size (for make_lmd)')
+    parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
+    parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
+    parser.add_argument('--make_lang_analysis', action='store_true', help='make language analysis data')
+    parser.add_argument('--make_dataset_samples', action='store_true', help='make dataset sample data')
+    parser.add_argument('--profile', action='store_true', help='turn on profiler')
+    parser.add_argument('--read_amount', type=str, default='1200G', help='the size of the data read from the set')
+
+    args = parser.parse_args()
     random.seed(42)
 
     if args.using != 'pile_no_cc':
         # add CC
         datasets.append((CommonCrawlDataset(), 1.))
 
-    print(mk_table(datasets))
+    print(mk_table(datasets, parse_size(args.read_amount)))
 
     if args.using == 'pile' or args.using == 'pile_no_cc':
-        pile = ThePile(datasets, train_chars, profile=args.profile)
+        pile = ThePile(datasets, parse_size(args.read_amount), profile=args.profile)
     elif args.using == 'cc':
-        pile = dataset_tqdm(CommonCrawlDataset())
+        pile = CommonCrawlDataset()
     elif args.using == 'owt2':
-        pile = dataset_tqdm(OpenWebText2Dataset())
+        pile = OpenWebText2Dataset()
+    elif args.using == 'bibliotik':
+        pile = BibliotikDataset()
     else:
-        print('Unknown dataset!')
+        print('We don\'t have a shortcut for that yet!')
 
-    if args.download:
+    if args.force_download:
         for dset, _ in datasets:
             dset._download()
     
@@ -300,10 +346,25 @@ if __name__ == '__main__':
 
     if args.make_lmd:
         ar = lmd.Archive('pile_output')
-        for doc in pile.documents():
-            ar.add_data(doc)
+
+        if args.chunk:
+            chunk_size = parse_size(args.chunk)
+
+        cursize = 0
+        for doc, meta in pile.documents():
+            ar.add_data(doc, meta)
+            cursize += len(doc)
+            if args.chunk and cursize > chunk_size:
+                cursize = 0
+                ar.commit(archive_name=args.using)
         
         ar.commit(archive_name=args.using)
 
     if args.make_fasttext:
         make_fasttext(pile.documents(), 0.1)
+    
+    if args.make_dataset_samples:
+        sample_from_sets(datasets)
+    
+    if args.make_lang_analysis:
+        lang_stats(datasets)

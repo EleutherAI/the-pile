@@ -2,7 +2,7 @@
 
 The Pile is a large, diverse, open source language modelling data set that consists of many smaller datasets combined together. The objective is to obtain text from as many modalities as possible to ensure that models trained using The Pile will have much broader generalization abilities. We are currently developing Version 1, with an ultimate goal of 1 TiB of English text. After the completion of Version 1, our next goal is a fully-multilingual, 10TiB text dataset.
 
-The Pile is currently still under development.
+The Pile is currently **under heavy development**. The interface may change rapidly and without warning. 
 
 
 |    Component    | Raw Size |Weight|Epochs|Effective Size|Mean Document Size|
@@ -55,6 +55,7 @@ python the_pile/pile.py --download
 
 To generate fasttext training data for CC filtering (OWT2 only):
 ```
+sudo apt install build-essential
 python the_pile/pile.py --using owt2 --make_fasttext 
 ```
 
@@ -72,3 +73,4 @@ To claim responsibility for implementing an unclaimed dataset, leave a comment o
 
 To raise an issue that is not proposing a new dataset, open an issue with the tag [![Feature Request](https://img.shields.io/github/labels/EleutherAI/The-Pile/Feature%20Request)](https://github.com/EleutherAI/The-Pile/labels/Feature%20Request) or [![Bug](https://img.shields.io/github/labels/EleutherAI/The-Pile/Bug)](https://github.com/EleutherAI/The-Pile/labels/Bug) as appropriate.
 
+**In preparation for the initial release, we are no longer accepting additions to the *master* branch. If you would like to contribute a dataset, please submit the pull request to the *Version2* branch.**
