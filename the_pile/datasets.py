@@ -227,14 +227,14 @@ class EnronEmailsDataset(Dataset):
         return "Enron Emails"
 
     def _download(self):
-        download('components/enron_emails/enron_mail_20150507.tar.gz', 'b3da1b3fe0369ec3140bb4fbce94702c33b7da810ec15d718b3fadf5cd748ca7', [
-            Source('direct', 'http://eaidata.bmk.sh/data/enron_mail_20150507.tar.gz'),
+        download('components/enron_emails/enron_emails.jsonl.zst', '6968dd2d6d9c4328ee3b77b263aad38401b77c326f693ce051c98a3f215bf583', [
+            Source('direct', 'http://eaidata.bmk.sh/data/enron_emails.jsonl.zst'),
         ])
 
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/enron_emails/out').stream_data(get_meta=True)
+        yield from lmd.Reader('components/enron_emails/enron_emails.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/enron_emails')
