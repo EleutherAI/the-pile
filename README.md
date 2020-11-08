@@ -5,32 +5,33 @@ The Pile is a large, diverse, open source language modelling data set that consi
 The Pile is currently **under heavy development**. The interface may change rapidly and without warning. 
 
 
-|    Component    | Raw Size  |Weight|Epochs|Effective Size|Mean Document Size|
-|-----------------|-----------|------|-----:|--------------|------------------|
-|CommonCrawl      |227.12 GiB |19.29%|1.0194|227.12 GiB    |4.33 KiB          |
-|PubMed Central   |90.27 GiB  |11.66%|1.5501|137.27 GiB    |30.55 KiB         |
-|Bibliotik        |100.96 GiB |10.20%|1.2125|120.08 GiB    |538.36 KiB        |
-|OpenWebText2     |62.77 GiB  |9.69% |1.8530|114.09 GiB    |3.85 KiB          |
-|ArXiv            |56.21 GiB  |9.68% |2.0669|113.96 GiB    |46.61 KiB         |
-|Github           |630.64 GiB |8.07% |0.1536|95.00 GiB     |11.68 KiB         |
-|FreeLaw          |51.15 GiB  |6.61% |1.5501|77.78 GiB     |15.06 KiB         |
-|StackExchange    |32.20 GiB  |4.97% |1.8530|58.52 GiB     |2.16 KiB          |
-|USPTO            |22.90 GiB  |3.95% |2.0669|46.44 GiB     |4.08 KiB          |
-|PubMed Abstracts |19.26 GiB  |3.32% |2.0669|39.06 GiB     |1.30 KiB          |
-|Gutenberg (PG-19)|10.88 GiB  |2.20% |2.4251|25.87 GiB     |398.73 KiB        |
-|Wikipedia (en)   |6.38 GiB   |1.48% |2.7795|17.39 GiB     |1.11 KiB          |
-|DM Mathematics   |7.75 GiB   |1.38% |2.1366|16.23 GiB     |48340.81 KiB      |
-|OpenSubtitles    |12.98 GiB  |1.32% |1.2233|15.58 GiB     |30.48 KiB         |
-|Literotica       |11.60 GiB  |1.17% |1.2125|13.80 GiB     |25.69 KiB         |
-|BookCorpus       |6.30 GiB   |0.96% |1.8188|11.24 GiB     |369.87 KiB        |
-|Ubuntu IRC       |5.52 GiB   |0.84% |1.8349|9.93 GiB      |2060.85 KiB       |
-|EuroParl         |4.59 GiB   |0.70% |1.8349|8.25 GiB      |68.87 KiB         |
-|PhilPapers       |2.38 GiB   |0.61% |3.1003|7.23 GiB      |73.37 KiB         |
-|HackerNews       |3.90 GiB   |0.60% |1.8349|7.02 GiB      |4.92 KiB          |
-|YoutubeSubtitles |3.73 GiB   |0.57% |1.8349|6.72 GiB      |22.55 KiB         |
-|NIH ExPorter     |1.89 GiB   |0.49% |3.1003|5.76 GiB      |2.11 KiB          |
-|Enron Emails     |0.88 GiB   |0.24% |3.2049|2.77 GiB      |1.78 KiB          |
-|**Total**        |1372.26 GiB|      |      |1177.12 GiB   |7.85 KiB          |
+|    Component    | Raw Size |Weight|Epochs|Effective Size|Mean Document Size|
+|-----------------|----------|------|-----:|--------------|------------------|
+|CommonCrawl      |227.12 GiB|19.29%|1.0194|227.12 GiB    |4.33 KiB          |
+|PubMed Central   |90.27 GiB |11.66%|1.5501|137.27 GiB    |30.55 KiB         |
+|Bibliotik        |100.96 GiB|10.20%|1.2125|120.08 GiB    |538.36 KiB        |
+|OpenWebText2     |62.77 GiB |9.69% |1.8530|114.09 GiB    |3.85 KiB          |
+|ArXiv            |56.21 GiB |9.68% |2.0669|113.96 GiB    |46.61 KiB         |
+|Github           |630.64 GiB|8.07% |0.1536|95.00 GiB     |11.68 KiB         |
+|FreeLaw          |51.15 GiB |6.61% |1.5501|77.78 GiB     |15.06 KiB         |
+|StackExchange    |32.20 GiB |4.97% |1.8530|58.52 GiB     |2.16 KiB          |
+|USPTO            |22.90 GiB |3.95% |2.0669|46.44 GiB     |4.08 KiB          |
+|PubMed Abstracts |19.26 GiB |3.32% |2.0669|39.06 GiB     |1.30 KiB          |
+|Gutenberg (PG-19)|10.88 GiB |2.20% |2.4251|25.87 GiB     |398.73 KiB        |
+|Wikipedia (en)   |6.38 GiB  |1.48% |2.7795|17.39 GiB     |1.11 KiB          |
+|DM Mathematics   |7.75 GiB  |1.38% |2.1366|16.23 GiB     |48340.81 KiB      |
+|OpenSubtitles    |12.98 GiB |1.32% |1.2233|15.58 GiB     |30.48 KiB         |
+|Literotica       |11.60 GiB |1.17% |1.2125|13.80 GiB     |25.69 KiB         |
+|BookCorpus       |6.30 GiB  |0.96% |1.8188|11.24 GiB     |369.87 KiB        |
+|Ubuntu IRC       |5.52 GiB  |0.84% |1.8349|9.93 GiB      |2060.85 KiB       |
+|EuroParl         |4.59 GiB  |0.70% |1.8349|8.25 GiB      |68.87 KiB         |
+|PhilPapers       |2.38 GiB  |0.61% |3.1003|7.23 GiB      |73.37 KiB         |
+|HackerNews       |3.90 GiB  |0.60% |1.8349|7.02 GiB      |4.92 KiB          |
+|YoutubeSubtitles |3.73 GiB  |0.57% |1.8349|6.72 GiB      |22.55 KiB         |
+|NIH ExPorter     |1.89 GiB  |0.49% |3.1003|5.76 GiB      |2.11 KiB          |
+|Enron Emails     |0.88 GiB  |0.24% |3.2049|2.77 GiB      |1.78 KiB          |
+|**Total**        |          |      |      |1177.12 GiB   |7.85 KiB          |
+
 
 
 
