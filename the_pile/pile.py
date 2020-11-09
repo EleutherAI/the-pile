@@ -364,7 +364,7 @@ if __name__ == '__main__':
 
     print(mk_table(datasets, parse_size(args.read_amount)))
 
-    if args.using == 'reprod_pile' or args.using == 'pile_no_cc':
+    if args.using == 'pile_reprod' or args.using == 'pile_reprod_no_cc':
         pile = PileReplication(datasets, parse_size(args.read_amount), profile=args.profile)
     elif args.using == 'cc':
         pile = CommonCrawlDataset()
