@@ -137,7 +137,7 @@ def mk_table(datasets, train_chars, print_latex=True):
 
 
 def dataset_tqdm(dset):
-    if isinstance(dset, ThePile):
+    if isinstance(dset, PileReplication):
         return dset.documents()
     pbar = tqdm(total=dset.size(), unit='B', unit_scale=True, unit_divisor=1024)
     for doc in dset.documents():
@@ -173,7 +173,7 @@ class Profiler:
             return doc
 
 
-class ThePile(Dataset):
+class PileReplication(Dataset):
     def __init__(self, datasets, dataset_bytes, profile=False):
         self.datasets = datasets
         self.dataset_bytes = dataset_bytes
@@ -181,7 +181,7 @@ class ThePile(Dataset):
         self.rnd = random.Random(42)
     
     def name(self):
-        return "The Pile"
+        return "Custom Pile"
 
     def documents(self):
         datasets = []
@@ -222,6 +222,22 @@ class ThePile(Dataset):
     
     def size(self):
         return self.dataset_bytes
+
+
+class ThePile(Dataset):
+    def name(self):
+        return "The Pile"
+
+    def _download(self):
+        # TODO: host final pile
+
+    def documents(self):
+        self._download()
+
+        return lmd.Reader('pile_output').stream_data(get_meta=True)
+
+    def clean(self):
+        rm_if_exists('pile_output')
 
 
 class LimitedDataset(Dataset):
@@ -348,10 +364,12 @@ if __name__ == '__main__':
 
     print(mk_table(datasets, parse_size(args.read_amount)))
 
-    if args.using == 'pile' or args.using == 'pile_no_cc':
-        pile = ThePile(datasets, parse_size(args.read_amount), profile=args.profile)
+    if args.using == 'reprod_pile' or args.using == 'pile_no_cc':
+        pile = PileReplication(datasets, parse_size(args.read_amount), profile=args.profile)
     elif args.using == 'cc':
         pile = CommonCrawlDataset()
+    elif args.using == 'pile':
+        pile = ThePile()
     elif args.using == 'owt2':
         pile = OpenWebText2Dataset()
     elif args.using == 'bibliotik':
