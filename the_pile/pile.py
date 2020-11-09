@@ -92,7 +92,7 @@ def take(n, iter):
             break
     return ret
 
-def mk_table(datasets, train_chars):
+def mk_table(datasets, train_chars, print_latex=True):
     values = []
 
     total_weight = sum([x[1] * x[0].size() for x in datasets])
@@ -100,16 +100,39 @@ def mk_table(datasets, train_chars):
     for dataset, weight in datasets:
         size = dataset.size()
         relative_weight = size * weight / total_weight
-        values.append([dataset.name(), size, '{:.2%}'.format(relative_weight), train_chars / size * relative_weight, size * weight, humanbytes(size / dataset.num_docs())])
+        values.append([dataset.name(), size, '{:.2%}'.format(relative_weight), '{:.4f}'.format(train_chars / size * relative_weight), size * weight, humanbytes(size / dataset.num_docs(), 'KiB')])
     
     values.sort(key=lambda x: -x[4])
-    values.append(['**Total**', sum([x[1] for x in values]), "", "", sum([x[4] for x in values]), humanbytes(sum([x[1] for x in values]) / sum(x[0].num_docs() for x in datasets))])
-    values = [[x[0], humanbytes(x[1]), x[2], x[3], humanbytes(x[4]), x[5]] for x in values]
+    values.append(['**Total**', "", "", "", sum([x[4] for x in values]), humanbytes(sum([x[1] for x in values]) / sum(x[0].num_docs() for x in datasets), 'KiB')])
+    values = [[x[0], humanbytes(x[1], 'GiB') if x[1] else "", x[2], x[3], humanbytes(x[4], 'GiB'), x[5]] for x in values]
 
     writer = MarkdownTableWriter()
     writer.table_name = "The Pile™"
     writer.headers = ["Component", "Raw Size", "Weight", "Epochs", "Effective Size", "Mean Document Size"]
     writer.value_matrix = values
+
+    if print_latex:
+        rows = []
+        for row in values[:-1]:
+            rows.append("        " + " & ".join(map(lambda x: str(x).replace('%', r'\%'), row)) + r" \\")
+        totalrow = " & ".join(map(lambda x: r'\textbf{%s}' % str(x).replace('%', r'\%') if x else "", values[-1][1:])) + r" \\"
+        latex = r"""
+\begin{table*}[t!]
+    \centering
+    \begin{tabular}{l r r r r r}
+    \toprule
+        \textbf{Component} & \textbf{Raw Size} & \textbf{Weight} & \textbf{Copies} & \textbf{Effective Size} & \textbf{Mean Document Size} \\
+        \midrule
+""" + "\n".join(rows) + r"""
+        \midrule
+        \textbf{The Pile} & """ + totalrow + r"""
+        \bottomrule
+    \end{tabular}
+\caption{Overview of datasets in \textit{The Pile} before deduplication. The Pile is distributed with a predefined up/down-sampling of the different constituent datasets.}
+\label{table:pile_overview}
+\end{table*}
+        """
+        print(latex)
     return writer.dumps()
 
 
