@@ -315,6 +315,7 @@ def lang_stats(pile):
 def sample_from_sets(datasets, n_docs):
     random.seed(42)
     for dset, _ in datasets:
+        print(dset.name())
         fname = 'dataset_samples/{}.json'.format(dset.name().replace(' ', '_'))
         if os.path.exists(fname): continue
 
