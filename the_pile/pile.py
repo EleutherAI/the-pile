@@ -293,21 +293,21 @@ def make_fasttext(pile, keep_frac):
 def lang_stats(pile):
     langdet = fasttext.load_model("lid.176.bin") 
     langs = collections.defaultdict(lambda: collections.defaultdict(int))
-    with open('language_stats.txt', 'w') as fout:
-        for i, (data, meta) in enumerate(pile.documents()):
-            details = langdet.predict(data.replace('\n', ' ')[:3000], k=1)
+    for i, (data, meta) in enumerate(pile.documents()):
+        details = langdet.predict(data.replace('\n', ' ')[:3000], k=1)
 
-            langs[meta['pile_set_name']][details[0][0].replace('__label__', '')] += 1
+        langs[meta['pile_set_name']][details[0][0].replace('__label__', '')] += 1
 
-            if (i+1) % 100000 == 0:
-                for name, x in langs.items():
-                    print('========= {} =========='.format(name))
-                    print('\n'.join([k + ',' + str(v / sum(x.values())).ljust(9) for k,v in sorted(list(x.items()), key=lambda x: -x[1])]))
+        if (i+1) % 100000 == 0:
+            for name, x in langs.items():
+                print('========= {} =========='.format(name))
+                print('\n'.join([k + ',' + str(v / sum(x.values())).ljust(9) for k,v in sorted(list(x.items()), key=lambda x: -x[1])]))
 
-                ob = {
-                    'langs': langs
-                }
-                fout.write(json.dumps(ob)+'\n')
+            ob = {
+                'langs': langs
+            }
+            with open('language_stats.json', 'w') as fout:
+                fout.write(json.dumps(ob))
 
 
 def sample_from_sets(datasets, n_docs):
