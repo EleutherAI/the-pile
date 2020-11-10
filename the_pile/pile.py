@@ -239,7 +239,9 @@ class ThePile(Dataset):
 
     def clean(self):
         rm_if_exists('pile_output')
-
+    
+    def size(self):
+        return 1200 * 1024 * 1024 * 1024
 
 class LimitedDataset(Dataset):
     def __init__(self, dataset, limit_size):
