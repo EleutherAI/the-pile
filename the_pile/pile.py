@@ -291,7 +291,7 @@ def make_fasttext(pile, keep_frac):
                 fh2.write(x + '<|endoftext|>\n')
 
 def lang_stats(pile):
-    download_file('https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.ftz', 'lid.176.ftz', '8f3472cfe8738a7b6099e8e999c3cbfae0dcd15696aac7d7738a8039db603e83')
+    download_file('https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.bin', 'lid.176.bin', '7e69ec5451bc261cc7844e49e4792a85d7f09c06789ec800fc4a44aec362764e')
     
     langdet = fasttext.load_model("lid.176.bin") 
     langs = collections.defaultdict(lambda: collections.defaultdict(int))
