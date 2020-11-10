@@ -277,14 +277,13 @@ class BibliotikDataset(Dataset):
         return "Bibliotik"
 
     def _download(self):
-        download('components/bibliotik/books3.tar.gz', '016b90fa6b8507328b6a90d13b0f68c2b87dfd281b35e449a1d466fd9eebc14a', [
-            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/books3.tar.gz'),
-        ], extract=True)
+        download('components/bibliotik/Bibliotik.jsonl.zst', '1aa43653f6de7ad074796bb6ca949beab584d91c5e188a66d994643838373b06', [
+        ])
+        raise NotImplementedError('bibliotik temporarily unavailable')
 
     def documents(self):
         self._download()
 
-        #yield from map(fread, flatMap(ls, ls('components/bibliotik/books3/the-eye.eu/public/Books/Bibliotik')))
         yield from lmd.Reader('components/bibliotik/Bibliotik.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
