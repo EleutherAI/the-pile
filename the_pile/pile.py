@@ -92,7 +92,7 @@ def take(n, iter):
             break
     return ret
 
-def mk_table(datasets, train_chars, print_latex=True):
+def mk_table(datasets, train_chars, print_latex=False):
     values = []
 
     total_weight = sum([x[1] * x[0].size() for x in datasets])
@@ -230,6 +230,7 @@ class ThePile(Dataset):
 
     def _download(self):
         # TODO: host final pile
+        pass
 
     def documents(self):
         self._download()
@@ -287,51 +288,52 @@ def make_fasttext(pile, keep_frac):
             if random.random() < 0.001:
                 fh2.write(x + '<|endoftext|>\n')
 
-def lang_stats(datasets):
+def lang_stats(pile):
     langdet = fasttext.load_model("lid.176.bin") 
+    langs = collections.defaultdict(lambda: collections.defaultdict(int))
     with open('language_stats.txt', 'w') as fout:
-        for dset, _ in datasets:
-            print(dset.name())
-            n = 0
-            langs = collections.defaultdict(int)
-            for x, _ in tqdm(dset.documents(), total=dset.num_docs()):
-                details = langdet.predict(x.replace('\n', ' ')[:3000], k=5)
-                langs[details[0][0].replace('__label__', '')] += 1
-                n += 1
-            print('\n'.join([k + ',' + str(v / n).ljust(9) for k,v in sorted(list(langs.items()), key=lambda x: -x[1])]))
-            fout.write(dset.name() + ' ' + json.dumps(langs) + '\n')
+        for i, (data, meta) in enumerate(pile.documents()):
+            details = langdet.predict(data.replace('\n', ' ')[:3000], k=1)
+
+            langs[meta['pile_set_name']][details[0][0].replace('__label__', '')] += 1
+
+            if (i+1) % 100000 == 0:
+                for name, x in langs.items():
+                    print('========= {} =========='.format(name))
+                    print('\n'.join([k + ',' + str(v / sum(x.values())).ljust(9) for k,v in sorted(list(x.items()), key=lambda x: -x[1])]))
+
+                ob = {
+                    'langs': langs
+                }
+                fout.write(json.dumps(ob)+'\n')
 
 
-def sample_from_sets(datasets):
+def sample_from_sets(datasets, n_docs):
     random.seed(42)
-    sample_size = 512
-    max_read = 10000
-    with open('set_samples_latex.txt', 'w') as fout:
-        for dset, _ in tqdm(datasets):
-            print(dset.name())
-            fout.write('\\begin{samepage}\n\\subsection{' + dset.name() + '}\n')
-            readamt = random.randint(0, min(max_read, dset.num_docs()))
-            reader = dset.documents()
-            for _ in range(readamt): next(reader)
-            
-            doc, _ = next(reader)
+    for dset, _ in datasets:
+        n = dset.num_docs()
 
-            spacing = max(len(doc) - sample_size, 0)
-            if spacing > 0:
-                offset = random.randrange(0, spacing)
-            else:
-                offset = 0
-            doc = doc[offset:offset+sample_size]
+        # hotfix: github is the only dataset in v1 that's run for less than one epoch, so we only look at the part of it that actually ended up in v1.
+        if dset.name() == 'Github': n = int(n * 0.19)
 
-            page = """
-\\begin{quote}
-""" + doc + """
-\\end{quote}
-\\end{samepage}
-"""
-            fout.write(page)
-            fout.flush()
+        indices = set(random.sample(range(n), n_docs))
+        pbar = tqdm(total=n_docs)
 
+        docs = []
+        for i, (doc, meta) in enumerate(dset.documents()):
+            if i in indices:
+                docs.append((doc, meta))
+                pbar.update(1)
+        
+        try:
+            os.mkdir('dataset_samples')
+        except:
+            pass
+
+        with open('dataset_samples/{}.json'.format(dset.name().replace(' ', '_')), 'w') as fh:
+            json.dump(docs, fh)
+
+        pbar.close()
 
 
 def docs_for_dedupe():
@@ -351,16 +353,16 @@ if __name__ == '__main__':
     parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
     parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
     parser.add_argument('--make_lang_analysis', action='store_true', help='make language analysis data')
-    parser.add_argument('--make_dataset_samples', action='store_true', help='make dataset sample data')
+    parser.add_argument('--make_dataset_samples', type=int, help='make dataset sample data')
     parser.add_argument('--profile', action='store_true', help='turn on profiler')
     parser.add_argument('--read_amount', type=str, default='1200G', help='the size of the data read from the set')
 
     args = parser.parse_args()
     random.seed(42)
 
-    if args.using != 'pile_no_cc':
+    if args.using != 'pile_reprod_no_cc':
         # add CC
-        datasets.append((CommonCrawlDataset(), 1.))
+        datasets.insert(0, (CommonCrawlDataset(), 1.))
 
     print(mk_table(datasets, parse_size(args.read_amount)))
 
@@ -405,7 +407,7 @@ if __name__ == '__main__':
         make_fasttext(pile.documents(), 0.1)
     
     if args.make_dataset_samples:
-        sample_from_sets(datasets)
+        sample_from_sets(datasets, args.make_dataset_samples)
     
     if args.make_lang_analysis:
-        lang_stats(datasets)
+        lang_stats(pile)
