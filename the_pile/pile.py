@@ -315,9 +315,9 @@ def lang_stats(pile):
 def sample_from_sets(datasets, n_docs):
     random.seed(42)
     for dset, _ in datasets:
-        fname = 'dataset_samples/{}.json'.format(dset.name().replace(' ', '_')
+        fname = 'dataset_samples/{}.json'.format(dset.name().replace(' ', '_'))
         if os.path.exists(fname): continue
-        
+
         n = dset.num_docs()
 
         # hotfix: github is the only dataset in v1 that's run for less than one epoch, so we only look at the part of it that actually ended up in v1.
@@ -337,7 +337,7 @@ def sample_from_sets(datasets, n_docs):
         except:
             pass
 
-        with open(fname), 'w') as fh:
+        with open(fname, 'w') as fh:
             json.dump(docs, fh)
 
         pbar.close()
