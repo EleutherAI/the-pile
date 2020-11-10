@@ -416,5 +416,7 @@ if __name__ == '__main__':
         lang_stats(pile)
 
     if args.make_dummy:
-        for doc, meta in tqdm(pile.documents(), total=pile.size()):
-            pass
+        pbar = tqdm(total=pile.size())
+        for doc, meta in pile.documents():
+            pbar.update(utf8len(doc))
+        pbar.close()
