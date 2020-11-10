@@ -50,12 +50,12 @@ def main(working_directory, process_count, n_value):
             batch.append(document)
 
             if len(batch) == batch_size:
-                process_batch(pool, batch)
+                process_batch(pool, batch, frequencies)
                 batch = []
                 progress.update(batch_size)
 
         if len(batch) != 0:
-            process_batch(pool, batch)
+            process_batch(pool, batch, frequencies)
             progress.update(len(batch))
 
     logger.info("Pickling frequency dist")
