@@ -1,49 +1,24 @@
 import re
 import os
 import hashlib
-from concurrent_iterator.thread import Producer
 from functools import reduce
 import operator
 import collections
-import urllib.request
 from pathlib import Path
-import gdown
 import tarfile
-import requests
 import shutil
+
+import gdown
 from tqdm import tqdm
+from best_download import download_file
 
 def touch(x):
     Path(x).touch()
-
-def download_file(url, to):
-    # modified from https://stackoverflow.com/a/37573701
-    print('Downloading {}'.format(url))
-
-    response = requests.get(url, stream=True)
-    size = int(response.headers.get('content-length', 0))
-    block_size = 1024*1024
-    pbar = tqdm(total=size, unit='iB', unit_scale=True)
-    with open(to, 'wb') as fout:
-        for data in response.iter_content(block_size):
-            pbar.update(len(data))
-            fout.write(data)
-    pbar.close()
-    assert not (size != 0 and pbar.n != size)
 
 Source = collections.namedtuple('Source', ['type', 'url'])
 
 def download(fname, checksum, sources, extract=False):
     if os.path.exists(fname + '.done'): return
-    if os.path.exists(fname):
-        try:
-            print(fname, 'already exists, verifying checksum')
-            sha256sum(fname, expected=checksum)
-            touch(fname + '.done')
-            return
-        except AssertionError:
-            print('{} exists but doesn\'t match checksum!'.format(fname))
-            rm_if_exists(fname)
             
     print('Finding source for', fname)
 
@@ -54,9 +29,20 @@ def download(fname, checksum, sources, extract=False):
         try:
             # todo: implement torrent handling
             if source.type == 'direct':
-                download_file(source.url, fname)
+                download_file(source.url, fname, checksum)
             elif source.type == 'gdrive':
+                if os.path.exists(fname):
+                    try:
+                        print(fname, 'already exists.')
+                        sha256sum(fname, expected=checksum)
+                        touch(fname + '.done')
+                        return
+                    except AssertionError:
+                        print('{} exists but doesn\'t match checksum!'.format(fname))
+                        rm_if_exists(fname)
+
                 gdown.download(source.url, fname, quiet=False)
+                sha256sum(fname, expected=checksum)
             elif source.type == 'gcloud':
                 raise NotImplementedError('gcloud download not implemented!')            
             
@@ -68,13 +54,15 @@ def download(fname, checksum, sources, extract=False):
                 rm_if_exists(fname)
             touch(fname + '.done')
             return
+        except SystemExit:
+            raise
         except KeyboardInterrupt:
             raise
         except:
             import traceback
             traceback.print_exc()
             print('Download method [{}] {} failed, trying next option'.format(source.type, source.url))
-            rm_if_exists(fname)
+            # rm_if_exists(fname)
             continue
 
         break
@@ -134,12 +122,12 @@ def sha256str(s):
     h.update(s)
     return h.hexdigest()
 
-
-def sha256sum(filename, expected=None):    
+def sha256sum(filename, expected=None):
     h  = hashlib.sha256()
     b  = bytearray(128*1024)
-    mv = memoryview(b)    
-    progress = tqdm(total=os.path.getsize(filename), dynamic_ncols=True, unit_scale=True, unit="byte")
+    mv = memoryview(b)
+    progress = tqdm(total=os.path.getsize(filename), unit="byte", unit_scale=1)
+    tqdm.write(f"Verifying checksum for {filename}")
     with open(filename, 'rb', buffering=0) as f:
         for n in iter(lambda : f.readinto(mv), 0):
             h.update(mv[:n])
@@ -162,7 +150,7 @@ def rm_if_exists(path):
 
 
 # https://stackoverflow.com/questions/12523586/python-format-size-application-converting-b-to-kb-mb-gb-tb/37423778
-def humanbytes(B):
+def humanbytes(B, units=None):
    'Return the given bytes as a human friendly KB, MB, GB, or TB string'
    B = float(B)
    KB = float(1024)
@@ -170,15 +158,15 @@ def humanbytes(B):
    GB = float(KB ** 3) # 1,073,741,824
    TB = float(KB ** 4) # 1,099,511,627,776
 
-   if B < KB:
+   if (B < KB and units is None) or units == "B":
       return '{0} {1}'.format(B,'Bytes' if 0 == B > 1 else 'Byte')
-   elif KB <= B < MB:
+   elif (KB <= B < MB and units is None) or units == "KiB":
       return '{0:.2f} KiB'.format(B/KB)
-   elif MB <= B < GB:
+   elif (MB <= B < GB and units is None) or units == "MiB":
       return '{0:.2f} MiB'.format(B/MB)
-   elif GB <= B < TB:
+   elif (GB <= B < TB and units is None) or units == "GiB":
       return '{0:.2f} GiB'.format(B/GB)
-   elif TB <= B:
+   elif (TB <= B and units is None) or units == "TiB":
       return '{0:.2f} TiB'.format(B/TB)
 
 
@@ -212,3 +200,6 @@ def parse_size(sizestr):
         return size * 1024 * 1024 * 1024
     if unit.upper() == 'T':
         return size * 1024 * 1024 * 1024 * 1024
+
+def dummy_meta(xs):
+    return ((x, {}) for x in xs)
