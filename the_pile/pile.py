@@ -329,6 +329,7 @@ def sample_from_sets(datasets, n_docs):
 
         docs = []
         for i, (doc, meta) in enumerate(dset.documents()):
+            if i > max(indices): break
             if i in indices:
                 docs.append((doc, meta))
                 pbar.update(1)
