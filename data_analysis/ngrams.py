@@ -15,7 +15,7 @@ from the_pile.logger import setup_logger_tqdm
 logger = logging.getLogger(__name__)
 
 # Multiprocessing
-def extract_ngrams(data, num):
+def extract_ngrams(data, num, tqdm_func, global_tqdm):
     return ngrams(nltk.word_tokenize(data), num)
 
 def process_batch(pool, batch, frequencies, n_value):
