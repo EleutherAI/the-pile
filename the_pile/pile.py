@@ -367,7 +367,7 @@ if __name__ == '__main__':
 
     if args.using != 'pile_reprod_no_cc':
         # add CC
-        datasets.insert(0, (CommonCrawlDataset(), 1.))
+        datasets.append((CommonCrawlDataset(), 1.))
 
     print(mk_table(datasets, parse_size(args.read_amount)))
 
