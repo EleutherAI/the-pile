@@ -18,10 +18,10 @@ logger = logging.getLogger(__name__)
 def extract_ngrams(data, num):
     return ngrams(nltk.word_tokenize(data), num)
 
-def process_batch(pool, batch, frequencies):
+def process_batch(pool, batch, frequencies, n_value):
     tasks = []
     for document in batch:
-        task = (extract_ngrams, (document,))
+        task = (extract_ngrams, (document, n_value))
         tasks.append(task)
 
     on_done = lambda _ : None
@@ -50,12 +50,12 @@ def main(working_directory, process_count, n_value):
             batch.append(document)
 
             if len(batch) == batch_size:
-                process_batch(pool, batch, frequencies)
+                process_batch(pool, batch, frequencies, n_value)
                 batch = []
                 progress.update(batch_size)
 
         if len(batch) != 0:
-            process_batch(pool, batch, frequencies)
+            process_batch(pool, batch, frequencies, n_value)
             progress.update(len(batch))
 
     logger.info("Pickling frequency dist")
