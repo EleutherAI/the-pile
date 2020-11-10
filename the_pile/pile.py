@@ -350,6 +350,7 @@ if __name__ == '__main__':
     parser.add_argument('--limit', type=str, help='limit output size - this option causes read_amount tokens to be generated and then limit tokens to be sampled')
     parser.add_argument('--using', type=str, default='pile', help='the dataset to use')
     parser.add_argument('--chunk', type=str, help='output chunk size (for make_lmd)')
+    parser.add_argument('--make_dummy', action='store_true', help='dummy consumer')
     parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
     parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
     parser.add_argument('--make_lang_analysis', action='store_true', help='make language analysis data')
@@ -411,3 +412,7 @@ if __name__ == '__main__':
     
     if args.make_lang_analysis:
         lang_stats(pile)
+
+    if args.make_dummy:
+        for doc, meta in tqdm(pile.documents(), total=pile.size()):
+            pass
