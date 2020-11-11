@@ -37,6 +37,10 @@ class Dataset(abc.ABC):
         size = len(list(map(lambda x: None, tqdm(self.documents()))))
         print('docs', self.name(), size)
         return size
+    
+    def already_shuffled(self):
+        """ Datasets where the source is already shuffled should override this to return True so that it isn't shuffled again. """
+        return False
 
 
 class WikipediaDataset(Dataset):
@@ -117,6 +121,9 @@ class BookCorpusDataset(Dataset):
     
     def num_docs(self):
         return 17868
+    
+    def already_shuffled(self):
+        return True
 
 
 class OpenWebTextDataset(Dataset):
@@ -183,6 +190,9 @@ class GutenbergDataset(Dataset):
     
     def num_docs(self):
         return 28602
+    
+    def already_shuffled(self):
+        return True
 
 
 class DMMathDataset(Dataset):
@@ -277,9 +287,9 @@ class BibliotikDataset(Dataset):
         return "Bibliotik"
 
     def _download(self):
+        raise NotImplementedError('bibliotik temporarily unavailable')
         download('components/bibliotik/Bibliotik.jsonl.zst', '1aa43653f6de7ad074796bb6ca949beab584d91c5e188a66d994643838373b06', [
         ])
-        raise NotImplementedError('bibliotik temporarily unavailable')
 
     def documents(self):
         self._download()
@@ -294,6 +304,9 @@ class BibliotikDataset(Dataset):
     
     def num_docs(self):
         return 196640
+
+    def already_shuffled(self):
+        return True
 
 
 class CORD19Dataset(Dataset):
@@ -382,6 +395,9 @@ class ArXivDataset(Dataset):
     
     def num_docs(self):
         return 1264405
+    
+    def already_shuffled(self):
+        return True
 
 
 class PubMedDataset(Dataset):
