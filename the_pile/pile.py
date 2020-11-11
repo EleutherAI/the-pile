@@ -37,7 +37,6 @@ datasets = [
         # Prose
         (BibliotikDataset()    , 1.  ),
         (GutenbergDataset()    , 2.  ),
-        (LiteroticaDataset()   , 1.  ),
         (BookCorpusDataset()   , 1.5 ),
     ], 0.18
     ),
