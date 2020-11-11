@@ -353,15 +353,14 @@ class UbuntuIRCDataset(Dataset):
         return "Ubuntu IRC"
 
     def _download(self):
-        download('components/ubuntu_irc/ubuntu_irc_until_2020_9_1.jsonl.zst', 'b2bd119beb2741f428c7f1de954794718ce6e8090e3125be5e64845bb320767e', [
-            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/ubuntu_irc_until_2020_9_1.jsonl.zst'),
-            Source('direct', 'http://eaidata.bmk.sh/data/ubuntu_irc_until_2020_9_1.jsonl.zst'),
+        download('components/ubuntu_irc/ubuntu_irc_weekly.jsonl.zst', 'b744a253c5406f32c7a9c76ba4cf7888fdeb4b5b6bdc368ca9359a0238b968c9', [
+            Source('direct', 'http://eaidata.bmk.sh/data/ubuntu_irc_weekly.jsonl.zst'),
         ])
 
     def documents(self):
         self._download()
 
-        return lmd.Reader('components/ubuntu_irc/ubuntu_irc_until_2020_9_1.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/ubuntu_irc/ubuntu_irc_weekly.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/ubuntu_irc')
@@ -370,7 +369,7 @@ class UbuntuIRCDataset(Dataset):
         return 5923631555
     
     def num_docs(self):
-        return 2807
+        return 10605
 
 
 class ArXivDataset(Dataset):
