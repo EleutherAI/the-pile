@@ -10,76 +10,40 @@ from the_pile.datasets import *
 
 
 datasets = [
-    (
-    [
-        # Academic
-        (PubMedCentralDataset(), 1.5 ),
-        (ArXivDataset()        , 2.  ),
-        (FreeLawDataset()      , 1.5 ),
-        (USPTODataset()        , 2.  ),
-        (PubMedDataset()       , 2.  ),
-        (PhilPapersDataset()   , 3.  ),
-        (ExPorterDataset()     , 3.  ),
-    ], 0.45
-    ),
+    # Academic
+    (PubMedCentralDataset(), 2.  ),
+    (ArXivDataset()        , 2.  ),
+    (FreeLawDataset()      , 1.5 ),
+    (USPTODataset()        , 2.  ),
+    (PubMedDataset()       , 2.  ),
+    (PhilPapersDataset()   , 2.  ),
+    (ExPorterDataset()     , 2.  ),
 
-    (
-    [
-        # General internet
-        (OpenWebText2Dataset() , 2.  ),
-        (StackExchangeDataset(), 2.  ),
-        (WikipediaDataset()    , 3.  ),
-    ], 0.20
-    ),
+    # General internet
+    (OpenWebText2Dataset() , 2.  ),
+    (StackExchangeDataset(), 2.  ),
+    (WikipediaDataset()    , 3.  ),
 
-    (
-    [
-        # Prose
-        (BibliotikDataset()    , 1.  ),
-        (GutenbergDataset()    , 2.  ),
-        (BookCorpusDataset()   , 1.5 ),
-    ], 0.18
-    ),
+    # Prose
+    (BibliotikDataset()    , 1.5 ),
+    (GutenbergDataset()    , 2.5 ),
+    (BookCorpusDataset()   , 1.5 ),
 
-    (
-    [
-        (GithubDataset()       , 1.  ),
-    ], 0.10
-    ),
+    # Github
+    (GithubDataset()       , 1.  ),
 
-    (
-    [
-        # Dialogue
-        (UbuntuIRCDataset()    , 3.  ),
-        (HackerNewsDataset()   , 3.  ),
-        (EuroParlDataset()     , 3.  ),
-        (YTSubtitlesDataset()  , 3.  ),
-        (OpensubtitlesDataset(), 2.  ),
-    ], 0.05
-    ),
+    # Dialogue
+    (UbuntuIRCDataset()    , 2.  ),
+    (HackerNewsDataset()   , 2.  ),
+    (EuroParlDataset()     , 2.  ),
+    (YTSubtitlesDataset()  , 2.  ),
+    (OpensubtitlesDataset(), 1.5 ),
 
-    (
-    [
-        # Misc
-        (DMMathDataset()       , 2.  ),
-        (EnronEmailsDataset()  , 3.  ),
-    ], 0.02
-    ),
+    # Misc
+    (DMMathDataset()       , 2.  ),
+    (EnronEmailsDataset()  , 2.  ),
+
 ]
-
-datasets_new = []
-target_size = 950 * 1024 * 1024 * 1024
-train_chars = 1200 * 1024 * 1024 * 1024
-for dsets, tgt_frac in datasets:
-    dsets_size_wt = sum([x.size()*w for x, w in dsets])
-    dsets_twt     = sum([w          for _, w in dsets])
-    tgt_size = tgt_frac * target_size
-
-    for dset, wt in dsets:
-        frac_of_section = dset.size() * wt / dsets_size_wt
-        datasets_new.append((dset, frac_of_section * tgt_size / dset.size()))
-
-datasets = datasets_new
 
 
 def take(n, iter):
