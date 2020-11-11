@@ -329,7 +329,7 @@ if __name__ == '__main__':
     parser.add_argument('--make_lang_analysis', action='store_true', help='make language analysis data')
     parser.add_argument('--make_dataset_samples', type=int, help='make dataset sample data')
     parser.add_argument('--profile', action='store_true', help='turn on profiler')
-    parser.add_argument('--read_amount', type=str, default='1200G', help='the size of the data read from the set')
+    parser.add_argument('--read_amount', type=str, help='the size of the data read from the set')
 
     args = parser.parse_args()
     random.seed(42)
@@ -338,10 +338,15 @@ if __name__ == '__main__':
         # add CC
         datasets.append((CommonCrawlDataset(), 1.))
 
-    print(mk_table(datasets, parse_size(args.read_amount)))
+    if args.read_amount is None:
+        args.read_amount = sum([ds.size() * epochs for ds, epochs in datasets])
+    else:
+        args.read_amount = parse_size(args.read_amount)
+
+    print(mk_table(datasets, args.read_amount))
 
     if args.using == 'pile_reprod' or args.using == 'pile_reprod_no_cc':
-        pile = PileReplication(datasets, parse_size(args.read_amount), profile=args.profile)
+        pile = PileReplication(datasets, args.read_amount, profile=args.profile)
     elif args.using == 'cc':
         pile = CommonCrawlDataset()
     elif args.using == 'pile':
