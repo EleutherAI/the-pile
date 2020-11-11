@@ -11,3 +11,5 @@ fasttext
 tqdm-multiprocess
 cassandra-driver
 motor
+
+alembic

@@ -14,11 +14,14 @@ import logging
 from the_pile.logger import setup_logger_tqdm
 logger = logging.getLogger(__name__)
 
+from .models import get_db_session, NGram
+
 # Multiprocessing
 def extract_ngrams(data, num, tqdm_func, global_tqdm):
-    return list(ngrams(nltk.word_tokenize(data), num))
+    n_grams = ngrams(nltk.word_tokenize(data), num)
+    return [ ' '.join(grams) for grams in n_grams]
 
-def process_batch(pool, batch, frequencies, n_value):
+def process_batch(pool, batch, n_value, db_session):
     tasks = []
     for document in batch:
         task = (extract_ngrams, (document, n_value))
@@ -28,17 +31,29 @@ def process_batch(pool, batch, frequencies, n_value):
     on_error = lambda _ : None
     document_ngrams = pool.map(None, tasks, on_error, on_done)
 
+    query = db_session.query(NGram) \
+                      .filter(NGram.n_gram.in_(document_ngrams))
+
+
+    existing_ngrams = set()
+    for n_gram_row in query.all():        
+        existing_ngrams.add(n_gram_row.n_gram)
+        n_gram_row.count += 1
+
     for document_ngram in document_ngrams:
-        for n_gram in document_ngram:
-            frequencies[n_gram] += 1       
+        if document_ngram not in existing_ngrams:
+            new_ngram = NGram()
+            new_ngram.n_gram = document_ngram
+            new_ngram.count = 1
+            db_session.add(new_ngram)
+
+    db_session.commit()
 
 def main(working_directory, process_count, n_value):
     nltk.download('punkt')
 
-    stats_pickle_file = os.path.join(working_directory, f"stats_n{n_value}.pkl")
-
     cc_dataset = CommonCrawlDataset()
-    frequencies = FreqDist()
+    db_session = get_db_session()
 
     batch_size = 1000
     batch = []
@@ -50,16 +65,13 @@ def main(working_directory, process_count, n_value):
             batch.append(document)
 
             if len(batch) == batch_size:
-                process_batch(pool, batch, frequencies, n_value)
+                process_batch(pool, batch, n_value, db_session)
                 batch = []
                 progress.update(batch_size)
 
         if len(batch) != 0:
-            process_batch(pool, batch, frequencies, n_value)
+            process_batch(pool, batch, n_value, db_session)
             progress.update(len(batch))
-
-    logger.info("Pickling frequency dist")
-    pickle.dump(frequencies, open(stats_pickle_file, "wb"))
 
 parser = argparse.ArgumentParser(description='n-gram statistics')
 parser.add_argument("-dir", "--working_directory", default="")
