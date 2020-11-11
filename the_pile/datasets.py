@@ -255,7 +255,6 @@ class EnronEmailsDataset(Dataset):
     def num_docs(self):
         return 517401
 
-
 class LiteroticaDataset(Dataset):
     """ Source: https://www.reddit.com/r/literotica/comments/6xvxvh/i_downloaded_all_380000_stories_on_literotica/?utm_source=share&utm_medium=ios_app&utm_name=iossmf """
     def name(self):
@@ -680,7 +679,7 @@ class HackerNewsDataset(Dataset):
         return 831198
 
 
-class GithubDataset(Dataset):
+class FullGithubDataset(Dataset):
     def name(self):
         return "Github"
 
@@ -703,6 +702,30 @@ class GithubDataset(Dataset):
     
     def num_docs(self):
         return 56626342
+
+
+class GithubDataset(Dataset):
+    def name(self):
+        return "Github"
+
+    def _download(self):
+        download('components/github/github_small.jsonl.zst', '4323250bed817466de868f752b7685350123cff1f1363e87dfb6f22585b97f96', [
+            Source('direct', 'http://eaidata.bmk.sh/data/github_small.jsonl.zst'),
+        ])
+
+    def documents(self):
+        self._download()
+
+        return lmd.Reader('components/github/github_small.jsonl.zst').stream_data(get_meta=True)
+
+    def clean(self):
+        rm_if_exists('components/github')
+    
+    def size(self):
+        return 102180233200
+    
+    def num_docs(self):
+        return 19021454
 
 
 class OpenWebText2Dataset(Dataset):
