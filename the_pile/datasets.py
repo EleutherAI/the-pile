@@ -206,20 +206,20 @@ class DMMathDataset(Dataset):
     def documents(self):
         self._download()
 
-        return dummy_meta(concat(
+        return dummy_meta(chunk_at_even_lines(concat(
             map(
                 lambda x: map(fread, ls('components/dm_math/mathematics_dataset-v1.0/train-' + x)), 
                 ['easy', 'medium', 'hard'])
-        ))
+        ), 8192))
 
     def clean(self):
         rm_if_exists('components/dm_math')
 
     def size(self):
         return 8316165951
-
+    
     def num_docs(self):
-        return 168
+        return 1014997
 
 
 class EnronEmailsDataset(Dataset):

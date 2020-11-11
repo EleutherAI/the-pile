@@ -200,3 +200,18 @@ def parse_size(sizestr):
 
 def dummy_meta(xs):
     return ((x, {}) for x in xs)
+
+def chunk_at_even_lines(it, chunksize):
+    for doc in it:
+        totlen = 0
+        res = []
+        for i, line in enumerate(doc):
+            res.append(line)
+            totlen += len(line)
+        
+            if totlen > chunksize and i % 2 == 1:
+                yield '\n'.join(res)
+                totlen = 0
+                res = []
+        if res: yield '\n'.join(res)
+
