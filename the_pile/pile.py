@@ -359,6 +359,7 @@ if __name__ == '__main__':
     parser.add_argument('--limit', type=str, help='limit output size - this option causes read_amount tokens to be generated and then limit tokens to be sampled')
     parser.add_argument('--using', type=str, default='pile', help='the dataset to use')
     parser.add_argument('--chunk', type=str, help='output chunk size (for make_lmd)')
+    parser.add_argument('--interleave_output', type=int, help='output interleaved chunks (for make_lmd)')
     parser.add_argument('--make_dummy', action='store_true', help='dummy consumer')
     parser.add_argument('--make_lmd', action='store_true', help='generate lm_dataformat')
     parser.add_argument('--make_fasttext', action='store_true', help='make data for fasttext')
@@ -398,20 +399,33 @@ if __name__ == '__main__':
         pile = LimitedDataset(pile, size_limit)
 
     if args.make_lmd:
-        ar = lmd.Archive('pile_output')
+        assert not (args.interleave_output and args.chunk) # can't chunk and interleave
+
+        if args.interleave_output:
+            ars = [lmd.Archive('pile_pass1/chunk{}'.format(i)) for i in range(args.interleave_output)]
+        else:
+            ar = lmd.Archive('pile_output')
 
         if args.chunk:
             chunk_size = parse_size(args.chunk)
 
         cursize = 0
         for doc, meta in pile.documents():
+            if args.interleave_output:
+                ar = random.choice(ars)
+            
             ar.add_data(doc, meta)
+                
             cursize += len(doc)
             if args.chunk and cursize > chunk_size:
+                # interleave will not be on
                 cursize = 0
                 ar.commit(archive_name=args.using)
         
-        ar.commit(archive_name=args.using)
+        if args.interleave_output:
+            for ar in ars: ar.commit(archive_name=args.using)
+        else:
+            ar.commit(archive_name=args.using)
 
     if args.make_fasttext:
         make_fasttext(pile.documents(), 0.1)
