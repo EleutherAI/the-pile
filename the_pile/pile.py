@@ -284,9 +284,6 @@ def sample_from_sets(datasets, n_docs):
 
         n = dset.num_docs()
 
-        # hotfix: github is the only dataset in v1 that's run for less than one epoch, so we only look at the part of it that actually ended up in v1.
-        if dset.name() == 'Github': n = int(n * 0.19)
-
         indices = set(random.sample(range(n), n_docs))
         pbar = tqdm(total=n_docs)
 
