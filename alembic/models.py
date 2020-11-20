@@ -17,7 +17,7 @@ base = declarative_base()
 class NGram(base):
     __tablename__ = "n_gram"
     id = Column(Integer, primary_key=True) # Auto-increment should be default
-    n_gram = Column(String(13))
+    n_gram = Column(String(13), index=True)
     count = Column(Integer)
 
 # Index('idx_url_created', RedditSubmission.url, RedditSubmission.created_utc)
