@@ -205,7 +205,7 @@ def chunk_at_even_lines(it, chunksize):
     for doc in it:
         totlen = 0
         res = []
-        for i, line in enumerate(doc):
+        for i, line in enumerate(doc.split('\n')):
             res.append(line)
             totlen += len(line)
         
