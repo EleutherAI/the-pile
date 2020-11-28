@@ -53,7 +53,6 @@ ds.map(lambda item: simple_tokenization(item), num_parallel_calls=tf.data.experi
 
 """
 
-_simdjson_enabled = True
 try:
     import simdjson as json
 except ImportError:
