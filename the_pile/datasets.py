@@ -37,6 +37,10 @@ class Dataset(abc.ABC):
         size = len(list(map(lambda x: None, tqdm(self.documents()))))
         print('docs', self.name(), size)
         return size
+    
+    def already_shuffled(self):
+        """ Datasets where the source is already shuffled should override this to return True so that it isn't shuffled again. """
+        return False
 
 
 class WikipediaDataset(Dataset):
@@ -81,7 +85,7 @@ class OpensubtitlesDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(lmd.Reader('components/opensubtitles/out').stream_data())
+        return dummy_meta(lmd.Reader('components/opensubtitles/out').stream_data())
 
     def clean(self):
         rm_if_exists('components/opensubtitles')
@@ -107,7 +111,7 @@ class BookCorpusDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(map(fread, ls('components/bookcorpus/books1/epubtxt')))
+        return dummy_meta(map(fread, ls('components/bookcorpus/books1/epubtxt')))
 
     def clean(self):
         rm_if_exists('components/bookcorpus')
@@ -117,6 +121,9 @@ class BookCorpusDataset(Dataset):
     
     def num_docs(self):
         return 17868
+    
+    def already_shuffled(self):
+        return True
 
 
 class OpenWebTextDataset(Dataset):
@@ -140,7 +147,7 @@ class OpenWebTextDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(lmd.Reader('components/openwebtext/openwebtext').stream_data())
+        return dummy_meta(lmd.Reader('components/openwebtext/openwebtext').stream_data())
 
     def clean(self):
         rm_if_exists('components/openwebtext')
@@ -173,7 +180,7 @@ class GutenbergDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(map(fread, ls('components/gutenberg/pg19_train')))
+        return dummy_meta(map(fread, ls('components/gutenberg/pg19_train')))
 
     def clean(self):
         rm_if_exists('components/gutenberg')
@@ -183,6 +190,9 @@ class GutenbergDataset(Dataset):
     
     def num_docs(self):
         return 28602
+    
+    def already_shuffled(self):
+        return True
 
 
 class DMMathDataset(Dataset):
@@ -206,20 +216,20 @@ class DMMathDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(concat(
+        return dummy_meta(chunk_at_even_lines(concat(
             map(
                 lambda x: map(fread, ls('components/dm_math/mathematics_dataset-v1.0/train-' + x)), 
                 ['easy', 'medium', 'hard'])
-        ))
+        ), 8192))
 
     def clean(self):
         rm_if_exists('components/dm_math')
 
     def size(self):
         return 8316165951
-
+    
     def num_docs(self):
-        return 168
+        return 1014997
 
 
 class EnronEmailsDataset(Dataset):
@@ -227,14 +237,14 @@ class EnronEmailsDataset(Dataset):
         return "Enron Emails"
 
     def _download(self):
-        download('components/enron_emails/enron_mail_20150507.tar.gz', 'b3da1b3fe0369ec3140bb4fbce94702c33b7da810ec15d718b3fadf5cd748ca7', [
-            Source('direct', 'http://eaidata.bmk.sh/data/enron_mail_20150507.tar.gz'),
+        download('components/enron_emails/enron_emails.jsonl.zst', '6968dd2d6d9c4328ee3b77b263aad38401b77c326f693ce051c98a3f215bf583', [
+            Source('direct', 'http://eaidata.bmk.sh/data/enron_emails.jsonl.zst'),
         ])
 
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/enron_emails/out').stream_data(get_meta=True)
+        return lmd.Reader('components/enron_emails/enron_emails.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/enron_emails')
@@ -244,7 +254,6 @@ class EnronEmailsDataset(Dataset):
     
     def num_docs(self):
         return 517401
-
 
 class LiteroticaDataset(Dataset):
     """ Source: https://www.reddit.com/r/literotica/comments/6xvxvh/i_downloaded_all_380000_stories_on_literotica/?utm_source=share&utm_medium=ios_app&utm_name=iossmf """
@@ -260,7 +269,7 @@ class LiteroticaDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/literotica/Literotica.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/literotica/Literotica.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/literotica')
@@ -277,14 +286,13 @@ class BibliotikDataset(Dataset):
         return "Bibliotik"
 
     def _download(self):
-        download('components/bibliotik/books3.tar.gz', '016b90fa6b8507328b6a90d13b0f68c2b87dfd281b35e449a1d466fd9eebc14a', [
-            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/books3.tar.gz'),
-        ], extract=True)
+        raise NotImplementedError('bibliotik temporarily unavailable')
+        download('components/bibliotik/Bibliotik.jsonl.zst', '1aa43653f6de7ad074796bb6ca949beab584d91c5e188a66d994643838373b06', [
+        ])
 
     def documents(self):
         self._download()
 
-        #yield from map(fread, flatMap(ls, ls('components/bibliotik/books3/the-eye.eu/public/Books/Bibliotik')))
         yield from lmd.Reader('components/bibliotik/Bibliotik.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
@@ -295,6 +303,9 @@ class BibliotikDataset(Dataset):
     
     def num_docs(self):
         return 196640
+
+    def already_shuffled(self):
+        return True
 
 
 class CORD19Dataset(Dataset):
@@ -324,7 +335,7 @@ class CORD19Dataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/cord19/out').stream_data(get_meta=True)
+        return lmd.Reader('components/cord19/out').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/cord19')
@@ -341,15 +352,14 @@ class UbuntuIRCDataset(Dataset):
         return "Ubuntu IRC"
 
     def _download(self):
-        download('components/ubuntu_irc/ubuntu_irc_until_2020_9_1.jsonl.zst', 'b2bd119beb2741f428c7f1de954794718ce6e8090e3125be5e64845bb320767e', [
-            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/ubuntu_irc_until_2020_9_1.jsonl.zst'),
-            Source('direct', 'http://eaidata.bmk.sh/data/ubuntu_irc_until_2020_9_1.jsonl.zst'),
+        download('components/ubuntu_irc/ubuntu_irc_weekly.jsonl.zst', 'b744a253c5406f32c7a9c76ba4cf7888fdeb4b5b6bdc368ca9359a0238b968c9', [
+            Source('direct', 'http://eaidata.bmk.sh/data/ubuntu_irc_weekly.jsonl.zst'),
         ])
 
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/ubuntu_irc/ubuntu_irc_until_2020_9_1.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/ubuntu_irc/ubuntu_irc_weekly.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/ubuntu_irc')
@@ -358,7 +368,7 @@ class UbuntuIRCDataset(Dataset):
         return 5923631555
     
     def num_docs(self):
-        return 2807
+        return 10605
 
 
 class ArXivDataset(Dataset):
@@ -373,7 +383,7 @@ class ArXivDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/arxiv/arxiv.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/arxiv/arxiv.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/arxiv')
@@ -383,6 +393,9 @@ class ArXivDataset(Dataset):
     
     def num_docs(self):
         return 1264405
+    
+    def already_shuffled(self):
+        return True
 
 
 class PubMedDataset(Dataset):
@@ -398,7 +411,7 @@ class PubMedDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/pubmed/PUBMED_title_abstracts_2019_baseline.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/pubmed/PUBMED_title_abstracts_2019_baseline.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/pubmed')
@@ -423,7 +436,7 @@ class ExPorterDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/exporter/NIH_ExPORTER_awarded_grant_text.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/exporter/NIH_ExPORTER_awarded_grant_text.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/exporter')
@@ -448,7 +461,7 @@ class StackExchangeDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(lmd.Reader('components/stackexchange/out').stream_data())
+        return dummy_meta(lmd.Reader('components/stackexchange/out').stream_data())
 
     def clean(self):
         rm_if_exists('components/stackexchange/out')
@@ -473,7 +486,7 @@ class FreeLawDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/freelaw/FreeLaw_Opinions.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/freelaw/FreeLaw_Opinions.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/freelaw')
@@ -498,7 +511,7 @@ class PubMedCentralDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from dummy_meta(map(strip_markdown_colons, lmd.Reader('components/pubmedcentral/PMC_extracts.tar.gz').stream_data()))
+        return dummy_meta(map(strip_markdown_colons, lmd.Reader('components/pubmedcentral/PMC_extracts.tar.gz').stream_data()))
 
     def clean(self):
         rm_if_exists('components/pubmedcentral')
@@ -530,7 +543,7 @@ class CZICDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/czic/GOVINFO_CZIC_KL.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/czic/GOVINFO_CZIC_KL.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/czic')
@@ -555,7 +568,7 @@ class PhilPapersDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/philpapers/PhilArchive.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/philpapers/PhilArchive.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/philpapers')
@@ -580,7 +593,7 @@ class USPTODataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/uspto/pile_uspto.jsonl.zst.tar').stream_data(get_meta=True)
+        return lmd.Reader('components/uspto/pile_uspto.jsonl.zst.tar').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/uspto')
@@ -605,7 +618,7 @@ class EuroParlDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/europarl/EuroParliamentProceedings_1996_2011.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/europarl/EuroParliamentProceedings_1996_2011.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/europarl')
@@ -630,7 +643,7 @@ class YTSubtitlesDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/youtubesubtitles/yt_subs.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/youtubesubtitles/yt_subs.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/youtubesubtitles')
@@ -647,27 +660,26 @@ class HackerNewsDataset(Dataset):
         return "HackerNews"
 
     def _download(self):
-        download('components/hackernews/hn.tar.gz', '6220e1dcd5d9d71821fee552e4e154ee1ee5f62744e3eab9a4c5001f52e27067', [
-            Source('direct', 'https://the-eye.eu/public/AI/pile_preliminary_components/hn.tar.gz'),
-            Source('direct', 'http://eaidata.bmk.sh/data/hn.tar.gz'),
+        download('components/hackernews/hn.jsonl.zst', '9fbc978c92a466b1653cd578700eeb8b417ddcf8c66c7c468d5c1d11ef82aed7', [
+            Source('direct', 'http://eaidata.bmk.sh/data/hn.jsonl.zst'),
         ])
 
     def documents(self):
         self._download()
 
-        yield from dummy_meta(lmd.Reader('components/hackernews/hn.tar.gz').stream_data())
+        return lmd.Reader('components/hackernews/hn.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/hackernews')
     
     def size(self):
-        return 1704809038
+        return 4185091916
     
     def num_docs(self):
-        return 373028
+        return 831198
 
 
-class GithubDataset(Dataset):
+class FullGithubDataset(Dataset):
     def name(self):
         return "Github"
 
@@ -680,7 +692,7 @@ class GithubDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from filter(lambda x: len(x[0]) < 100000, lmd.Reader('components/github/github.jsonl.zst.tar').stream_data(get_meta=True))
+        return filter(lambda x: len(x[0]) < 100000, lmd.Reader('components/github/github.jsonl.zst.tar').stream_data(get_meta=True))
 
     def clean(self):
         rm_if_exists('components/github')
@@ -690,6 +702,30 @@ class GithubDataset(Dataset):
     
     def num_docs(self):
         return 56626342
+
+
+class GithubDataset(Dataset):
+    def name(self):
+        return "Github"
+
+    def _download(self):
+        download('components/github/github_small.jsonl.zst', '4323250bed817466de868f752b7685350123cff1f1363e87dfb6f22585b97f96', [
+            Source('direct', 'http://eaidata.bmk.sh/data/github_small.jsonl.zst'),
+        ])
+
+    def documents(self):
+        self._download()
+
+        return lmd.Reader('components/github/github_small.jsonl.zst').stream_data(get_meta=True)
+
+    def clean(self):
+        rm_if_exists('components/github')
+    
+    def size(self):
+        return 102180233200
+    
+    def num_docs(self):
+        return 19021454
 
 
 class OpenWebText2Dataset(Dataset):
@@ -705,7 +741,7 @@ class OpenWebText2Dataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from map(lambda x: (remove_advertisement(x[0]), x[1]), lmd.Reader('components/openwebtext2/openwebtext2.jsonl.zst.tar').stream_data(get_meta=True))
+        return map(lambda x: (remove_advertisement(x[0]), x[1]), lmd.Reader('components/openwebtext2/openwebtext2.jsonl.zst.tar').stream_data(get_meta=True))
 
     def clean(self):
         rm_if_exists('components/openwebtext2')
@@ -729,7 +765,7 @@ class CommonCrawlDataset(Dataset):
     def documents(self):
         self._download()
 
-        yield from lmd.Reader('components/commoncrawl/pile_cc_filtered_deduped.jsonl.zst').stream_data(get_meta=True)
+        return lmd.Reader('components/commoncrawl/pile_cc_filtered_deduped.jsonl.zst').stream_data(get_meta=True)
 
     def clean(self):
         rm_if_exists('components/commoncrawl')

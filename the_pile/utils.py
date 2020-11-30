@@ -147,7 +147,7 @@ def rm_if_exists(path):
 
 
 # https://stackoverflow.com/questions/12523586/python-format-size-application-converting-b-to-kb-mb-gb-tb/37423778
-def humanbytes(B):
+def humanbytes(B, units=None):
    'Return the given bytes as a human friendly KB, MB, GB, or TB string'
    B = float(B)
    KB = float(1024)
@@ -155,15 +155,15 @@ def humanbytes(B):
    GB = float(KB ** 3) # 1,073,741,824
    TB = float(KB ** 4) # 1,099,511,627,776
 
-   if B < KB:
+   if (B < KB and units is None) or units == "B":
       return '{0} {1}'.format(B,'Bytes' if 0 == B > 1 else 'Byte')
-   elif KB <= B < MB:
+   elif (KB <= B < MB and units is None) or units == "KiB":
       return '{0:.2f} KiB'.format(B/KB)
-   elif MB <= B < GB:
+   elif (MB <= B < GB and units is None) or units == "MiB":
       return '{0:.2f} MiB'.format(B/MB)
-   elif GB <= B < TB:
+   elif (GB <= B < TB and units is None) or units == "GiB":
       return '{0:.2f} GiB'.format(B/GB)
-   elif TB <= B:
+   elif (TB <= B and units is None) or units == "TiB":
       return '{0:.2f} TiB'.format(B/TB)
 
 
@@ -200,3 +200,18 @@ def parse_size(sizestr):
 
 def dummy_meta(xs):
     return ((x, {}) for x in xs)
+
+def chunk_at_even_lines(it, chunksize):
+    for doc in it:
+        totlen = 0
+        res = []
+        for i, line in enumerate(doc.split('\n')):
+            res.append(line)
+            totlen += len(line)
+        
+            if totlen > chunksize and i % 2 == 1:
+                yield '\n'.join(res)
+                totlen = 0
+                res = []
+        if res: yield '\n'.join(res)
+
