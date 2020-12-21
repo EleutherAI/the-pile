@@ -9,7 +9,9 @@ Replication scripts are listed in approximate order needed for replication.
 
 ## Analysis & Ablation
 
- - `lang_len_analysis.py`: Runs analysis for length in {chars, bytes, tokens, words} and language. Saves the result as .jsonl.zst files which need a second pass to aggregate, but this first pass is the more expensive one anyways, and this means we can make nice histograms and stuff. Should be run with `TOKENIZERS_PARALLELISM=false` for max performance since it prevents thread thrashing. This script would be a useful template for other future analysis.
+ - `lang_len_analysis_pass1.py`: Runs analysis for length in {chars, bytes, tokens, words} and language. Saves the result as .jsonl.zst files which need a second pass to aggregate, but this first pass is the more expensive one anyways, and this means we can make nice histograms and stuff. Should be run with `TOKENIZERS_PARALLELISM=false` for max performance since it prevents thread thrashing. This script would be a useful template for other future analysis.
+ - `lang_len_analysis_pass2.py`: Pass 2 for langth/language analysis. Aggregates and makes plots.
+ - `profanity_analysis_pass1.py`: Profanity analysis pass 1.
  - `ablation_dedupe/make_excludes_lambada_wikitext.py`: For ablation; detokenizes LAMBADA and wikitext in preparation for eval-dedupe. Thie script should be obsolete now; `write_out.py` in lm_evaluation_harness handles many more sets. TODO: write detailed guide on how to use `write_out.py`
  - `ablation_dedupe/make_deduped.py`: For ablation; performs decontamination of training data against validation/test data. Run `make_excludes_lambada_wikitext` or `write_out.py` first. TODO: clean up and make official validation-dedupe script.
 
