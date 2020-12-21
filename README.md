@@ -46,7 +46,18 @@ Install:
 pip install -e .
 ```
 
-To download all data:
+### To replicate pile
+
+```
+python the_pile/pile.py --interleave_output 30 --using pile_reprod
+```
+
+Use the pass 2 script [here](https://github.com/EleutherAI/The-Pile/tree/master/processing_scripts) to complete shuffling.
+
+
+### Other
+
+To force download all data:
 ```
 python the_pile/pile.py --force_download
 ```
