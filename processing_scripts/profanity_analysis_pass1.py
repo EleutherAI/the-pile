@@ -106,7 +106,7 @@ def profanity(doc):
     sentlens = list(map(len, sentwords))
     
     lwords = join(sentwords)
-    p_words = list(map(is_profane, lwords))
+    p_words = is_profane(lwords)
     p_words = unjoin(p_words, sentlens)
     n_prof = list(map(sum, p_words))
     
