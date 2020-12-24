@@ -112,7 +112,7 @@ def profanity(doc):
     p_words = unjoin(p_words, sentlens)
     n_prof = list(map(sum, p_words))
     
-    res = list(zip(pred, sentlens, n_prof))
+    res = list(zip(p_sents, sentlens, n_prof))
     return {
         'sentences': res,
         'num_bytes': len(doc.encode('utf-8'))
