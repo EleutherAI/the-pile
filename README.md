@@ -9,7 +9,7 @@ The Pile is currently **under heavy development**. Breaking changes may be intro
 
 |    Component    | Raw Size |Weight|Epochs|Effective Size|Mean Document Size|
 |-----------------|----------|------|-----:|--------------|------------------|
-|[CommonCrawl](https://github.com/leogao2/commoncrawl_downloader)      |227.12 GiB|18.11%|   1.0|227.12 GiB    |4.33 KiB          |
+|[Pile-CC](https://github.com/leogao2/commoncrawl_downloader)      |227.12 GiB|18.11%|   1.0|227.12 GiB    |4.33 KiB          |
 |[PubMed Central](https://github.com/EleutherAI/pile-pubmedcentral)   |90.27 GiB |14.40%|   2.0|180.55 GiB    |30.55 KiB         |
 |[Books3](https://twitter.com/theshawwn/status/1320282149329784833)        |100.96 GiB|12.07%|   1.5|151.44 GiB    |538.36 KiB        |
 |[OpenWebText2](https://github.com/EleutherAI/openwebtext2)     |62.77 GiB |10.01%|   2.0|125.54 GiB    |3.85 KiB          |
