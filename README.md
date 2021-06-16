@@ -1,11 +1,8 @@
 # The Pile Replication Code
 
-The Pile is a large, diverse, open source language modelling data set that consists of many smaller datasets combined together. The objective is to obtain text from as many modalities as possible to ensure that models trained using The Pile will have much broader generalization abilities. We are currently developing Version 1, with an ultimate goal of 1 TiB of English text. After the completion of Version 1, our next goal is a fully-multilingual, 10TiB text dataset.
+The Pile is a large, diverse, open source language modelling data set that consists of many smaller datasets combined together. The objective is to obtain text from as many modalities as possible to ensure that models trained using The Pile will have much broader generalization abilities.
 
 **This repository is for replicating or making variants of the Pile. IF YOU ARE HERE TO USE THE PILE DATASET, THIS REPO IS PROBABLY NOT WHAT YOU ARE LOOKING FOR. A copy of the Pile can be downloaded [here](https://the-eye.eu/public/AI/pile/).**
-
-The Pile is currently **under heavy development**. Breaking changes may be introduced rapidly and without warning. 
-
 
 |    Component    | Raw Size |Weight|Epochs|Effective Size|Mean Document Size|
 |-----------------|----------|------|-----:|--------------|------------------|
