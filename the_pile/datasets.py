@@ -758,20 +758,27 @@ class CommonCrawlDataset(Dataset):
         return "CommonCrawl"
 
     def _download(self):
-        download('components/commoncrawl/pile_cc_filtered_deduped.jsonl.zst', '4906a6731a7d2d9182c40a13d681078ed537508cf75b1d32ad7f7c491b2f272a', [
+        download('components/commoncrawl/pile_cc_filtered_deduped.jsonl.zst', 'baf2ecc9891d9bf57c7e5644fdcee9f752b5da13a8af8e4d14e75670b18c2c50', [
             Source('direct', 'http://eaidata.bmk.sh/data/pile_cc_filtered_deduped.jsonl.zst'),
         ])
 
     def documents(self):
         self._download()
 
-        return lmd.Reader('components/commoncrawl/pile_cc_filtered_deduped.jsonl.zst').stream_data(get_meta=True)
+        reader = lmd.Reader('components/commoncrawl/pile_cc_filtered_deduped.jsonl.zst').stream_data(get_meta=True)
+        while True:
+            try:
+                yield next(reader)
+            except StopIteration:
+                break
+            except Exception as ex:
+                print(f"Error Yielding: {ex}") # last entry in CommonCrawlDataset is broken
 
     def clean(self):
         rm_if_exists('components/commoncrawl')
     
     def size(self):
-        return 243872121726
+        return 147319103591
     
     def num_docs(self):
-        return 54953117
+        return 33815032
